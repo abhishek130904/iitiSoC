@@ -1,6 +1,9 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # iitiSoC
 =======
+=======
+>>>>>>> 59bba48ae76cac5e107afb35b0663ef2cea3eefa
 This is a Kotlin Multiplatform project targeting Android, iOS.
 
 * `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
@@ -14,5 +17,9 @@ This is a Kotlin Multiplatform project targeting Android, iOS.
   you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
 
 
+<<<<<<< HEAD
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
 >>>>>>> 4262f24 (initial)
+=======
+Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…LoginPage()
+>>>>>>> 59bba48ae76cac5e107afb35b0663ef2cea3eefa
