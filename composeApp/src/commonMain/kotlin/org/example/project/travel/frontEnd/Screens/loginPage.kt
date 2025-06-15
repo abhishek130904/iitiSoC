@@ -1,10 +1,12 @@
 package org.example.project.travel.frontEnd.Screens
 
-
+import com.google.firebase.auth.ktx.auth
+import com.google.firebase.ktx.Firebase
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -12,107 +14,122 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.painterResource
-import org.jetbrains.compose.ui.tooling.preview.Preview
-import org.jetbrains.compose.resources.painterResource // ✅ MPP version
-
-
-
+import travelfrontend.composeapp.generated.resources.Res
+import travelfrontend.composeapp.generated.resources.login_background
 
 @Composable
 fun LoginPage() {
+    val auth = Firebase.auth
     val blueColor = Color(23, 111, 243)
 
     var email by remember { mutableStateOf("") }
-    var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White),
-        contentAlignment = Alignment.Center
-    ) {
-        val painter = painterResource("login_background.png")
-        Image(
-            painter = painter,
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier.fillMaxSize()
-        )
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
+    val snackbarHostState = remember { SnackbarHostState() }
+    var message by remember { mutableStateOf("") }
+
+    // Show snackbar when message is updated
+    LaunchedEffect(message) {
+        if (message.isNotEmpty()) {
+            snackbarHostState.showSnackbar(message)
+            message = ""
+        }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) }
+    ) { padding ->
+        Box(
             modifier = Modifier
-                .padding(24.dp)
+                .padding(padding)
+                .fillMaxSize()
+                .background(Color.White),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "Login",
-                color = blueColor,
-                fontSize = 32.sp,
-                modifier = Modifier.padding(bottom = 24.dp)
+            val painter = painterResource(Res.drawable.login_background)
+            Image(
+                painter = painter,
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
             )
-
-            OutlinedTextField(
-                value = name,
-                onValueChange = { name = it },
-                label = { Text("Name") },
-                singleLine = true,
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = email,
-                onValueChange = { email = it },
-                label = { Text("Email ID") },
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
-
-            OutlinedTextField(
-                value = password,
-                onValueChange = { password = it },
-                label = { Text("Password") },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                singleLine = true,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp)
-            )
-
-            Button(
-                onClick = {
-                    // TODO: Add login logic
-                },
-                colors = ButtonDefaults.buttonColors(containerColor = blueColor),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
+                    .padding(24.dp)
             ) {
-                Text("Login", color = Color.White)
-            }
-            Spacer(modifier = Modifier.height(12.dp))
 
-            TextButton(
-                onClick = {
-                    // TODO: Navigate to Sign Up screen
+                Text(
+                    text = "Login",
+                    color = Color.White,
+                    fontSize = 40.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 24.dp)
+                )
+
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = { email = it },
+                    label = { Text("Email ID", color = Color.White) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password", color = Color.White) },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    singleLine = true,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 8.dp)
+                )
+
+                Button(
+                    onClick = {
+                        if (email.isNotBlank() && password.isNotBlank()) {
+                            auth.signInWithEmailAndPassword(email.trim(), password.trim())
+                                .addOnCompleteListener { task ->
+                                    if (task.isSuccessful) {
+                                        message = "Login Successful!"
+                                        // TODO: Navigate to Home Screen
+                                    } else {
+                                        message = "Error: ${task.exception?.message}"
+                                    }
+                                }
+                        } else {
+                            message = "Please enter both email and password."
+                        }
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = blueColor),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text("Login", color = Color.White)
                 }
-            ) {
-                Text("Already a user? Sign up", color = blueColor)
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                TextButton(
+                    onClick = {
+                        // TODO: Navigate to Sign Up screen
+                    }
+                ) {
+                    Text("Already a user? Sign up", color = Color.White)
+                }
             }
         }
     }
 }
-
-
-

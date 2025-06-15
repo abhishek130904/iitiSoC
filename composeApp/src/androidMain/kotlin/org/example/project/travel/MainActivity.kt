@@ -7,19 +7,14 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.travel.frontEnd.Screens.LoginPage
-
-
+import ui.TravelAppScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         setContent {
-            LoginPage()
-
-
-
+            TravelAppScreen("shrawani")
         }
     }
 }
