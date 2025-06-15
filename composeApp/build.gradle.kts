@@ -40,6 +40,7 @@ kotlin {
                 implementation("cafe.adriel.voyager:voyager-navigator:1.1.0-beta02")
                 implementation("cafe.adriel.voyager:voyager-transitions:1.1.0-beta02")
             }
+            resources.srcDir( "src/commonMain/composeResources")
         }
 
         val androidMain by getting {
