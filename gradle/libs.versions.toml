@@ -52,6 +52,7 @@ androidx-media3-common-ktx = { group = "androidx.media3", name = "media3-common-
 androidx-navigation-compose-android = { group = "androidx.navigation", name = "navigation-compose-android", version.ref = "navigationComposeAndroid" }
 androidx-navigation-runtime-desktop = { group = "androidx.navigation", name = "navigation-runtime-desktop", version.ref = "navigationRuntimeDesktop" }
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
+compose-material-icons = { module = "org.jetbrains.compose.material:material-icons", version.ref = "composeMultiplatform" } # Added
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
