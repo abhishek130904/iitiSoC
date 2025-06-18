@@ -2,6 +2,7 @@ package org.example.project.travel.frontend.Screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,13 +18,16 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.ComponentContext
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import org.example.project.travel.frontend.auth.AuthService
+import org.example.project.travel.frontend.auth.GoogleSignInManager
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.login_background
+import travelfrontend.composeapp.generated.resources.gg
 
 interface SignInScreenComponent {
     val onLoginSuccess: () -> Unit
@@ -48,15 +52,18 @@ class SignInScreenComponentImpl(
 @Composable
 fun SignInScreen(
     authService: AuthService,
+    googleSignInManager: GoogleSignInManager,
     onLoginSuccess: () -> Unit,
     onSignUpClick: () -> Unit
 ) {
     val coroutineScope = rememberCoroutineScope()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var isSigningIn by remember { mutableStateOf(false) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var message by remember { mutableStateOf("") }
+    var isSigningInWithGoogle by remember { mutableStateOf(false) }
 
     LaunchedEffect(message) {
         if (message.isNotEmpty()) {
@@ -120,7 +127,8 @@ fun SignInScreen(
 
                 Button(
                     onClick = {
-                        if (email.isNotBlank() && password.isNotBlank()) {
+                        if (email.isNotBlank() && password.isNotBlank() && !isSigningIn) {
+                            isSigningIn = true
                             coroutineScope.launch {
                                 val result = authService.signInWithEmailAndPassword(email.trim(), password.trim())
                                 result.onSuccess { userId ->
@@ -129,18 +137,49 @@ fun SignInScreen(
                                 }.onFailure { exception ->
                                     message = "Error: ${exception.message}"
                                 }
+                                isSigningIn = false
                             }
-                        } else {
+                        } else if (!isSigningIn) {
                             message = "Please enter both email and password."
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = AppBlue),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 16.dp)
+                        .padding(vertical = 16.dp),
+                    enabled = !isSigningIn
                 ) {
-                    Text("Sign In", color = Color.White)
+                    Text(if (isSigningIn) "Signing In..." else "Sign In", color = Color.White)
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = "OR SIGN IN WITH",
+                    color = Color.White,
+                    fontSize = 14.sp,
+                    modifier = Modifier.padding(vertical = 8.dp)
+                )
+                Image(
+                    painter = painterResource(Res.drawable.gg),
+                    contentDescription = "Google Sign-In",
+                    modifier = Modifier
+                        .size(40.dp) // Adjust size as needed
+                        .clickable(enabled = !isSigningInWithGoogle) {
+                            coroutineScope.launch {
+                                isSigningInWithGoogle = true
+                                googleSignInManager.signOut()
+                                googleSignInManager.signInWithGoogle().onSuccess {
+                                    message = "Google Sign In Successful!"
+                                    onLoginSuccess()
+                                }.onFailure { exception ->
+                                    message = "Error: ${exception.message}"
+
+                                }
+                                isSigningInWithGoogle = false
+                            }
+                        }
+                )
 
                 Spacer(modifier = Modifier.height(12.dp))
 

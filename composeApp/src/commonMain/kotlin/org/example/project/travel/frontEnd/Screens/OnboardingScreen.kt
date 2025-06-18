@@ -18,7 +18,8 @@ import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun OnboardingScreen(
-    onFinished: () -> Unit
+    onFinished: () -> Unit,
+    onNavigateToSignIn: () -> Unit
 ) {
     val pages = listOf(
         OnboardingPage("Find your perfect place to stay!", "Explore stays and destinations with ease.", "welcome.json"),
@@ -120,7 +121,7 @@ fun OnboardingScreen(
                     if (pageIndex < pages.lastIndex) {
                         pageIndex++
                     } else {
-                        onFinished()
+                        onNavigateToSignIn()
                     }
                 },
                 colors = ButtonDefaults.buttonColors(containerColor = Color.White),
@@ -140,6 +141,7 @@ fun OnboardingScreen(
         }
     }
 }
+
 
 
 data class OnboardingPage(

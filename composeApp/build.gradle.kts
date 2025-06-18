@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
         kotlin("plugin.serialization") version "1.9.0" // match your Kotlin version
-
+    id("com.google.gms.google-services")
 }
 
 
@@ -93,7 +93,8 @@ kotlin {
 
                 // Koin for Android (only if you need it)
                 implementation("io.insert-koin:koin-android:3.5.3")
-
+                implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
+                implementation("com.google.android.gms:play-services-auth:21.2.0")
             }
         }
 

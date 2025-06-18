@@ -1,2 +1,2 @@
-package org.example.project.travel.frontend.viewModel
+package org.example.project.travel.frontEnd.viewModel
 

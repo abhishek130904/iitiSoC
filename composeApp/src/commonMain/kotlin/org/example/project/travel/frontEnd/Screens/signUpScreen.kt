@@ -1,8 +1,6 @@
-package org.example.project.travel.frontEnd.Screens
+package org.example.project.travel.frontend.Screens
 
-
-
-
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -12,22 +10,39 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arkivanov.decompose.ComponentContext
+import org.example.project.travel.frontend.auth.AuthService
+import org.example.project.travel.frontend.navigation.RootComponent
+import org.example.project.travel.frontend.navigation.Screen
+import kotlinx.coroutines.CoroutineScope  // Added explicitly
+import kotlinx.coroutines.launch        // Already present
+import org.example.project.travel.frontend.auth.GoogleSignInManager
+import org.jetbrains.compose.resources.painterResource
+import travelfrontend.composeapp.generated.resources.Res
+import travelfrontend.composeapp.generated.resources.gg
+import travelfrontend.composeapp.generated.resources.login_background
 
 // Custom blue color
 val AppBlue = Color(red = 23, green = 111, blue = 243)
 
 @Composable
-fun SignInScreen(
-    onSignInClick: (String, String) -> Unit = { _, _ -> },
-    onForgotPasswordClick: () -> Unit = {},
-    onCreateAccountClick: () -> Unit = {}
+fun SignUpScreen(
+    authService: AuthService,
+    googleSignInManager: GoogleSignInManager,
+    onBack: () -> Unit,
+    onSignUpSuccess: () -> Unit
 ) {
-    var userId by remember { mutableStateOf("") }
+    val coroutineScope = rememberCoroutineScope()
+    var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var isSigningUp by remember { mutableStateOf(false) }
+    var isSigningUpWithGoogle by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -35,6 +50,15 @@ fun SignInScreen(
             .background(Color.White),
         contentAlignment = Alignment.Center
     ) {
+
+        val painter = painterResource(Res.drawable.login_background)
+        Image(
+            painter = painter,
+            contentDescription = null,
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+        )
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp),
@@ -42,16 +66,12 @@ fun SignInScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            Text(
-                text = "Sign In",
-                fontSize = 32.sp,
-                color = AppBlue
-            )
+            Text(text = "Sign Up", fontSize = 32.sp, color = Color.White)
 
             OutlinedTextField(
-                value = userId,
-                onValueChange = { userId = it },
-                label = { Text("User ID") },
+                value = email,
+                onValueChange = { email = it },
+                label = { Text("Email") },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -74,13 +94,62 @@ fun SignInScreen(
                 )
             )
 
-            Button(
-                onClick = { onSignInClick(userId, password) },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(containerColor = AppBlue)
-            ) {
-                Text("Sign In", color = Color.White)
+            errorMessage?.let {
+                Text(it, color = Color.Red, fontSize = 14.sp)
             }
+
+            Button(
+                onClick = {
+                    if (email.isNotBlank() && password.isNotBlank() && !isSigningUp) {
+                        isSigningUp = true
+                        coroutineScope.launch {
+                            val result = authService.createUserWithEmailAndPassword(email.trim(), password.trim())
+                            result.onSuccess {
+                                onSignUpSuccess()
+                            }.onFailure { exception ->
+                                errorMessage = "Error: ${exception.message}"
+                            }
+                            isSigningUp = false
+                        }
+                    } else if (!isSigningUp) {
+                        errorMessage = "Please fill in both fields."
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = AppBlue),
+                enabled = !isSigningUp
+            ) {
+                Text(if (isSigningUp) "Signing Up..." else "Sign Up", color = Color.White)
+            }
+
+            Text(
+                text = "OR SIGN UP WITH",
+                color = Color.White,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
+            Image(
+                painter = painterResource(Res.drawable.gg),
+                contentDescription = "Google Sign-In",
+                modifier = Modifier
+                    .size(40.dp) // Adjust size as needed
+                    .clickable(enabled = !isSigningUpWithGoogle) {
+                        coroutineScope.launch {
+                            isSigningUpWithGoogle = true
+                            googleSignInManager.signOut()
+                            googleSignInManager.signInWithGoogle().onSuccess {
+                                errorMessage = null
+                                onSignUpSuccess()
+                            }.onFailure { e ->
+                                errorMessage = "Google Sign-Up Failed: ${e.message}"
+                            }
+                            isSigningUpWithGoogle = false
+                        }
+                    }
+            )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
 
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -89,17 +158,10 @@ fun SignInScreen(
                     .padding(top = 8.dp)
             ) {
                 Text(
-                    text = "Forgot Password?",
-                    color = AppBlue,
+                    text = "Back to Sign In",
+                    color = Color.White,
                     fontSize = 14.sp,
-                    modifier = Modifier.clickable(onClick = onForgotPasswordClick)
-                )
-
-                Text(
-                    text = "Create Account",
-                    color = AppBlue,
-                    fontSize = 14.sp,
-                    modifier = Modifier.clickable(onClick = onCreateAccountClick)
+                    modifier = Modifier.clickable { onBack() }
                 )
             }
         }

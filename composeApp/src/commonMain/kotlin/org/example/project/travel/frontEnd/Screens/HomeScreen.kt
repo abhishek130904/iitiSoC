@@ -23,14 +23,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.*
+
+interface HomeScreenComponent {
+    val userName: String // Fetched from authService or user profile
+}
+
+
 @OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun TravelAppScreen(userName: String) {
+fun HomeScreen(userName: String,
+               onNavigateToHome : () -> Unit) {
     val blue = Color(0xFF176FF3)
     val white = Color.White
 

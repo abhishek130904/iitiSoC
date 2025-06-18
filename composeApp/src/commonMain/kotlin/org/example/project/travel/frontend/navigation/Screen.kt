@@ -5,6 +5,19 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 sealed class Screen {
+
+    @Serializable
+    data object Onboarding : Screen()
+
+    @Serializable
+    data object  Signup : Screen()
+
+    @Serializable
+    data object Login : Screen()
+
+    @Serializable
+    data object  HomeScreen : Screen()
+
     @Serializable
     object FlightSearch : Screen()
 

@@ -142,7 +142,6 @@ class FlightViewModel : ViewModel() {
 
     fun clearFlights(flightViewModel: FlightViewModel) {
         flightViewModel._flights.value = emptyList()
-        println("FlightViewModel: Clearing flights - caller=${Thread.currentThread().stackTrace[3]}")
         println("FlightViewModel: Flights cleared - flights=${_flights.value}")
         flightViewModel._flightsError.value = null
         flightViewModel._isFlightsLoading.value = false
