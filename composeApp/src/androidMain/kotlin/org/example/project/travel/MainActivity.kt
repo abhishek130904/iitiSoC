@@ -7,6 +7,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import org.example.project.travel.frontEnd.Screens.LoginPage
+import org.example.project.travel.frontEnd.Screens.NetworkDisconnectedScreen
 import ui.TravelAppScreen
 
 class MainActivity : ComponentActivity() {
@@ -14,7 +15,9 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-            TravelAppScreen("shrawani")
+             NetworkDisconnectedScreen()
+
+
         }
     }
 }

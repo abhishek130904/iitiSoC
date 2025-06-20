@@ -140,6 +140,13 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("com.google.firebase:firebase-auth-ktx:22.3.1")
 
+        implementation("com.airbnb.android:lottie-compose:6.3.0")
+        implementation("androidx.activity:activity-compose:1.8.2")
+        implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.35.0-alpha")
+
+
+
 }
 
 
