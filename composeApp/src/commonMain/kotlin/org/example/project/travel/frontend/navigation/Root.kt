@@ -14,7 +14,11 @@ import org.example.project.travel.frontend.Screens.Transportation.FlightDetailSc
 import org.example.project.travel.frontend.Screens.Transportation.FlightSearchScreen
 import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.auth.GoogleSignInManager
+import org.example.project.travel.frontend.model.DestinationCity
+import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
+import org.example.project.travel.frontend.screen.SearchCityScreen
 import ui.HomeScreen
+import org.example.project.travel.frontEnd.Screens.CityDetailsScreen
 
 
 
@@ -48,11 +52,13 @@ fun RootContent(
                 )
                 is RootComponent.Child.HomeScreen -> HomeScreen(
                     userName = "TRAVELER", // Pass userName from component
-                    onNavigateToHome = { component.navigateTo(Screen.HomeScreen) }
+                    onNavigateToCitySearch = { component.navigateTo(Screen.CitySearchScreen) }
                 )
                 is RootComponent.Child.FlightSearch -> FlightSearchScreen(instance.component)
                 is RootComponent.Child.FlightDetail -> FlightDetailScreen(instance.component)
                 is RootComponent.Child.Hotel -> HotelScreenWrapper(instance.component)
+                is RootComponent.Child.CitySearchScreen -> SearchCityScreen(instance.component, CitySearchViewModel())
+                is RootComponent.Child.CityDetails -> CityDetailsScreen(instance.component)
             }
         }
     }

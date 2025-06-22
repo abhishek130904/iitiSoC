@@ -16,10 +16,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
@@ -30,13 +32,12 @@ import travelfrontend.composeapp.generated.resources.*
 
 interface HomeScreenComponent {
     val userName: String // Fetched from authService or user profile
+    fun onNavigateToCitySearch()
 }
-
 
 @OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(userName: String,
-               onNavigateToHome : () -> Unit) {
+fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit) {
     val blue = Color(0xFF176FF3)
     val white = Color.White
 
@@ -69,43 +70,85 @@ fun HomeScreen(userName: String,
         }
     }
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = white
-    ) {
+    Scaffold(
+        topBar = {
+            TopAppBar(
+                title = {
+                    Text(
+                        text = "Welcome, $userName",
+                        fontSize = 28.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = blue
+                    )
+                },
+                actions = {
+                    IconButton(onClick = { /* Handle profile action */ }) {
+                        Icon(
+                            Icons.Default.Person,
+                            contentDescription = "Profile",
+                            tint = blue
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = white,
+                    titleContentColor = blue
+                )
+            )
+        },
+        modifier = Modifier.fillMaxSize()
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
+                .padding(innerPadding)
                 .padding(horizontal = 20.dp, vertical = 16.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            Text(
-                text = "Welcome, $userName 👋",
-                fontSize = 28.sp,
-                fontWeight = FontWeight.Bold,
-                color = blue
-            )
-
-            // ✅ Search Bar added
-            OutlinedTextField(
-                value = "",
-                onValueChange = { },
-                placeholder = { Text("Search destinations...") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
-                singleLine = true,
+            // Attractive "Create a Perfect Trip for You" Section
+            Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(12.dp)),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
-                    unfocusedBorderColor = blue,
-                    focusedBorderColor = blue,
-                    focusedTextColor = Color.Black
-                )
-            )
+                    .padding(vertical = 16.dp)
+                    .shadow(8.dp, RoundedCornerShape(16.dp)),
+                colors = CardDefaults.cardColors(containerColor = Color(0xFFE3F2FD)),
+                shape = RoundedCornerShape(16.dp)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = "Create a Perfect Trip for You!",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF1976D2),
+                        modifier = Modifier.padding(bottom = 8.dp)
+                    )
+                    Text(
+                        text = "Let us craft a personalized travel experience tailored to your preferences.",
+                        fontSize = 14.sp,
+                        color = Color(0xFF455A64),
+                        textAlign = TextAlign.Center
+                    )
+                    Button(
+                        onClick = { onNavigateToCitySearch() },
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1976D2)),
+                        shape = RoundedCornerShape(8.dp),
+                        modifier = Modifier
+                            .padding(top = 12.dp)
+                            .height(40.dp)
+                    ) {
+                        Text("Get Started", color = Color.White, fontSize = 16.sp)
+                    }
+                }
+            }
 
             Text(
-                text = "Categories",
+                text = "Where to go next?",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.SemiBold,
                 color = blue
@@ -162,39 +205,6 @@ fun HomeScreen(userName: String,
             )
 
             InfiniteCarousel(items = imageResourcesWithLabels, listState = listState)
-
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Button(
-                    onClick = { println("Create a Trip clicked") },
-                    colors = ButtonDefaults.buttonColors(containerColor = blue),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-                ) {
-                    Icon(Icons.Default.TravelExplore, contentDescription = null, tint = Color.White)
-                    Spacer(Modifier.width(6.dp))
-                    Text("Create Trip", color = Color.White)
-                }
-
-                Button(
-                    onClick = { println("Previous Trips clicked") },
-                    colors = ButtonDefaults.buttonColors(containerColor = blue),
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(52.dp),
-                    shape = RoundedCornerShape(12.dp),
-                    elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
-                ) {
-                    Icon(Icons.Default.History, contentDescription = null, tint = Color.White)
-                    Spacer(Modifier.width(6.dp))
-                    Text("Previous Trips", color = Color.White)
-                }
-            }
 
             Spacer(modifier = Modifier.height(8.dp))
         }

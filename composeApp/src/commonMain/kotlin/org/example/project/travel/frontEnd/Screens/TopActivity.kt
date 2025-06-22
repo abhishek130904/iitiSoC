@@ -1,4 +1,4 @@
-package org.example.project.travel.frontEnd.Screens
+package org.example.project.travel.frontend.Screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -25,10 +25,11 @@ import androidx.compose.ui.unit.sp
 
 
 
-val AppBlue = Color(red = 23, green = 111, blue = 243)
+
 
 @Composable
 fun TopActivity() {
+    val AppBlue = Color(red = 23, green = 111, blue = 243)
     val snackbarHostState = remember { SnackbarHostState() }
     val coroutineScope = rememberCoroutineScope()
 

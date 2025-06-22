@@ -16,23 +16,29 @@ import org.example.project.travel.frontend.Screens.Transportation.FlightDetailSc
 import org.example.project.travel.frontend.Screens.Transportation.FlightSearchScreenComponent
 import org.example.project.travel.frontend.Screens.Transportation.FlightSearchScreenComponentImpl
 import org.example.project.travel.frontend.auth.AuthService
+import org.example.project.travel.frontend.screen.CitySearchScreenComponentImpl
 import ui.HomeScreenComponent
+import org.example.project.travel.frontEnd.Screens.CityDetailsScreenComponent
+import org.example.project.travel.frontEnd.Screens.CityDetailsScreenComponentImpl
 
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
     val flightViewModel: FlightViewModel
 
     fun navigateTo(screen: Screen)
+    fun navigateToDetails(cityId: Long)
     fun pop()
 
     sealed class Child {
         data class Onboarding(val component: Any) : Child()
+        data class CitySearchScreen(val component: CitySearchScreenComponentImpl) : Child()
         data class HomeScreen(val component: Any) : Child()
         data class Login(val component: SignInScreenComponentImpl) : Child() // Changed to LoginScreenComponent
         data class Signup(val component: Any) : Child()
         data class FlightSearch(val component: FlightSearchScreenComponent) : Child()
         data class FlightDetail(val component: FlightDetailScreenComponent) : Child()
         data class Hotel(val component: HotelScreenComponent) : Child()
+        data class CityDetails(val component: CityDetailsScreenComponent) : Child()
     }
 }
 
@@ -67,6 +73,10 @@ class RootComponentImpl(
         println("RootComponentImpl: Navigating to $screen")
         navigation.push(screen)
         println("RootComponentImpl: Navigation stack after push - active screen=${childStack.value.active.configuration}")
+    }
+
+    override fun navigateToDetails(cityId: Long) {
+        navigateTo(Screen.CityDetails(cityId))
     }
 
     override fun pop() {
@@ -110,11 +120,16 @@ class RootComponentImpl(
                 println("RootComponentImpl: Created Onboarding placeholder component")
                 RootComponent.Child.Onboarding(Any())
             }
-
+            is Screen.CityDetails -> {
+                val component = CityDetailsScreenComponentImpl(componentContext, this, screen.cityId)
+                RootComponent.Child.CityDetails(component)
+            }
             Screen.HomeScreen ->{
                 RootComponent.Child.HomeScreen(Any())
             }
-
+            Screen.CitySearchScreen ->{
+                RootComponent.Child.CitySearchScreen(CitySearchScreenComponentImpl(componentContext, this))
+            }
         }
     }
 }

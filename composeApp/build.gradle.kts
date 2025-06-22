@@ -74,6 +74,7 @@ kotlin {
                 implementation("moe.tlaster:precompose-viewmodel:1.5.6")
 
                 implementation("org.jetbrains.skiko:skiko:0.8.12")
+                implementation("media.kamel:kamel-image:0.9.0")
 
 
             }
@@ -95,6 +96,7 @@ kotlin {
                 implementation("io.insert-koin:koin-android:3.5.3")
                 implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
                 implementation("com.google.android.gms:play-services-auth:21.2.0")
+                implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
             }
         }
 

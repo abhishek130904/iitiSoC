@@ -52,7 +52,7 @@ override val flightViewModel: FlightViewModel = rootComponent.flightViewModel
 
         rootComponent.navigateTo(screen)
     }
-
+//
 //    override fun pop() {
 //        rootComponent.pop()
 //    }

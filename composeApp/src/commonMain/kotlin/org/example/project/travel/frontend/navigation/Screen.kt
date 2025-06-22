@@ -19,6 +19,9 @@ sealed class Screen {
     data object  HomeScreen : Screen()
 
     @Serializable
+    data object CitySearchScreen : Screen()
+
+    @Serializable
     object FlightSearch : Screen()
 
     @Serializable
@@ -26,4 +29,7 @@ sealed class Screen {
 
     @Serializable
     data class Hotel(val flightPrice: Double, val flightCurrency : String) : Screen()
+
+    @Serializable
+    data class CityDetails(val cityId: Long) : Screen()
 }
