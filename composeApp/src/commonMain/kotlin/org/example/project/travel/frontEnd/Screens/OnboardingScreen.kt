@@ -27,6 +27,7 @@ fun OnboardingScreen(
         OnboardingPage("Let's discover & enjoy the world!", "Get ready for your next unforgettable journey.", "loading.json")
     )
 
+
     var pageIndex by remember { mutableStateOf(0) }
     val blue = Color(0xFF176FF3)
 
