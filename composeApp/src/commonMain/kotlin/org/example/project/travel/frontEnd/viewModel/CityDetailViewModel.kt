@@ -10,7 +10,7 @@ import org.example.project.travel.frontend.model.UnsplashResponse
 import org.example.project.travel.frontend.model.WikipediaResponse
 import org.example.project.travel.frontend.network.TravelApi
 
-class CityDetailsViewModel(private val cityId: Long) : ViewModel() {
+class CityDetailsViewModel(private val cityId: String) : ViewModel() {
     private val _cityDetails = MutableStateFlow<CityDetailsResponse?>(null)
     val cityDetails: StateFlow<CityDetailsResponse?> = _cityDetails
 

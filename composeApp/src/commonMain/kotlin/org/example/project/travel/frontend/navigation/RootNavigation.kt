@@ -17,16 +17,17 @@ import org.example.project.travel.frontend.Screens.Transportation.FlightSearchSc
 import org.example.project.travel.frontend.Screens.Transportation.FlightSearchScreenComponentImpl
 import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.screen.CitySearchScreenComponentImpl
-import ui.HomeScreenComponent
 import org.example.project.travel.frontEnd.Screens.CityDetailsScreenComponent
 import org.example.project.travel.frontEnd.Screens.CityDetailsScreenComponentImpl
+import org.example.project.travel.frontEnd.network.TripService
+import org.example.project.travel.frontend.Screens.TripItineraryScreenComponent
+import org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl
 
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
     val flightViewModel: FlightViewModel
 
     fun navigateTo(screen: Screen)
-    fun navigateToDetails(cityId: Long)
     fun pop()
 
     sealed class Child {
@@ -39,6 +40,9 @@ interface RootComponent {
         data class FlightDetail(val component: FlightDetailScreenComponent) : Child()
         data class Hotel(val component: HotelScreenComponent) : Child()
         data class CityDetails(val component: CityDetailsScreenComponent) : Child()
+        data class TripItinerary(val component: TripItineraryScreenComponent) : Child()
+        data class ProfileScreen(val component: Any) : Child()
+        data class TripConfirmation(val tripId: String) : Child()
     }
 }
 
@@ -75,10 +79,6 @@ class RootComponentImpl(
         println("RootComponentImpl: Navigation stack after push - active screen=${childStack.value.active.configuration}")
     }
 
-    override fun navigateToDetails(cityId: Long) {
-        navigateTo(Screen.CityDetails(cityId))
-    }
-
     override fun pop() {
         println("RootComponentImpl: Popping from stack")
         navigation.pop()
@@ -112,8 +112,8 @@ class RootComponentImpl(
                 RootComponent.Child.FlightDetail(component)
             }
             is Screen.Hotel -> {
-                val component = HotelScreenComponentImpl(componentContext, this, screen.flightPrice, screen.flightCurrency)
-                println("RootComponentImpl: Created HotelScreenComponent - flightPrice=${screen.flightPrice}, flightCurrency=${screen.flightCurrency}")
+                val component = HotelScreenComponentImpl(componentContext, this, screen.selectedFlight)
+                println("RootComponentImpl: Created HotelScreenComponent - flight=${screen.selectedFlight.flightNumber}")
                 RootComponent.Child.Hotel(component)
             }
             Screen.Onboarding -> {
@@ -121,7 +121,7 @@ class RootComponentImpl(
                 RootComponent.Child.Onboarding(Any())
             }
             is Screen.CityDetails -> {
-                val component = CityDetailsScreenComponentImpl(componentContext, this, screen.cityId)
+                val component = CityDetailsScreenComponentImpl(componentContext, this, screen.cityId, screen.cityName)
                 RootComponent.Child.CityDetails(component)
             }
             Screen.HomeScreen ->{
@@ -129,6 +129,23 @@ class RootComponentImpl(
             }
             Screen.CitySearchScreen ->{
                 RootComponent.Child.CitySearchScreen(CitySearchScreenComponentImpl(componentContext, this))
+            }
+            is Screen.TripItinerary -> {
+                val component = org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl(
+                    componentContext,
+                    this,
+                    screen.selectedFlight,
+                    screen.selectedHotel,
+                    screen.selectedCityName,
+                    networkService = TripService(authService)
+                )
+                RootComponent.Child.TripItinerary(component)
+            }
+            Screen.ProfileScreen -> {
+                RootComponent.Child.ProfileScreen(Any())
+            }
+            is Screen.TripConfirmation -> {
+                RootComponent.Child.TripConfirmation(screen.tripId)
             }
         }
     }

@@ -28,13 +28,14 @@ import com.arkivanov.decompose.ComponentContext
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.model.DestinationCity
 import org.example.project.travel.frontend.navigation.RootComponent
+import org.example.project.travel.frontend.navigation.Screen
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.background_image
 
 // Data for famous places
 interface CitySearchScreenComponent {
-    fun onCitySelected(city: String)
+    fun onCitySelected(city: org.example.project.travel.frontend.model.DestinationCity)
     fun onBack()
 }
 
@@ -43,12 +44,8 @@ class CitySearchScreenComponentImpl(
     private val rootComponent: RootComponent
 ) : CitySearchScreenComponent, ComponentContext by componentContext {
 
-    override fun onCitySelected(city: String) {
-        // This is not needed anymore as we will pass the whole city object
-    }
-
-    fun onCitySelected(city: DestinationCity) {
-        rootComponent.navigateToDetails(city.id)
+    override fun onCitySelected(city: org.example.project.travel.frontend.model.DestinationCity) {
+        rootComponent.navigateTo(Screen.CityDetails(city.id.toString(), city.city))
     }
 
     override fun onBack() {
@@ -63,12 +60,18 @@ data class FamousPlace(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SearchCityScreen(component: CitySearchScreenComponentImpl, viewModel: CitySearchViewModel<DestinationCity>) {
+fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearchViewModel<DestinationCity>) {
     val cities by viewModel.cities.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var selectedCity by remember { mutableStateOf<DestinationCity?>(null) }
+
+    LaunchedEffect(cities) {
+        if (cities.isNotEmpty() && selectedCity == null) {
+            selectedCity = cities.first()
+        }
+    }
 
     val famousPlaces = listOf(
         FamousPlace(DestinationCity(id = 1, city = "Goa", state = "Goa", country = "India", cityCode = 101), "drawable/beach.jpg"),

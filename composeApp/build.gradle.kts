@@ -77,6 +77,7 @@ kotlin {
                 implementation("media.kamel:kamel-image:0.9.0")
 
 
+
             }
         }
 
@@ -164,6 +165,8 @@ dependencies {
     implementation(libs.androidx.media3.common.ktx)
     implementation(libs.androidx.navigation.compose.android)
     implementation(libs.androidx.navigation.runtime.android)
+    implementation(libs.firebase.firestore.ktx)
+    implementation(libs.firebase.auth.ktx)
 //    implementation(project(":composeApp"))
     debugImplementation(compose.uiTooling)
 

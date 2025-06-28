@@ -23,12 +23,10 @@ import androidx.compose.ui.unit.sp
 import kotlinx.datetime.*
 import androidx.compose.ui.graphics.Brush
 import com.arkivanov.decompose.ComponentContext
-import com.example.travel.model.dto.FlightDTO
-import com.example.travel.viewmodel.CityViewModel
+import com.example.travel.viewmodel.AirportCityViewModel
 import com.example.travel.viewmodel.FlightViewModel
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
-import com.arkivanov.decompose.extensions.compose.subscribeAsState
 
 interface FlightSearchScreenComponent {
 //    val cityViewModel: CityViewModel
@@ -63,7 +61,7 @@ override val flightViewModel: FlightViewModel = rootComponent.flightViewModel
 fun FlightSearchScreen(
     component: FlightSearchScreenComponent
 ) {
-    val cityViewModel = remember { CityViewModel() }
+    val cityViewModel = remember { AirportCityViewModel() }
     val flightViewModel = remember { FlightViewModel() }
     var selectedTab by remember { mutableStateOf("Flights") }
     var showDatePicker by remember { mutableStateOf(false) }
@@ -644,7 +642,7 @@ fun FlightSearchScreen(
                                     modifier = Modifier.heightIn(max = 300.dp)
                                 ) {
                                     items(filteredCities) { city ->
-                                        val airportName = cityViewModel.popularAirports.find { it.first == city.iataCode }?.second?.second ?: ""
+                                        val airportName = city.airportName
                                         CityOption(
                                             code = city.iataCode,
                                             name = city.city,

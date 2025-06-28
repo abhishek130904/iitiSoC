@@ -6,7 +6,6 @@ import androidx.compose.runtime.getValue
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import org.example.project.travel.frontEnd.Screens.OnboardingScreen
 import org.example.project.travel.frontend.Screens.SignInScreen
-import org.example.project.travel.frontend.Screens.SignInScreenComponent // Added import
 import org.example.project.travel.frontend.Screens.SignUpScreen
 import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.Screens.HotelScreenWrapper
@@ -44,6 +43,7 @@ fun App(
             is RootComponent.Child.FlightSearch -> FlightSearchScreen(child.component)
             is RootComponent.Child.FlightDetail -> FlightDetailScreen(child.component)
             is RootComponent.Child.Hotel -> HotelScreenWrapper(child.component)
+            is RootComponent.Child.TripItinerary -> org.example.project.travel.frontend.Screens.TripItineraryScreen(child.component)
             else -> throw IllegalStateException("Unhandled navigation child: $child")
         }
     }

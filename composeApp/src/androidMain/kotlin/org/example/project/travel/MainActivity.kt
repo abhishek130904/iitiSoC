@@ -39,7 +39,6 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.project.travel.frontend.model.DestinationCity
 
 
 //class MainActivity : ComponentActivity() {

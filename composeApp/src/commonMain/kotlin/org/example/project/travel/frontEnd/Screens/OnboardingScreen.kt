@@ -52,7 +52,7 @@ fun OnboardingScreen(
             // Logo (only on the first screen)
             if (pageIndex == 0) {
                 Text(
-                    text = "GoTour",
+                    text = "Trip Buddy",
                     fontSize = 28.sp,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
@@ -91,7 +91,7 @@ fun OnboardingScreen(
             Text(
                 text = pages[pageIndex].description,
                 fontSize = 15.sp,
-                color = Color.LightGray,
+                color = Color.Black,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
@@ -136,7 +136,7 @@ fun OnboardingScreen(
             }
 
             TextButton(onClick = onFinished) {
-                Text("Skip", color = Color.White)
+                Text("Skip", color = Color.Black)
             }
         }
     }

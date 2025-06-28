@@ -62,7 +62,7 @@ fun TopActivity() {
                     }
                 }
             )
-
+ 
             TravelCategoryCard(
                 title = "Famous Sightseeing",
                 cities = listOf("Anjuna Beach", "Baga Beach", "Dudhsagar Waterfalls", "Calangute Beach", "Chapora Fort"),

@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import org.example.project.travel.frontend.auth.UserProfile
+import org.example.project.travel.frontend.auth.fetchUserProfile
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -37,9 +39,11 @@ interface HomeScreenComponent {
 
 @OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit) {
+fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit, onProfileClick: () -> Unit,) {
     val blue = Color(0xFF176FF3)
     val white = Color.White
+    var userProfile by remember { mutableStateOf<UserProfile?>(null) }
+    var isVisible by remember { mutableStateOf(false) }
 
     val categories = listOf(
         Triple("Beaches", Icons.Default.BeachAccess, Color(0xFFE0F7FA)),
@@ -75,14 +79,14 @@ fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit) {
             TopAppBar(
                 title = {
                     Text(
-                        text = "Welcome, $userName",
+                        text = "Welcome, Traveller",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = blue
                     )
                 },
                 actions = {
-                    IconButton(onClick = { /* Handle profile action */ }) {
+                    IconButton(onClick = onProfileClick) {
                         Icon(
                             Icons.Default.Person,
                             contentDescription = "Profile",

@@ -10,22 +10,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arkivanov.decompose.ComponentContext
 import org.example.project.travel.frontend.auth.AuthService
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
-import kotlinx.coroutines.CoroutineScope  // Added explicitly
 import kotlinx.coroutines.launch        // Already present
 import org.example.project.travel.frontend.auth.GoogleSignInManager
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.gg
 import travelfrontend.composeapp.generated.resources.login_background
+import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
+import com.google.firebase.auth.FirebaseAuth
 
 // Custom blue color
 val AppBlue = Color(red = 23, green = 111, blue = 243)
@@ -40,9 +39,15 @@ fun SignUpScreen(
     val coroutineScope = rememberCoroutineScope()
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var name by remember { mutableStateOf("") }
+    var age by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isSigningUp by remember { mutableStateOf(false) }
     var isSigningUpWithGoogle by remember { mutableStateOf(false) }
+    var showGoogleProfileDialog by remember { mutableStateOf(false) }
+    var googleUid by remember { mutableStateOf("") }
+    var googleName by remember { mutableStateOf("") }
+    var googleAge by remember { mutableStateOf("") }
 
     Box(
         modifier = Modifier
@@ -67,6 +72,30 @@ fun SignUpScreen(
                 .padding(horizontal = 24.dp)
         ) {
             Text(text = "Sign Up", fontSize = 32.sp, color = Color.White)
+
+            OutlinedTextField(
+                value = name,
+                onValueChange = { name = it},
+                label = { Text("Name")},
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = AppBlue,
+                    cursorColor = AppBlue
+                )
+            )
+            OutlinedTextField(
+                value = age,
+                onValueChange = { age = it},
+                label = { Text("Age") },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = AppBlue,
+                    cursorColor = AppBlue
+                )
+            )
 
             OutlinedTextField(
                 value = email,
@@ -100,19 +129,23 @@ fun SignUpScreen(
 
             Button(
                 onClick = {
-                    if (email.isNotBlank() && password.isNotBlank() && !isSigningUp) {
+                    coroutineScope.launch {
                         isSigningUp = true
-                        coroutineScope.launch {
-                            val result = authService.createUserWithEmailAndPassword(email.trim(), password.trim())
-                            result.onSuccess {
-                                onSignUpSuccess()
-                            }.onFailure { exception ->
-                                errorMessage = "Error: ${exception.message}"
-                            }
+                        val userAge = age.toIntOrNull()
+                        if (userAge == null || name.isBlank()) {
+                            errorMessage = "Please enter a valid name and age."
+                            isSigningUp = false
+                            return@launch
+                        }
+                        val result = authService.createUserWithEmailAndPassword(email.trim(), password.trim())
+                        result.onSuccess { uid ->
+                            authService.saveUserProfile(uid, name.trim(), userAge, email.trim())
+                            isSigningUp = false
+                            onSignUpSuccess()
+                        }.onFailure {
+                            errorMessage = "Error: ${it.message}"
                             isSigningUp = false
                         }
-                    } else if (!isSigningUp) {
-                        errorMessage = "Please fill in both fields."
                     }
                 },
                 modifier = Modifier.fillMaxWidth(),
@@ -139,7 +172,13 @@ fun SignUpScreen(
                             googleSignInManager.signOut()
                             googleSignInManager.signInWithGoogle().onSuccess {
                                 errorMessage = null
-                                onSignUpSuccess()
+                                val uid = getCurrentFirebaseUserUid()
+                                if (uid != null) {
+                                    googleUid = uid
+                                    showGoogleProfileDialog = true
+                                } else {
+                                    errorMessage = "Google sign-in failed: No user found."
+                                }
                             }.onFailure { e ->
                                 errorMessage = "Google Sign-Up Failed: ${e.message}"
                             }
@@ -147,6 +186,65 @@ fun SignUpScreen(
                         }
                     }
             )
+
+            if (showGoogleProfileDialog) {
+                AlertDialog(
+                    onDismissRequest = { showGoogleProfileDialog = false },
+                    containerColor = Color.White,
+                    titleContentColor = Color.Black,
+                    textContentColor = Color.Black,
+                    title = { Text("Complete Profile") },
+                    text = {
+                        Column {
+                            OutlinedTextField(
+                                value = googleName,
+                                onValueChange = { googleName = it },
+                                label = { Text("Name") },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                            OutlinedTextField(
+                                value = googleAge,
+                                onValueChange = { googleAge = it },
+                                label = { Text("Age") },
+                                singleLine = true,
+                                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    },
+                    confirmButton = {
+                        Button(onClick = {
+                            val userAge = googleAge.toIntOrNull()
+                            if (googleName.isBlank() || userAge == null) {
+                                errorMessage = "Please enter a valid name and age."
+                                return@Button
+                            }
+                            coroutineScope.launch {
+                                val user = FirebaseAuth.getInstance().currentUser
+                                val email = user?.email
+                                authService.saveUserProfile(googleUid, googleName.trim(), userAge, email)
+                                showGoogleProfileDialog = false
+                                onSignUpSuccess()
+                            }
+                        },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AppBlue,
+                                contentColor = Color.White
+                            )) {
+                            Text("Save")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showGoogleProfileDialog = false },
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = AppBlue
+                            )) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
 
             Spacer(modifier = Modifier.height(12.dp))
 

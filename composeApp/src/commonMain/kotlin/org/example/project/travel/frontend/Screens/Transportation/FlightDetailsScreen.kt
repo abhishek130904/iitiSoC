@@ -13,14 +13,12 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
-import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -36,11 +34,9 @@ import kotlinx.datetime.toLocalDateTime
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
-import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.ic_ai
-import travelfrontend.composeapp.generated.resources.login_background
 
 interface FlightDetailScreenComponent {
     val flights: StateFlow<List<FlightDTO>>
@@ -155,11 +151,10 @@ fun FlightDetailScreen(
             Button(
                 onClick = {
                     println("FlightDetailScreen: Next button clicked for flight - airlineCode=${selectedFlight?.airlineCode}")
+                    val destinationIata = selectedFlight!!.arrival.iataCode
+                    val destinationCity = component.flightViewModel.getCityNameByIata(destinationIata) ?: destinationIata
                     component.navigateTo(
-                        Screen.Hotel(
-                            flightPrice = selectedFlight!!.price,
-                            flightCurrency = selectedFlight!!.currency
-                        )
+                        Screen.Hotel(selectedFlight = selectedFlight!!)
                     )
                           // Add navigation or action for the "Next" button here
                 },

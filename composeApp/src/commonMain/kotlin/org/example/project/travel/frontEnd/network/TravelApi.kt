@@ -21,11 +21,11 @@ object TravelApi {
     }
 
     suspend fun getCities(query: String): List<DestinationCity> {
-        return client.get("http://192.168.212.251:8080/api/destinations?name=$query").body()
+        return client.get("http://192.168.213.173:8080/api/destinations?name=$query").body()
     }
 
-    suspend fun getCityDetails(cityId: Long): CityDetailsResponse {
-        return client.get("http://192.168.212.251:8080/api/destinations/$cityId/details").body()
+    suspend fun getCityDetails(cityId: String): CityDetailsResponse {
+        return client.get("http://192.168.213.173:8080/api/destinations/$cityId/details").body()
     }
 
     suspend fun getWikipediaSummary(city: String): WikipediaResponse {

@@ -28,8 +28,21 @@ sealed class Screen {
     data class FlightDetail(val flights: List<FlightDTO>) : Screen()
 
     @Serializable
-    data class Hotel(val flightPrice: Double, val flightCurrency : String) : Screen()
+    data class Hotel(val selectedFlight: FlightDTO) : Screen()
 
     @Serializable
-    data class CityDetails(val cityId: Long) : Screen()
+    data class TripItinerary(
+        val selectedFlight: FlightDTO,
+        val selectedHotel: com.example.travel.model.dto.AccommodationDTO,
+        val selectedCityName: String
+    ) : Screen()
+
+    @Serializable
+    data class CityDetails(val cityId: String, val cityName: String) : Screen()
+
+    @Serializable
+    data object ProfileScreen : Screen()
+
+    @Serializable
+    data class TripConfirmation(val tripId: String) : Screen()
 }

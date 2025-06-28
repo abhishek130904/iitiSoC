@@ -79,15 +79,15 @@ import org.example.project.travel.frontend.network.TravelApi
 //    }
 //}
 
-class CitySearchViewModel<T : DestinationCity> : ViewModel() {
+open class CitySearchViewModel<T : DestinationCity> : ViewModel() {
     private val _cities = MutableStateFlow<List<T>>(emptyList())
-    val cities: StateFlow<List<T>> = _cities
+    open val cities: StateFlow<List<T>> = _cities
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading
+    open val isLoading: StateFlow<Boolean> = _isLoading
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error
+    open val error: StateFlow<String?> = _error
 
     fun searchCities(query: String) {
         viewModelScope.launch {

@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 
-class CityViewModel : CoroutineScope by CoroutineScope(Dispatchers.Default) {
+class AirportCityViewModel : CoroutineScope by CoroutineScope(Dispatchers.Default) {
     private val apiService = ApiService()
 
     // Cities state

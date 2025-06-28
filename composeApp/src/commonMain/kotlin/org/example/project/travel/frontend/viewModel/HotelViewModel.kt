@@ -9,50 +9,32 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
 
-class HotelViewModel(private val apiClient: HotelApiClient) {
-    private val scope = CoroutineScope(Dispatchers.IO)
-
-    // List of cities (hardcoded for now, can fetch dynamically later)
-    private val cities = listOf(
-        "Mumbai", "Delhi", "Goa", "Jaipur", "Kerala",
-        "Shimla", "Darjeeling", "Bangalore", "Chennai", "Kolkata"
-    )
-
-    // State for UI
-    private val _selectedCity = MutableStateFlow("Mumbai")
-    val selectedCity: StateFlow<String> = _selectedCity.asStateFlow()
-
+class HotelViewModel(private val apiClient: HotelApiClient, private val city: String) : ViewModel() {
     private val _hotels = MutableStateFlow<List<AccommodationDTO>>(emptyList())
-    val hotels: StateFlow<List<AccommodationDTO>> = _hotels.asStateFlow()
+    val hotels = _hotels.asStateFlow()
 
     private val _isLoading = MutableStateFlow(false)
-    val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
+    val isLoading = _isLoading.asStateFlow()
 
     private val _error = MutableStateFlow<String?>(null)
-    val error: StateFlow<String?> = _error.asStateFlow()
+    val error = _error.asStateFlow()
 
     init {
-        fetchHotels("Mumbai") // Fetch hotels for default city
-    }
-
-    fun onCitySelected(city: String) {
-        _selectedCity.value = city
         fetchHotels(city)
     }
 
-    fun getCities(): List<String> = cities
-
     private fun fetchHotels(city: String) {
-        scope.launch {
+        viewModelScope.launch {
             _isLoading.value = true
             _error.value = null
             try {
-                val response = apiClient.getHotelsByCity(city)
-                _hotels.value = response
+                val hotels = apiClient.getHotels(city)
+                _hotels.value = hotels
             } catch (e: Exception) {
-                _error.value = "Failed to fetch hotels: ${e.message}"
-                _hotels.value = emptyList()
+                _error.value = "Failed to load hotels: ${e.message}"
             } finally {
                 _isLoading.value = false
             }

@@ -9,12 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Flight
-import androidx.compose.material.icons.filled.Hotel
-import androidx.compose.material.icons.filled.LocalActivity
-import androidx.compose.material.icons.filled.Restaurant
-import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,21 +21,34 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.arkivanov.decompose.ComponentContext
+import com.example.travel.model.dto.AccommodationDTO
+import com.example.travel.model.dto.FlightDTO
+import org.example.project.travel.frontend.navigation.RootComponent
+import kotlin.random.Random
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
+import org.example.project.travel.frontEnd.model.TripRequestDTO
+import org.example.project.travel.frontEnd.model.Meal
+import org.example.project.travel.frontEnd.network.TripService
+import org.example.project.travel.frontend.navigation.Screen
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.example.project.travel.frontEnd.model.TripActivity
 
 // Data classes remain unchanged
 data class ItineraryDay(
     val date: String,
-    val activities: List<Activity>,
+    val activities: List<TripActivity>,
     val transport: Transport?,
     val accommodation: Accommodation,
     val meals: List<Meal>
-)
-
-data class Activity(
-    val time: String,
-    val name: String,
-    val description: String,
-    val cost: Double
 )
 
 data class Transport(
@@ -58,66 +66,120 @@ data class Accommodation(
     val cost: Double
 )
 
-data class Meal(
-    val type: String,
-    val venue: String?,
-    val time: String,
-    val cost: Double
-)
-
 private val primaryBlue = Color(23, 111, 243)
 private val white = Color.White
 
+interface TripItineraryScreenComponent : ComponentContext {
+    val selectedFlight: FlightDTO
+    val selectedHotel: AccommodationDTO
+    val selectedCityName: String
+    fun onNavigateToTransport()
+    fun onNavigateToAccommodation()
+    fun onNavigateToActivities()
+    fun onNavigateToDining()
+    fun onProceedToBooking(itinerary: List<ItineraryDay>, tripNotes: String)
+    fun onGoBack()
+}
+
+class TripItineraryScreenComponentImpl(
+    componentContext: ComponentContext,
+    private val rootComponent: RootComponent,
+    override val selectedFlight: FlightDTO,
+    override val selectedHotel: AccommodationDTO,
+    override val selectedCityName: String,
+    private val networkService: TripService // Make sure this is injected
+) : TripItineraryScreenComponent, ComponentContext by componentContext {
+    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    override fun onNavigateToTransport() { /*TODO*/ }
+    override fun onNavigateToAccommodation() { /*TODO*/ }
+    override fun onNavigateToActivities() { /*TODO*/ }
+    override fun onNavigateToDining() { /*TODO*/ }
+    override fun onGoBack() { rootComponent.pop() }
+
+    suspend fun saveTripAndProceed(itinerary: List<ItineraryDay>, tripNotes: String) {
+        val tripData = TripRequestDTO(
+            flightId = selectedFlight.airlineCode + "-" + selectedFlight.flightNumber,
+            cityName = selectedCityName,
+            hotelName = selectedHotel.name,
+            activities = itinerary.first().activities,
+            meals = itinerary.first().meals,
+            notes = tripNotes
+        )
+        try {
+            val tripId = networkService.saveTrip(tripData)
+            rootComponent.navigateTo(Screen.TripConfirmation(tripId.toString()))
+        } catch (e: Exception) {
+            // Handle error (e.g., update state in UI)
+        }
+    }
+
+    override fun onProceedToBooking(itinerary: List<ItineraryDay>, tripNotes: String) {
+        coroutineScope.launch {
+            saveTripAndProceed(itinerary, tripNotes)
+        }
+    }
+}
+
 @Composable
 fun TripItineraryScreen(
-    onNavigateToTransport: () -> Unit = {},
-    onNavigateToAccommodation: () -> Unit = {},
-    onNavigateToActivities: () -> Unit = {},
-    onNavigateToDining: () -> Unit = {},
-    onProceedToBooking: () -> Unit = {}
+    component: TripItineraryScreenComponent
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
     var tripNotes by remember { mutableStateOf("") }
+    var isSaving by remember { mutableStateOf(false) }
+    var saveError by remember { mutableStateOf<String?>(null) }
 
     // Sample data - Replace with ViewModel in production
-    val itinerary = remember {
+    val itinerary = remember(component.selectedFlight, component.selectedHotel) {
+        val arrivalTime = component.selectedFlight.arrival.time
+        val checkInTime = arrivalTime.plus(1, DateTimeUnit.HOUR)
+
+        // Calculate checkout time: 11:00 AM on the day after check-in, in the system's local timezone
+        val tz = TimeZone.currentSystemDefault()
+        val checkOutInstant = checkInTime.plus(1, DateTimeUnit.DAY, tz)
+        val checkOutLocalDateTime = checkOutInstant.toLocalDateTime(tz)
+        val checkOutTime = LocalDateTime(
+            year = checkOutLocalDateTime.year,
+            monthNumber = checkOutLocalDateTime.monthNumber,
+            dayOfMonth = checkOutLocalDateTime.dayOfMonth,
+            hour = 11,
+            minute = 0
+        ).toInstant(tz)
+
+
+        val formattedDeparture = formatInstant(component.selectedFlight.departure.time)
+        val formattedArrival = formatInstant(arrivalTime)
+        val formattedCheckIn = formatInstant(checkInTime)
+        val formattedCheckOut = formatInstant(checkOutTime)
+
+
         listOf(
             ItineraryDay(
-                date = "Day 1 - Dec 15, 2024",
+                date = "Trip Summary",
                 activities = listOf(
-                    Activity(
-                        time = "14:00",
-                        name = "Hotel Check-in",
-                        description = "Taj Resort & Spa",
-                        cost = 0.0
-                    ),
-                    Activity(
-                        time = "16:00",
-                        name = "Beach Walk",
-                        description = "Evening stroll at Calangute Beach",
-                        cost = 0.0
-                    )
+                    TripActivity("09:00", "Breakfast", "Enjoy breakfast at the hotel.", 0.0),
+                    TripActivity("10:00", "City Tour", "Explore the city's main attractions.", 0.0),
+                    TripActivity("13:00", "Lunch", "Have lunch at a local restaurant.", 0.0),
+                    TripActivity("15:00", "Local Sightseeing", "Visit the interesting places.", 0.0),
+                    TripActivity("19:00", "Dinner", "Enjoy a nice dinner.", 0.0)
                 ),
                 transport = Transport(
                     type = "Flight",
-                    details = "Air India AI-123",
-                    time = "10:30 AM",
-                    cost = 350.0
+                    details = "${component.selectedFlight.airlineCode} ${component.selectedFlight.flightNumber}",
+                    time = "Departs: ${formattedDeparture.first}, ${formattedDeparture.second}\nArrives: ${formattedArrival.first}, ${formattedArrival.second}",
+                    cost = component.selectedFlight.price
                 ),
                 accommodation = Accommodation(
-                    name = "Taj Resort & Spa",
-                    type = "Luxury Hotel",
-                    checkIn = "14:00",
-                    checkOut = "12:00",
-                    cost = 200.0
+                    name = component.selectedHotel.name,
+                    type = "Hotel",
+                    checkIn = "${formattedCheckIn.first}, ${formattedCheckIn.second}",
+                    checkOut = "${formattedCheckOut.first}, ${formattedCheckOut.second}",
+                    cost = component.selectedHotel.pricePerNight
                 ),
                 meals = listOf(
-                    Meal(
-                        type = "Dinner",
-                        venue = "Hotel Restaurant",
-                        time = "19:30",
-                        cost = 30.0
-                    )
+                    Meal("Breakfast", "Hotel", "09:00", Random.nextDouble(500.0, 1000.0)),
+                    Meal("Lunch", "Local Restaurant", "13:00", Random.nextDouble(500.0, 1000.0)),
+                    Meal("Dinner", "Local Restaurant", "19:00", Random.nextDouble(500.0, 1000.0))
                 )
             )
         )
@@ -158,17 +220,11 @@ fun TripItineraryScreen(
             // Quick Actions
             item {
                 QuickActionsSection(
-                    onNavigateToTransport = onNavigateToTransport,
-                    onNavigateToAccommodation = onNavigateToAccommodation,
-                    onNavigateToActivities = onNavigateToActivities,
-                    onNavigateToDining = onNavigateToDining
+                    onNavigateToTransport = component::onNavigateToTransport,
+                    onNavigateToAccommodation = component::onNavigateToAccommodation,
+                    onNavigateToActivities = component::onNavigateToActivities,
+                    onNavigateToDining = component::onNavigateToDining
                 )
-                Spacer(modifier = Modifier.height(24.dp))
-            }
-
-            // Budget Overview Section
-            item {
-                BudgetOverviewSection(itinerary)
                 Spacer(modifier = Modifier.height(24.dp))
             }
 
@@ -220,7 +276,7 @@ fun TripItineraryScreen(
                 Button(
                     onClick = {
                         showConfirmDialog = false
-                        onProceedToBooking()
+                        component.onProceedToBooking(itinerary, tripNotes)
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = primaryBlue)
                 ) {
@@ -234,6 +290,13 @@ fun TripItineraryScreen(
             }
         )
     }
+}
+
+private fun formatInstant(instant: Instant): Pair<String, String> {
+    val localDateTime = instant.toLocalDateTime(TimeZone.currentSystemDefault())
+    val date = "${localDateTime.dayOfMonth} ${localDateTime.month.name.take(3)} ${localDateTime.year}"
+    val time = "%02d:%02d".format(localDateTime.hour, localDateTime.minute)
+    return Pair(date, time)
 }
 
 @Composable
@@ -310,114 +373,6 @@ private fun QuickActionButton(
 }
 
 @Composable
-private fun BudgetOverviewSection(itinerary: List<ItineraryDay>) {
-    var isExpanded by remember { mutableStateOf(true) }
-    val rotationState by animateFloatAsState(
-        targetValue = if (isExpanded) 180f else 0f
-    )
-
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        color = white,
-        shadowElevation = 2.dp,
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { isExpanded = !isExpanded },
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    "Budget Overview",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = primaryBlue
-                )
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = "Expand",
-                    modifier = Modifier.rotate(rotationState),
-                    tint = primaryBlue
-                )
-            }
-
-            AnimatedVisibility(visible = isExpanded) {
-                Column(modifier = Modifier.padding(top = 16.dp)) {
-                    val transport = itinerary.sumOf { it.transport?.cost ?: 0.0 }
-                    val accommodation = itinerary.sumOf { it.accommodation.cost }
-                    val activities = itinerary.sumOf { day -> 
-                        day.activities.sumOf { it.cost }
-                    }
-                    val meals = itinerary.sumOf { day ->
-                        day.meals.sumOf { it.cost }
-                    }
-                    val total = transport + accommodation + activities + meals
-
-                    BudgetItem("Transport", transport)
-                    BudgetItem("Accommodation", accommodation)
-                    BudgetItem("Activities", activities)
-                    BudgetItem("Meals", meals)
-                    Divider(
-                        modifier = Modifier.padding(vertical = 12.dp),
-                        color = primaryBlue.copy(alpha = 0.1f),
-                        thickness = 1.dp
-                    )
-                    BudgetItem("Total", total, true)
-                }
-            }
-        }
-    }
-}
-
-@Composable
-private fun BudgetItem(
-    title: String,
-    amount: Double,
-    isTotal: Boolean = false
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Icon(
-                imageVector = when (title) {
-                    "Transport" -> Icons.Default.Flight
-                    "Accommodation" -> Icons.Default.Hotel
-                    "Activities" -> Icons.Default.LocalActivity
-                    "Meals" -> Icons.Default.Restaurant
-                    else -> Icons.Default.AttachMoney
-                },
-                contentDescription = title,
-                tint = if (isTotal) primaryBlue else Color(0xFF333333),
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(8.dp))
-            Text(
-                text = title,
-                fontWeight = if (isTotal) FontWeight.SemiBold else FontWeight.Normal,
-                color = if (isTotal) primaryBlue else Color(0xFF333333)
-            )
-        }
-//        Text(
-//            text = "$${"%.2f".format(amount)}",
-//            fontWeight = if (isTotal) FontWeight.SemiBold else FontWeight.Normal,
-//            color = if (isTotal) primaryBlue else Color(0xFF333333)
-//        )
-    }
-}
-
-@Composable
 private fun DayItineraryCard(day: ItineraryDay) {
     var isExpanded by remember { mutableStateOf(true) }
     val rotationState by animateFloatAsState(
@@ -461,7 +416,7 @@ private fun DayItineraryCard(day: ItineraryDay) {
                         ) {
                             ItineraryItemContent("${transport.type}: ${transport.details}")
                             ItineraryItemContent("Time: ${transport.time}")
-                            ItineraryItemContent("Cost: $${transport.cost}")
+                            ItineraryItemContent("Cost: ₹${transport.cost}")
                         }
                     }
 
@@ -472,7 +427,7 @@ private fun DayItineraryCard(day: ItineraryDay) {
                         ItineraryItemContent(day.accommodation.name)
                         ItineraryItemContent("Check-in: ${day.accommodation.checkIn}")
                         ItineraryItemContent("Check-out: ${day.accommodation.checkOut}")
-                        ItineraryItemContent("Cost: $${day.accommodation.cost}/night")
+                        ItineraryItemContent("Cost: ₹${day.accommodation.cost}/night")
                     }
 
                     if (day.activities.isNotEmpty()) {
@@ -483,7 +438,7 @@ private fun DayItineraryCard(day: ItineraryDay) {
                             day.activities.forEach { activity ->
                                 ItineraryItemContent("${activity.time} - ${activity.name}")
                                 if (activity.cost > 0) {
-                                    ItineraryItemContent("Cost: $${activity.cost}")
+                                    ItineraryItemContent("Cost: ₹${activity.cost}")
                                 }
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -498,7 +453,7 @@ private fun DayItineraryCard(day: ItineraryDay) {
                             day.meals.forEach { meal ->
                                 ItineraryItemContent("${meal.time} - ${meal.type}")
                                 meal.venue?.let { ItineraryItemContent("at $it") }
-                                ItineraryItemContent("Cost: $${meal.cost}")
+                                ItineraryItemContent("Cost: ₹${"%.2f".format(meal.cost)}")
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }

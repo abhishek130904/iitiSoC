@@ -29,19 +29,26 @@ import org.example.project.travel.frontend.navigation.RootComponent
 
 interface CityDetailsScreenComponent {
     val viewModel: CityDetailsViewModel
+    val cityName: String
     fun onBack()
+    fun onContinue()
 }
 
 class CityDetailsScreenComponentImpl(
     componentContext: ComponentContext,
     private val rootComponent: RootComponent,
-    cityId: Long
+    cityId: String,
+    override val cityName: String
 ) : CityDetailsScreenComponent, ComponentContext by componentContext {
 
     override val viewModel = CityDetailsViewModel(cityId)
 
     override fun onBack() {
         rootComponent.pop()
+    }
+
+    override fun onContinue() {
+        rootComponent.navigateTo(org.example.project.travel.frontend.navigation.Screen.FlightSearch)
     }
 }
 
@@ -57,18 +64,30 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(cityDetails?.city ?: "City Details") },
+                title = { Text(cityDetails?.city ?: component.cityName) },
                 navigationIcon = {
                     IconButton(onClick = component::onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(0xFF4A90E2),
+                    containerColor = Color(0xFF176FF3),
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )
             )
+        },
+        bottomBar = {
+            Button(
+                onClick = { component.onContinue() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF176FF3))
+            ){
+                Text("Continue", color = Color.White, fontSize = 18.sp)
+            }
         }
     ) { paddingValues ->
         Box(
@@ -149,7 +168,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                                             val aboutText = stripHtmlTags(page.extract)
                                             val wordCount = aboutText.trim().split("\\s+".toRegex()).size
                                             val finalText = if (wordCount < 15) {
-                                                "${page.title} is more than just a place on the map—it’s a journey into the heart of culture, tradition, and breathtaking landscapes. With every step, you’ll uncover hidden stories, timeless architecture, and experiences that will stay with you forever. Whether you seek the thrill of discovery or the peace of scenic beauty, this place offers an unforgettable adventure waiting to unfold."
+                                                "${page.title} is more than just a place on the map—it's a journey into the heart of culture, tradition, and breathtaking landscapes. With every step, you'll uncover hidden stories, timeless architecture, and experiences that will stay with you forever. Whether you seek the thrill of discovery or the peace of scenic beauty, this place offers an unforgettable adventure waiting to unfold."
                                             } else {
                                                 aboutText
                                             }
@@ -177,7 +196,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                             if (cityDetails!!.activities.isNotEmpty()) {
                                 item {
                                     Text(
-                                        "Top Activities",
+                                        "Top Tourist Places in ${cityDetails!!.city}",
                                         fontSize = 24.sp,
                                         fontWeight = FontWeight.Bold,
                                         color = Color(0xFF333333)
@@ -187,7 +206,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                                     ActivityItem(activity)
                                 }
                             }
-                    }
+                        }
                 }
             }
         }

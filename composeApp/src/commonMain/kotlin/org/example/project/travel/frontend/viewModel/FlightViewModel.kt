@@ -2,6 +2,7 @@ package com.example.travel.viewmodel
 
 import com.example.travel.model.dto.FlightDTO
 import com.example.travel.network.ApiService
+import com.example.travel.dto.CityDTO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,6 +32,11 @@ class FlightViewModel : ViewModel() {
 
     private val _flightsError = MutableStateFlow<String?>(null)
     val flightsError: StateFlow<String?> = _flightsError.asStateFlow()
+
+    // City mapping
+    private val _cities = MutableStateFlow<List<CityDTO>>(emptyList())
+    val cities: StateFlow<List<CityDTO>> = _cities.asStateFlow()
+    private val iataToCityName = mutableMapOf<String, String>()
 
     init {
         // Set default search state
@@ -146,6 +152,20 @@ class FlightViewModel : ViewModel() {
         flightViewModel._flightsError.value = null
         flightViewModel._isFlightsLoading.value = false
         println("FlightViewModel: clearFlights called - flights=${flightViewModel._flights.value}, error=${flightViewModel._flightsError.value}, isLoading=${flightViewModel._isFlightsLoading.value}")
+    }
+
+    fun getCityNameByIata(iata: String): String? = iataToCityName[iata]
+
+    fun fetchCities() {
+        viewModelScope.launch {
+            val result = apiService.getCitiesWithAirports()
+            result.onSuccess { cityList ->
+                _cities.value = cityList
+                iataToCityName.clear()
+                iataToCityName.putAll(cityList.associate { it.iataCode to it.city })
+            }
+            // Optionally handle errors
+        }
     }
 
     data class FlightSearchState(
