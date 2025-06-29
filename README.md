@@ -1,32 +1,66 @@
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-<<<<<<< HEAD
-# iitiSoC
-=======
-=======
->>>>>>> 59bba48ae76cac5e107afb35b0663ef2cea3eefa
->>>>>>> ada75e01303c85da45c0f47de73c5e0aec522ec0
-This is a Kotlin Multiplatform project targeting Android, iOS.
+Travel Planning Application
+Description
+This is a travel planning application developed for a midterm evaluation, featuring a mobile frontend for creating and managing trip itineraries and a backend for data persistence. The app allows users to select cities, plan activities, and save trip details.
+Features
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
-  It contains several subfolders:
-  - `commonMain` is for code that’s common for all targets.
-  - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
-    For example, if you want to use Apple’s CoreCrypto for the iOS part of your Kotlin app,
-    `iosMain` would be the right folder for such calls.
+City search and selection screen with famous places in India.
+Trip itinerary screen with customizable activities, meals, and notes.
+Data persistence for trips, activities, and meals in a MySQL database.
+Navigation between screens using Decompose.
+Backend API for saving trip data, testable via Postman.
 
-* `/iosApp` contains iOS applications. Even if you’re sharing your UI with Compose Multiplatform, 
-  you need this entry point for your iOS app. This is also where you should add SwiftUI code for your project.
+Tech Stack
+
+Frontend: Kotlin Multiplatform with Jetpack Compose, Decompose, Ktor.
+Backend: Spring Boot with JPA, MySQL.
+Tools: Android Studio, Postman, MySQL Workbench.
+
+Installation and Setup
+
+Clone the Repository:git clone https://github.com/your-username/travel-app.git
+cd travel-app
 
 
-<<<<<<< HEAD
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…LoginPage()
-=======
-<<<<<<< HEAD
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
->>>>>>> 4262f24 (initial)
-=======
-Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…LoginPage()
->>>>>>> 59bba48ae76cac5e107afb35b0663ef2cea3eefa
->>>>>>> ada75e01303c85da45c0f47de73c5e0aec522ec0
+Backend Setup:
+Install MySQL and create a database named travel_db.
+Update src/main/resources/application.properties with your MySQL credentials.
+Run the Spring Boot app: ./gradlew bootRun or use IDE Run configuration.
+
+
+Frontend Setup:
+Open in Android Studio and sync the project.
+Update NetworkService.kt with the backend URL (e.g., http://10.0.2.2:8080/api/trips for emulator).
+Build and run on an Android emulator or device.
+
+
+
+Usage
+
+Launch the app and search for a city (e.g., Goa, Jaipur).
+Proceed to the trip itinerary screen to add activities and notes.
+Save the trip via the "Proceed to Booking" button.
+Test the backend API with Postman:
+URL: http://localhost:8080/api/trips
+Method: POST
+Headers: X-User-Id: user123, Content-Type: application/json
+Body: See sample JSON in the code comments.
+
+
+
+Current Status and Challenges
+
+Progress: Successfully implemented city search, trip itinerary, and backend data persistence.
+Resolved Issues: Fixed JSON parse errors by adjusting flightId to String and resolved class resolution errors in the frontend.
+Ongoing Challenges: Connection timeouts due to network configuration (e.g., emulator to backend IP). Partial data model alignment (e.g., flightId as string vs. numeric ID).
+
+Next Steps
+
+Resolve connection timeouts by standardizing the backend URL.
+Enhance FlightDTO and AccommodationDTO with numeric id fields.
+Develop the TripConfirmationScreen for post-booking feedback.
+Add user authentication with Firebase.
+
+Contributing
+Contributions are welcome! Please fork the repository and submit pull requests.
+License
+[MIT License] (Placeholder - replace with actual license if chosen)
