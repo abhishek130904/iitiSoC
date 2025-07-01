@@ -14,6 +14,7 @@ class TravelPlanApplication {
 	}
 }
 
+
 fun main(args: Array<String>) {
 	runApplication<TravelPlanApplication>(*args)
 }

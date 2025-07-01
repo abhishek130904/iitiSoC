@@ -6,6 +6,7 @@ plugins {
 	kotlin("plugin.jpa") version "2.0.20"
 
 	kotlin("plugin.serialization") version "2.0.20"
+
 }
 
 val ktorVersion = "2.3.10"
@@ -53,6 +54,12 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin:2.17.1")
 	implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.17.1")
 
+	implementation("org.springframework.boot:spring-boot-starter")
+
+	implementation("org.seleniumhq.selenium:selenium-java:4.19.0")
+	implementation("io.github.bonigarcia:webdrivermanager:5.8.0")
+
+
 
 
 }
@@ -68,3 +75,4 @@ kotlin {
 		freeCompilerArgs.addAll("-Xjsr305=strict")
 	}
 }
+

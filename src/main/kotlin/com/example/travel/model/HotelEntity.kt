@@ -8,32 +8,46 @@ import jakarta.persistence.Column
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "hotels")
+@Table(name = "goibibo_hotels_with_random_prices")
 data class HotelEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     val id: Long = 0,
 
-    @Column(nullable = false)
-    val name: String,
+    @Column(name = "Hotel_Name", nullable = false)
+    val hotelName: String,
 
-    @Column(nullable = false)
+    @Column(name = "Hotel_Rating", nullable = false)
+    val hotelRating: Double,
+
+    @Column(name = "City", nullable = false)
     val city: String,
 
-    @Column(nullable = false)
-    val latitude: Double,
+    @Column(name = "Feature_1")
+    val feature1: String?,
 
-    @Column(nullable = false)
-    val longitude: Double,
+    @Column(name = "Feature_2")
+    val feature2: String?,
 
-    @Column(nullable = false)
-    val rating: Float,
+    @Column(name = "Feature_3")
+    val feature3: String?,
 
-    @Column(name = "price_per_night", nullable = false)
-    val pricePerNight: Double,
+    @Column(name = "Feature_4")
+    val feature4: String?,
 
-    @Column(nullable = false)
-    val currency: String,
+    @Column(name = "Feature_5")
+    val feature5: String?,
 
-    val amenities: String?
+    @Column(name = "Feature_6")
+    val feature6: String?,
+
+    @Column(name = "Feature_7")
+    val feature7: String?,
+
+    @Column(name = "Feature_8")
+    val feature8: String?,
+
+    @Column(name = "Hotel_Price", nullable = false)
+    val hotelPrice: Double
 )
