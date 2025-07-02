@@ -1,4 +1,4 @@
-package com.example.travel.model.dto
+package org.example.project.travel.frontEnd.model
 
 import kotlinx.serialization.Serializable
 

@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens.Transportation
+package org.example.project.travel.frontEnd.Screens.Transportation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -32,8 +32,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import moe.tlaster.precompose.flow.collectAsStateWithLifecycle
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
+import org.example.project.travel.frontEnd.navigation.RootComponent
+import org.example.project.travel.frontEnd.navigation.Screen
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.ic_ai

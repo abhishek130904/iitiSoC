@@ -24,8 +24,8 @@ import com.arkivanov.decompose.ComponentContext
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
 import org.example.project.travel.frontEnd.viewModel.CityDetailsViewModel
-import org.example.project.travel.frontend.model.Activity
-import org.example.project.travel.frontend.navigation.RootComponent
+import org.example.project.travel.frontEnd.model.Activity
+import org.example.project.travel.frontEnd.navigation.RootComponent
 
 interface CityDetailsScreenComponent {
     val viewModel: CityDetailsViewModel
@@ -48,7 +48,7 @@ class CityDetailsScreenComponentImpl(
     }
 
     override fun onContinue() {
-        rootComponent.navigateTo(org.example.project.travel.frontend.navigation.Screen.FlightSearch)
+        rootComponent.navigateTo(org.example.project.travel.frontEnd.navigation.Screen.FlightSearch)
     }
 }
 

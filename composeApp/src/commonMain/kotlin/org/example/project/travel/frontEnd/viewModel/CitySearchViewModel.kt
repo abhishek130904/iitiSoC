@@ -17,8 +17,8 @@ import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
 //import androidx.lifecycle.ViewModel
 //import androidx.lifecycle.viewModelScope
-import org.example.project.travel.frontend.model.DestinationCity
-import org.example.project.travel.frontend.network.TravelApi
+import org.example.project.travel.frontEnd.model.DestinationCity
+import org.example.project.travel.frontEnd.network.TravelApi
 
 //class CitySearchViewModel<T> : ViewModel() {
 //    private val client = HttpClient(CIO) {

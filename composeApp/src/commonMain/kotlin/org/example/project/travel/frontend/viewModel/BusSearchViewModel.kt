@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.viewModel
+package org.example.project.travel.frontEnd.viewModel
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

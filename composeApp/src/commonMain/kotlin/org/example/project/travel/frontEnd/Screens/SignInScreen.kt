@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens
+package org.example.project.travel.frontEnd.Screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -18,10 +18,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.ComponentContext
 import kotlinx.coroutines.launch
-import org.example.project.travel.frontend.auth.AuthService
-import org.example.project.travel.frontend.auth.GoogleSignInManager
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
+import org.example.project.travel.frontEnd.auth.AuthService
+import org.example.project.travel.frontEnd.auth.GoogleSignInManager
+import org.example.project.travel.frontEnd.navigation.RootComponent
+import org.example.project.travel.frontEnd.navigation.Screen
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.login_background

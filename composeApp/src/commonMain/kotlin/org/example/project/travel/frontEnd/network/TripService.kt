@@ -7,8 +7,8 @@ import io.ktor.http.contentType
 import org.example.project.travel.frontEnd.model.TripRequestDTO
 import org.example.project.travel.frontEnd.model.TripActivity
 import org.example.project.travel.frontEnd.model.Meal
-import org.example.project.travel.frontend.auth.AuthService
-import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
+import org.example.project.travel.frontEnd.auth.AuthService
+import org.example.project.travel.frontEnd.auth.getCurrentFirebaseUserUid
 
 class TripService(private val authService: AuthService) {
     private val client = ApiClient.client

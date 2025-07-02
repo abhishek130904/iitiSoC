@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens
+package org.example.project.travel.frontEnd.Screens
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -16,14 +16,14 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.example.project.travel.frontend.auth.AuthService
+import org.example.project.travel.frontEnd.auth.AuthService
 import kotlinx.coroutines.launch        // Already present
-import org.example.project.travel.frontend.auth.GoogleSignInManager
+import org.example.project.travel.frontEnd.auth.GoogleSignInManager
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.gg
 import travelfrontend.composeapp.generated.resources.login_background
-import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
+import org.example.project.travel.frontEnd.auth.getCurrentFirebaseUserUid
 import com.google.firebase.auth.FirebaseAuth
 
 // Custom blue color

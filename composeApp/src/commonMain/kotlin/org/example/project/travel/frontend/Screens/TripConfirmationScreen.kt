@@ -14,187 +14,91 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.rememberLottieComposition
+import com.airbnb.lottie.compose.LottieConstants
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun TripConfirmationScreen(
+    tripId: String,
     onConfirmTrip: () -> Unit = {},
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onGoHome: () -> Unit = {},
+    onShareTrip: () -> Unit = {},
+    onDownloadPdf: () -> Unit = {}
 ) {
     val primaryBlue = Color(23, 111, 243)
+    val composition by rememberLottieComposition(LottieCompositionSpec.Asset("tick.json"))
     
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.White)
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        // Header
+        // Tick animation
+        LottieAnimation(
+            composition = composition,
+            iterations = 1,
+            modifier = Modifier.size(180.dp)
+        )
+        Spacer(modifier = Modifier.height(24.dp))
         Text(
-            "Trip Confirmation",
-            fontSize = 28.sp,
+            "Trip Confirmed!",
+            fontSize = 30.sp,
             fontWeight = FontWeight.Bold,
             color = primaryBlue
         )
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Destination Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "Destination",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = primaryBlue
-                )
-                
-                Spacer(modifier = Modifier.height(8.dp))
-                
-                // Destination Image
-//                Image(
-//                    painter = painterResource("drawable/sample_destination.jpg"),
-//                    contentDescription = "Destination Image",
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .height(200.dp)
-//                        .clip(RoundedCornerShape(8.dp)),
-//                    contentScale = ContentScale.Crop
-//                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Text(
-                    "Goa,India",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                )
-                
-                Text(
-                    "7 Days, 6 Nights",
-                    fontSize = 16.sp,
-                    color = Color.Gray
-                )
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Budget Details Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "Budget Details",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = primaryBlue
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                BudgetItem("Flight", "$50")
-                BudgetItem("Hotel", "$60")
-                BudgetItem("Activities", "$30")
-                BudgetItem("Food & Drinks", "$20")
-                BudgetItem("Transportation", "$100")
-                
-                Divider(
-                    modifier = Modifier.padding(vertical = 16.dp),
-                    color = Color.LightGray
-                )
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Text(
-                        "Total per person",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = primaryBlue
-                    )
-                    Text(
-                        "$260",
-                        fontSize = 18.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = primaryBlue
-                    )
-                }
-            }
-        }
-        
-        Spacer(modifier = Modifier.height(24.dp))
-        
-        // Included Activities Card
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
-        ) {
-            Column(modifier = Modifier.padding(16.dp)) {
-                Text(
-                    "Included Activities",
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = primaryBlue
-                )
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    ActivityImage("Beach Tour")
-                    ActivityImage("Temple Visit")
-                    ActivityImage("Spa Day")
-                }
-            }
-        }
-        
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            "Your booking was successful. You can now download your trip summary, share your trip, or return to the home screen.",
+            fontSize = 16.sp,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(horizontal = 8.dp)
+        )
         Spacer(modifier = Modifier.height(32.dp))
-        
-        // Confirm Button
         Button(
-            onClick = onConfirmTrip,
+            onClick = onDownloadPdf,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = primaryBlue)
+                .height(54.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = primaryBlue),
+            shape = RoundedCornerShape(12.dp),
+            elevation = ButtonDefaults.buttonElevation(defaultElevation = 6.dp)
         ) {
-            Text(
-                "Confirm Booking",
-                fontSize = 18.sp,
-                color = Color.White
-            )
+            Text("Download Trip Summary PDF", color = Color.White, fontSize = 17.sp, fontWeight = FontWeight.Medium)
         }
-        
         Spacer(modifier = Modifier.height(16.dp))
-        
-        // Back Button
-        TextButton(
-            onClick = onBack,
-            modifier = Modifier.fillMaxWidth()
+        OutlinedButton(
+            onClick = onShareTrip,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = ButtonDefaults.outlinedButtonBorder,
         ) {
-            Text(
-                "Back to Search",
-                color = primaryBlue,
-                fontSize = 16.sp
-            )
+            Text("Share Trip", color = primaryBlue, fontSize = 16.sp, fontWeight = FontWeight.Medium)
+        }
+        Spacer(modifier = Modifier.height(16.dp))
+        OutlinedButton(
+            onClick = onGoHome,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            shape = RoundedCornerShape(12.dp),
+            border = ButtonDefaults.outlinedButtonBorder,
+        ) {
+            Text("Go to Home Screen", color = primaryBlue, fontSize = 16.sp, fontWeight = FontWeight.Medium)
         }
     }
 }

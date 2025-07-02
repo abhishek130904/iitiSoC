@@ -5,10 +5,10 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
-import org.example.project.travel.frontend.model.CityDetailsResponse
-import org.example.project.travel.frontend.model.UnsplashResponse
-import org.example.project.travel.frontend.model.WikipediaResponse
-import org.example.project.travel.frontend.network.TravelApi
+import org.example.project.travel.frontEnd.model.CityDetailsResponse
+import org.example.project.travel.frontEnd.model.UnsplashResponse
+import org.example.project.travel.frontEnd.model.WikipediaResponse
+import org.example.project.travel.frontEnd.network.TravelApi
 
 class CityDetailsViewModel(private val cityId: String) : ViewModel() {
     private val _cityDetails = MutableStateFlow<CityDetailsResponse?>(null)

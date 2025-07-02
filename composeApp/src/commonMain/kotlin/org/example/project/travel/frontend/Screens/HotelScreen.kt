@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens
+package org.example.project.travel.frontEnd.Screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -44,10 +44,10 @@ import io.ktor.client.HttpClient
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
-import org.example.project.travel.frontend.model.DestinationCity
-import org.example.project.travel.frontend.viewModel.HotelViewModel
+import org.example.project.travel.frontEnd.navigation.RootComponent
+import org.example.project.travel.frontEnd.navigation.Screen
+import org.example.project.travel.frontEnd.model.DestinationCity
+import org.example.project.travel.frontEnd.viewModel.HotelViewModel
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.background_image

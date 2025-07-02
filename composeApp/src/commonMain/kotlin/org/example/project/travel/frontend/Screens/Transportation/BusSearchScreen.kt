@@ -1,10 +1,10 @@
-package org.example.project.travel.frontend.Screens.Transportation
+package org.example.project.travel.frontEnd.Screens.Transportation
 
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.ComponentContext
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
+import org.example.project.travel.frontEnd.navigation.RootComponent
+import org.example.project.travel.frontEnd.navigation.Screen
 
 interface BusSearchScreenComponent {
     fun navigateTo(screen: Screen)

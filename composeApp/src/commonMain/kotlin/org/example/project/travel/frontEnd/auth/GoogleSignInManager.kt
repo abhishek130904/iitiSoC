@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.auth
+package org.example.project.travel.frontEnd.auth
 
 expect class GoogleSignInManager {
     suspend fun signInWithGoogle(): Result<Unit>

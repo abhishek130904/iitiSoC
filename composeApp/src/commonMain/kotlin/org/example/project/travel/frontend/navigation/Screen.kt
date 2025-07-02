@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.navigation
+package org.example.project.travel.frontEnd.navigation
 
 import com.example.travel.model.dto.FlightDTO
 import kotlinx.serialization.Serializable

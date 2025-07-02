@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.viewModel
+package org.example.project.travel.frontEnd.viewModel
 
 import com.example.travel.model.dto.AccommodationDTO
 import com.example.travel.network.HotelApiClient

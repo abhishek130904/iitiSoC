@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens
+package org.example.project.travel.frontEnd.Screens
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.ComponentContext
 import com.example.travel.model.dto.AccommodationDTO
 import com.example.travel.model.dto.FlightDTO
-import org.example.project.travel.frontend.navigation.RootComponent
+import org.example.project.travel.frontEnd.navigation.RootComponent
 import kotlin.random.Random
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
@@ -36,7 +36,7 @@ import kotlinx.datetime.toLocalDateTime
 import org.example.project.travel.frontEnd.model.TripRequestDTO
 import org.example.project.travel.frontEnd.model.Meal
 import org.example.project.travel.frontEnd.network.TripService
-import org.example.project.travel.frontend.navigation.Screen
+import org.example.project.travel.frontEnd.navigation.Screen
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -96,26 +96,26 @@ class TripItineraryScreenComponentImpl(
     override fun onNavigateToDining() { /*TODO*/ }
     override fun onGoBack() { rootComponent.pop() }
 
-    suspend fun saveTripAndProceed(itinerary: List<ItineraryDay>, tripNotes: String) {
-        val tripData = TripRequestDTO(
-            flightId = selectedFlight.airlineCode + "-" + selectedFlight.flightNumber,
-            cityName = selectedCityName,
-            hotelName = selectedHotel.name,
-            activities = itinerary.first().activities,
-            meals = itinerary.first().meals,
-            notes = tripNotes
-        )
-        try {
-            val tripId = networkService.saveTrip(tripData)
-            rootComponent.navigateTo(Screen.TripConfirmation(tripId.toString()))
-        } catch (e: Exception) {
-            // Handle error (e.g., update state in UI)
-        }
-    }
-
-    override fun onProceedToBooking(itinerary: List<ItineraryDay>, tripNotes: String) {
+    fun proceedToBooking(
+        itinerary: List<ItineraryDay>,
+        tripNotes: String,
+        onError: (String) -> Unit
+    ) {
         coroutineScope.launch {
-            saveTripAndProceed(itinerary, tripNotes)
+            val tripData = TripRequestDTO(
+                flightId = selectedFlight.airlineCode + "-" + selectedFlight.flightNumber,
+                cityName = selectedCityName,
+                hotelName = selectedHotel.name,
+                activities = itinerary.first().activities,
+                meals = itinerary.first().meals,
+                notes = tripNotes
+            )
+            try {
+                val tripId = networkService.saveTrip(tripData)
+                rootComponent.navigateTo(Screen.TripConfirmation(tripId.toString()))
+            } catch (e: Exception) {
+                onError(e.message ?: "Unknown error occurred while saving trip.")
+            }
         }
     }
 }
@@ -276,7 +276,14 @@ fun TripItineraryScreen(
                 Button(
                     onClick = {
                         showConfirmDialog = false
-                        component.onProceedToBooking(itinerary, tripNotes)
+                        isSaving = true
+                        saveError = null
+                        (component as? TripItineraryScreenComponentImpl)?.proceedToBooking(
+                            itinerary, tripNotes
+                        ) { errorMsg ->
+                            isSaving = false
+                            saveError = errorMsg
+                        }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = primaryBlue)
                 ) {
@@ -286,6 +293,25 @@ fun TripItineraryScreen(
             dismissButton = {
                 TextButton(onClick = { showConfirmDialog = false }) {
                     Text("Cancel", color = primaryBlue)
+                }
+            }
+        )
+    }
+    if (isSaving) {
+        // Show a loading indicator while saving
+        Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator(color = primaryBlue)
+        }
+    }
+    if (saveError != null) {
+        // Show error message if saving fails
+        AlertDialog(
+            onDismissRequest = { saveError = null },
+            title = { Text("Error") },
+            text = { Text(saveError ?: "") },
+            confirmButton = {
+                TextButton(onClick = { saveError = null }) {
+                    Text("OK")
                 }
             }
         )

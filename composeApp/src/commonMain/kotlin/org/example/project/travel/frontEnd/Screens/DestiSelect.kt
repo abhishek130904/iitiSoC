@@ -57,7 +57,7 @@ fun DestiSelect() {
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Let’s plan your perfect trip!",
+                text = "Let's plan your perfect trip!",
                 fontStyle = FontStyle.Italic,
                 fontSize = 30.sp,
                 fontWeight = FontWeight.Bold,

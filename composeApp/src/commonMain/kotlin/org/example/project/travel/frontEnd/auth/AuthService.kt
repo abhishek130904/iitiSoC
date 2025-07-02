@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.auth
+package org.example.project.travel.frontEnd.auth
 
 expect class AuthService {
     suspend fun signInWithEmailAndPassword(email: String, password: String): Result<String>

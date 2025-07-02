@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens
+package org.example.project.travel.frontEnd.Screens
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background

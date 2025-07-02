@@ -92,6 +92,7 @@ fun RootContent(
                     )
                 }
                 is RootComponent.Child.TripConfirmation -> TripConfirmationScreen(
+                    tripId = instance.tripId,
                     onConfirmTrip = {},
                     onBack = { component.pop() }
                 )

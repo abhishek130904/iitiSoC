@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.screen
+package org.example.project.travel.frontEnd.screen
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background

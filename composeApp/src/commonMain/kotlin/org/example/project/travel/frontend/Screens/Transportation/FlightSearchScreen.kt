@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.Screens.Transportation
+package org.example.project.travel.frontEnd.Screens.Transportation
 
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
@@ -25,8 +25,8 @@ import androidx.compose.ui.graphics.Brush
 import com.arkivanov.decompose.ComponentContext
 import com.example.travel.viewmodel.AirportCityViewModel
 import com.example.travel.viewmodel.FlightViewModel
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
+import org.example.project.travel.frontEnd.navigation.RootComponent
+import org.example.project.travel.frontEnd.navigation.Screen
 
 interface FlightSearchScreenComponent {
 //    val cityViewModel: CityViewModel

@@ -1,4 +1,4 @@
-package org.example.project.travel.frontend.network
+package org.example.project.travel.frontEnd.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
@@ -8,7 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
-import org.example.project.travel.frontend.model.*
+import org.example.project.travel.frontEnd.model.*
 
 object TravelApi {
     private val client = HttpClient(CIO) {

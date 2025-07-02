@@ -25,9 +25,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import org.example.project.travel.frontend.auth.UserProfile
-import org.example.project.travel.frontend.auth.fetchUserProfile
-import org.example.project.travel.frontend.auth.AuthService
+import org.example.project.travel.frontEnd.auth.UserProfile
+import org.example.project.travel.frontEnd.auth.fetchUserProfile
+import org.example.project.travel.frontEnd.auth.AuthService
 import kotlinx.coroutines.launch
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
