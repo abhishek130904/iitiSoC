@@ -25,6 +25,6 @@ object ApiClient {
 
 class HotelApiClient(private val httpClient: HttpClient) {
     suspend fun getHotels(city: String): List<AccommodationDTO> {
-        return httpClient.get("http://192.168.213.173:8080/api/hotels?city=$city").body()
+        return httpClient.get("http://192.168.62.173:8080/api/hotels?city=$city").body()
     }
 }

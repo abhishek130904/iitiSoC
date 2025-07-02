@@ -46,7 +46,8 @@ class FlightViewModel : ViewModel() {
             fromAirportName = "Indira Gandhi International Airport",
             toCity = "BOM",
             toCityName = "Mumbai",
-            toAirportName = "Chhatrapati Shivaji Maharaj International Airport"
+            toAirportName = "Chhatrapati Shivaji International Airport",
+            selectedDate = "2025-07-03"
         )
         println("FlightViewModel: Initialized with default searchState - fromCity=${_searchState.value.fromCity}, toCity=${_searchState.value.toCity}, selectedDate=${_searchState.value.selectedDate}, adults=${_searchState.value.adultCount}, children=${_searchState.value.childCount}, infants=${_searchState.value.infantCount}, cabinClass=${_searchState.value.cabinClass}")
     }
@@ -110,6 +111,26 @@ class FlightViewModel : ViewModel() {
         cabinClass: String
     ) {
         println("FlightViewModel: searchFlights called - fromCity=$fromCity, toCity=$toCity, date=$date, adults=$adults, children=$children, infants=$infants, cabinClass=$cabinClass")
+        val formattedDate = formatDateForApi(date)
+        println("FlightViewModel: Sending formatted date to API: $formattedDate")
+        try {
+            val today = java.time.LocalDate.now()
+            val selected = java.time.LocalDate.parse(formattedDate)
+            println("FlightViewModel: Today is $today, selected date is $selected")
+            if (selected.isBefore(today)) {
+                println("FlightViewModel: Blocked API call - selected date $selected is in the past compared to today $today")
+                _flightsError.value = "Selected date is in the past. Please choose a valid date."
+                _flights.value = emptyList()
+                _isFlightsLoading.value = false
+                return
+            }
+        } catch (e: Exception) {
+            println("FlightViewModel: Exception during date validation: ${e.message}")
+            _flightsError.value = "Invalid date format."
+            _flights.value = emptyList()
+            _isFlightsLoading.value = false
+            return
+        }
         viewModelScope.launch {
             _isFlightsLoading.value = true
             println("FlightViewModel: searchFlights - Loading started, isFlightsLoading=${_isFlightsLoading.value}")
@@ -117,7 +138,7 @@ class FlightViewModel : ViewModel() {
                 val response = apiService.searchFlights(
                     fromCity = fromCity,
                     toCity = toCity,
-                    date = date,
+                    date = formattedDate,
                     adults = adults,
                     children = children,
                     infants = infants,
@@ -126,25 +147,64 @@ class FlightViewModel : ViewModel() {
                 println("FlightViewModel: searchFlights - API response received")
                 response
                     .onSuccess { flights ->
+                        println("FlightViewModel: searchFlights success - flights count=${flights.size}, flights=$flights")
                         _flights.value = flights
                         _flightsError.value = null
-                        println("FlightViewModel: searchFlights success - flights count=${flights.size}, flights=$flights")
                     }
                     .onFailure { exception ->
+                        println("FlightViewModel: searchFlights failed - error=${exception.message}")
                         _flightsError.value = exception.message
                         _flights.value = emptyList()
-                        println("FlightViewModel: searchFlights failed - error=${exception.message}")
                     }
             } catch (e: Exception) {
+                println("FlightViewModel: searchFlights exception - error=${e.message}")
                 _flightsError.value = e.message
                 _flights.value = emptyList()
-                println("FlightViewModel: searchFlights exception - error=${e.message}")
             } finally {
-                _isFlightsLoading.value = false
                 println("FlightViewModel: searchFlights - Loading finished, isFlightsLoading=${_isFlightsLoading.value}, flights=${_flights.value}, error=${_flightsError.value}")
+                _isFlightsLoading.value = false
             }
         }
     }
+
+    private fun formatDateForApi(date: String): String {
+        println("formatDateForApi: input date string = '$date'")
+        // If already in yyyy-MM-dd format, return as is
+        val isoRegex = Regex("""\d{4}-\d{2}-\d{2}""")
+        if (isoRegex.matches(date)) {
+            println("formatDateForApi: input is already in yyyy-MM-dd format, returning as is")
+            return date
+        }
+        // Otherwise, try to parse "03 JUL 25" etc.
+        val regex = Regex("""(\d{2})\s([A-Za-z]{3})\s(\d{2,4})""")
+        val match = regex.find(date)
+        if (match != null) {
+            val (day, monthStr, yearStr) = match.destructured
+            println("formatDateForApi: parsed day=$day, monthStr=$monthStr, yearStr=$yearStr")
+            val month = when (monthStr.uppercase()) {
+                "JAN" -> "01"
+                "FEB" -> "02"
+                "MAR" -> "03"
+                "APR" -> "04"
+                "MAY" -> "05"
+                "JUN" -> "06"
+                "JUL" -> "07"
+                "AUG" -> "08"
+                "SEP" -> "09"
+                "OCT" -> "10"
+                "NOV" -> "11"
+                "DEC" -> "12"
+                else -> "01"
+            }
+            val year = if (yearStr.length == 2) "20$yearStr" else yearStr
+            val formatted = "$year-$month-$day"
+            println("formatDateForApi: output formatted date = '$formatted'")
+            return formatted
+        }
+        println("formatDateForApi: fallback date used, returning input")
+        return date
+    }
+
 
     fun clearFlights(flightViewModel: FlightViewModel) {
         flightViewModel._flights.value = emptyList()

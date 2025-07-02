@@ -326,7 +326,8 @@ fun FlightSearchScreen(
                         ) {
                             Text("Departure Date", color = Color(0xFF424242), fontSize = 14.sp)
                             Text(
-                                searchState.selectedDate.ifEmpty { formatDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date) },
+                                if (searchState.selectedDate.isNotEmpty()) formatDate(LocalDate.parse(searchState.selectedDate))
+                                else formatDate(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date),
                                 fontSize = 16.sp,
                                 fontWeight = FontWeight.Medium,
                                 color = Color.Black,
@@ -512,14 +513,13 @@ fun FlightSearchScreen(
             Button(
                 onClick = {
                     val date = safeSearchState.selectedDate.ifEmpty {
-                        formatDate(Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Kolkata")).date)
+                        Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Kolkata")).date.toString()
                     }
-                    // Log the parameters before calling searchFlights
                     println("FlightSearchScreen: Search button clicked - fromCity=${safeSearchState.fromCity}, toCity=${safeSearchState.toCity}, date=$date, adults=${safeSearchState.adultCount}, children=${safeSearchState.childCount}, infants=${safeSearchState.infantCount}, cabinClass=${safeSearchState.cabinClass}")
                     flightViewModel.searchFlights(
                         fromCity = safeSearchState.fromCity,
                         toCity = safeSearchState.toCity,
-                        date = formatDateForApi(date),
+                        date = date,
                         adults = safeSearchState.adultCount,
                         children = safeSearchState.childCount,
                         infants = safeSearchState.infantCount,
@@ -963,9 +963,10 @@ fun FlightSearchScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        flightViewModel.updateDate(formatDate(selectedDateLocal))
+                        val apiDate = selectedDateLocal.toString() // yyyy-MM-dd
+                        flightViewModel.updateDate(apiDate)
                         showDatePicker = false
-                        println("FlightSearchScreen: Date picker confirmed - selected date=${formatDate(selectedDateLocal)}")
+                        println("FlightSearchScreen: Date picker confirmed - selected date=$apiDate")
                     }
                 ) {
                     Text("OK", color = Color(23, 111, 243))
@@ -1078,29 +1079,6 @@ private fun formatDate(date: LocalDate): String {
     val month = date.month.name.take(3)
     val year = date.year.toString().takeLast(2)
     return "$dayOfWeek, $day $month $year"
-}
-
-private fun formatDateForApi(date: String): String {
-    val parts = date.split(", ", " ")
-    if (parts.size < 4) return "2025-06-08" // Fallback to current date
-    val day = parts[1].padStart(2, '0')
-    val month = when (parts[2]) {
-        "Jan" -> "01"
-        "Feb" -> "02"
-        "Mar" -> "03"
-        "Apr" -> "04"
-        "May" -> "05"
-        "Jun" -> "06"
-        "Jul" -> "07"
-        "Aug" -> "08"
-        "Sep" -> "09"
-        "Oct" -> "10"
-        "Nov" -> "11"
-        "Dec" -> "12"
-        else -> "06"
-    }
-    val year = "20${parts[3]}"
-    return "$year-$month-$day"
 }
 
 @Composable
