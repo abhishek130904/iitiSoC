@@ -111,12 +111,12 @@ fun FlightDetailScreen(
         }
 
         if (flights.isEmpty()) {
-            println("FlightDetailScreen: Flights list is empty, showing 'No flights available'")
+            println("FlightDetailScreen: Flights list is empty, showing 'No flights found'")
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
             ) {
-                Text("No flights available", color = Color.Gray)
+                Text("No flights found", color = Color.Gray)
             }
         } else {
             println("FlightDetailScreen: Flights list is not empty - flights count=${flights.size}")

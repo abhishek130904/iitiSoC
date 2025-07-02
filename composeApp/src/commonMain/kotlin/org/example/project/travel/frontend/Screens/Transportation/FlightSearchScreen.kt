@@ -27,6 +27,7 @@ import com.example.travel.viewmodel.AirportCityViewModel
 import com.example.travel.viewmodel.FlightViewModel
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
+import com.airbnb.lottie.compose.*
 
 interface FlightSearchScreenComponent {
 //    val cityViewModel: CityViewModel
@@ -98,6 +99,14 @@ fun FlightSearchScreen(
             val screen: Screen = Screen.FlightDetail(flights) // Explicitly declare the type
             component.navigateTo(screen)
         }
+    }
+
+    // Lottie loading animation state
+    var showLoadingAnimation by remember { mutableStateOf(false) }
+    // Show animation when loading starts
+    LaunchedEffect(isFlightsLoading) {
+        if (isFlightsLoading) showLoadingAnimation = true
+        else showLoadingAnimation = false
     }
 
     Column(
@@ -509,6 +518,28 @@ fun FlightSearchScreen(
                 }
             }
 
+            // Lottie Loading Animation Overlay
+            if (showLoadingAnimation) {
+                // Lottie setup
+                val composition by rememberLottieComposition(LottieCompositionSpec.Asset("flight.json"))
+                val progress by animateLottieCompositionAsState(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever // Loop until loading is done
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White.copy(alpha = 0.8f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.size(220.dp)
+                    )
+                }
+            }
+
             // Search Button - Floating at the bottom
             Button(
                 onClick = {
@@ -516,6 +547,7 @@ fun FlightSearchScreen(
                         Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Kolkata")).date.toString()
                     }
                     println("FlightSearchScreen: Search button clicked - fromCity=${safeSearchState.fromCity}, toCity=${safeSearchState.toCity}, date=$date, adults=${safeSearchState.adultCount}, children=${safeSearchState.childCount}, infants=${safeSearchState.infantCount}, cabinClass=${safeSearchState.cabinClass}")
+                    showLoadingAnimation = true // Show animation immediately on click
                     flightViewModel.searchFlights(
                         fromCity = safeSearchState.fromCity,
                         toCity = safeSearchState.toCity,

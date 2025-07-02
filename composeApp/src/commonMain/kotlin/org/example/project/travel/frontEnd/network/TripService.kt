@@ -11,7 +11,7 @@ import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
 
 class TripService(private val authService: AuthService) {
-    private val client = ApiClient.client
+    private val client = ApiClient.clientx
 
     suspend fun saveTrip(trip: TripRequestDTO): Long {
         val userId = getCurrentFirebaseUserUid() ?: throw Exception("User not authenticated")
