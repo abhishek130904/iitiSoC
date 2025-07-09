@@ -75,8 +75,6 @@ kotlin {
 
                 implementation("org.jetbrains.skiko:skiko:0.8.12")
                 implementation("media.kamel:kamel-image:0.9.0")
-//                  implementation("com.russhwolf:multiplatform-settings:1.1.1")
-
 
             }
         }

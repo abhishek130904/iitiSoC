@@ -140,7 +140,8 @@ fun OnboardingScreen(
                 )
             }
 
-            TextButton(onClick = {onNavigateToSignIn()}) {
+            TextButton(onClick = {onNavigateToSignIn()
+                AppSettings.setHasSeenOnboarding()}) {
                 Text("Skip", color = Color.Black)
             }
         }

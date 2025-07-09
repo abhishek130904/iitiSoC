@@ -51,5 +51,7 @@ actual suspend fun fetchUserProfile(uid: String): UserProfile? {
 }
 
 actual fun getCurrentFirebaseUserUid(): String? {
-    return com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+    val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+    android.util.Log.d("AuthDebug", "Firebase currentUser = $user, uid = ${user?.uid}")
+    return user?.uid
 }

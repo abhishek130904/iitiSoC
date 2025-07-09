@@ -39,7 +39,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.project.travel.frontEnd.initSettings
+import org.example.project.travel.frontEnd.ui.initSettings
 
 
 //class MainActivity : ComponentActivity() {
@@ -92,6 +92,10 @@ class MainActivity : ComponentActivity() {
             authService = authService,
         )
 
+        // Initialize network monitor with application context
+        org.example.project.travel.frontEnd.network.NetworkMonitor.init(applicationContext)
+
+        
         setContent {
             RootContent(
                 component = root,

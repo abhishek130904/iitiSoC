@@ -24,10 +24,20 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Brush
+import org.example.project.travel.frontEnd.pdf.TripSummary
+import org.example.project.travel.frontEnd.pdf.generateTripSummaryPdf
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun TripConfirmationScreen(
+    destination: String = "Sample Destination",
+    dates: String = "2024-06-01 to 2024-06-10",
+    flightDetails: String = "Flight XYZ123, 10:00 AM",
+    hotelDetails: String = "Hotel ABC, 5 nights",
+    activities: String = "Sightseeing, Museum, Beach",
+    meals: String = "Breakfast, Dinner",
+    costBreakdown: String = "$1200 (Flight: $500, Hotel: $400, Activities: $200, Meals: $100)",
+    notes: String? = "Special requests: None",
     onHomeClick: () -> Unit = {},
     onMyTripsClick: () -> Unit = {}
 ) {
@@ -65,6 +75,19 @@ fun TripConfirmationScreen(
                     progress = { progress },
                     modifier = Modifier.size(180.dp)
                 )
+                // Download PDF Button
+                Button(
+                    onClick = {
+                        val summary = TripSummary(
+                            destination, dates, flightDetails, hotelDetails, activities, meals, costBreakdown, notes
+                        )
+                        val pdfBytes = generateTripSummaryPdf(summary)
+                        // TODO: Save or share the PDF (platform-specific)
+                    },
+                    modifier = Modifier.padding(top = 16.dp)
+                ) {
+                    Text("Download Trip Summary (PDF)")
+                }
             }
         }
 
@@ -73,15 +96,15 @@ fun TripConfirmationScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.BottomCenter)
-                .padding(bottom = 24.dp, start = 16.dp, end = 16.dp),
-            shape = RoundedCornerShape(32.dp),
-            shadowElevation = 8.dp,
+                .padding(bottom = 8.dp, start = 12.dp, end = 12.dp),
+            shape = RoundedCornerShape(18.dp),
+            shadowElevation = 4.dp,
             color = Color.White
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp, horizontal = 24.dp),
+                    .padding(vertical = 4.dp, horizontal = 12.dp),
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -96,10 +119,10 @@ fun TripConfirmationScreen(
                         imageVector = Icons.Default.Home,
                         contentDescription = "Home",
                         tint = primaryBlue,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(22.dp)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("Home", color = primaryBlue, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text("Home", color = primaryBlue, fontWeight = FontWeight.Medium, fontSize = 13.sp)
                 }
                 // My Trips Button
                 Column(
@@ -112,10 +135,10 @@ fun TripConfirmationScreen(
                         imageVector = Icons.Default.ListAlt,
                         contentDescription = "My Trips",
                         tint = primaryBlue,
-                        modifier = Modifier.size(32.dp)
+                        modifier = Modifier.size(22.dp)
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text("My Trips", color = primaryBlue, fontWeight = FontWeight.Medium)
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text("My Trips", color = primaryBlue, fontWeight = FontWeight.Medium, fontSize = 13.sp)
                 }
             }
         }

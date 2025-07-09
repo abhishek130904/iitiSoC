@@ -20,7 +20,7 @@ class TripService(private val authService: AuthService) {
         val userId = getCurrentFirebaseUserUid() ?: throw Exception("User not authenticated")
         println("[TripService] Sending trip data: $trip for userId: $userId")
         try {
-            val response = client.post("http://10.34.60.173:8080/api/trips") {
+            val response = client.post("http://10.75.204.173:8080/api/trips") {
                 headers {
                     append("X-User-Id", userId)
                     contentType(io.ktor.http.ContentType.Application.Json)

@@ -12,6 +12,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ListAlt
+import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -44,6 +46,7 @@ val DarkGray = Color(51, 51, 51)
 
 @Composable
 fun ProfileScreen(
+    onHomeClick: () -> Unit,
     uid: String?,
     authService: AuthService,
     password: String,
@@ -87,7 +90,7 @@ fun ProfileScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Profile Image Placeholder
+//             Profile Image Placeholder
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -192,27 +195,21 @@ fun ProfileScreen(
                     }
                 }
             }
-        }
-
-        // Logout Button at the bottom
-        Box(
-            modifier = Modifier
-                .fillMaxSize(),
-            contentAlignment = Alignment.BottomCenter
-        ) {
+            // Large, visible Logout Button below the card
             Button(
                 onClick = {
                     coroutineScope.launch {
-                        authService.signOut() // Add this line to sign out from Firebase
+                        authService.signOut()
                         onLogout()
                     }
                 },
                 modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
                     .fillMaxWidth()
-                    .padding(24.dp),
+                    .height(44.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
-                shape = RoundedCornerShape(12.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+                shape = RoundedCornerShape(10.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
             ) {
                 Text(
                     text = "Logout",
@@ -220,6 +217,58 @@ fun ProfileScreen(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold
                 )
+            }
+        }
+
+        // Bottom Bar (like TripConfirmationScreen)
+        Surface(
+            modifier = Modifier
+                .fillMaxWidth()
+                .align(Alignment.BottomCenter)
+                .padding(bottom = 8.dp, start = 12.dp, end = 12.dp),
+            shape = RoundedCornerShape(18.dp),
+            shadowElevation = 4.dp,
+            color = Color.White
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp, horizontal = 12.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Home Button
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { onHomeClick() }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Home,
+                        contentDescription = "Home",
+                        tint = AppBlue,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text("Home", color = AppBlue, fontWeight = FontWeight.Medium, fontSize = 13.sp)
+                }
+                // My Trips Button
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { /* TODO: Implement My Trips navigation */ }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.ListAlt,
+                        contentDescription = "My Trips",
+                        tint = AppBlue,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text("My Trips", color = AppBlue, fontWeight = FontWeight.Medium, fontSize = 13.sp)
+                }
             }
         }
 
