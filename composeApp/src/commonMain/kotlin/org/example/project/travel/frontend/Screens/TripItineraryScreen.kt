@@ -97,13 +97,29 @@ class TripItineraryScreenComponentImpl(
     override fun onGoBack() { rootComponent.pop() }
 
     suspend fun saveTripAndProceed(itinerary: List<ItineraryDay>, tripNotes: String) {
-        val tripData = TripRequestDTO(
+        val day = itinerary.first()
+        val flightCost = selectedFlight.price
+        val hotelCost = selectedHotel.pricePerNight
+        val activitiesCost = day.activities.sumOf { it.cost }
+        val mealsCost = day.meals.sumOf { it.cost }
+        val transportationCost = day.transport?.cost ?: 0.0
+
+        val costBreakdown = org.example.project.travel.frontEnd.model.TripCostBreakdown(
+            flight = flightCost,
+            hotel = hotelCost,
+            activities = activitiesCost,
+            meals = mealsCost,
+            transportation = transportationCost
+        )
+
+        val tripData = org.example.project.travel.frontEnd.model.TripRequestDTO(
             flightId = selectedFlight.airlineCode + "-" + selectedFlight.flightNumber,
             cityName = selectedCityName,
             hotelName = selectedHotel.name,
-            activities = itinerary.first().activities,
-            meals = itinerary.first().meals,
-            notes = tripNotes
+            activities = day.activities,
+            meals = day.meals,
+            notes = tripNotes,
+            costBreakdown = costBreakdown
         )
         try {
             val tripId = networkService.saveTrip(tripData)

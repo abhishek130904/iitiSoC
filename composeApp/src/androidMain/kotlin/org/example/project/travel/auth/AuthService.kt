@@ -36,6 +36,9 @@ actual class AuthService {
         if (email != null) userMap["email"] = email
         db.collection("users").document(uid).set(userMap).await()
     }
+    actual suspend fun signOut() {
+        auth.signOut()
+    }
 }
 
 actual suspend fun fetchUserProfile(uid: String): UserProfile? {

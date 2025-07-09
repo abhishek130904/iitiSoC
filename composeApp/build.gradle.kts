@@ -75,7 +75,7 @@ kotlin {
 
                 implementation("org.jetbrains.skiko:skiko:0.8.12")
                 implementation("media.kamel:kamel-image:0.9.0")
-
+//                  implementation("com.russhwolf:multiplatform-settings:1.1.1")
 
 
             }
@@ -98,6 +98,7 @@ kotlin {
                 implementation("com.google.firebase:firebase-auth-ktx:22.3.0")
                 implementation("com.google.android.gms:play-services-auth:21.2.0")
                 implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
+                implementation("com.russhwolf:multiplatform-settings-android:1.1.1")
             }
         }
 
@@ -183,8 +184,6 @@ dependencies {
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.ui:ui-tooling-preview")
     debugImplementation("androidx.compose.ui:ui-tooling")
-
-
 }
 
 

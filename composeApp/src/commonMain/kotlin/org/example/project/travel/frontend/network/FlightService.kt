@@ -30,7 +30,7 @@ class ApiService {
     suspend fun getCitiesWithAirports(): Result<List<CityDTO>> {
         Logger.d { "Fetching cities with airports" }
         return try {
-            val response: List<CityDTO> = client.get("http://192.168.62.173:8080/api/airports/cities").body()
+            val response: List<CityDTO> = client.get("http://10.34.60.173:8080/api/airports/cities").body()
             Logger.d { "Fetched ${response.size} cities" }
             Result.success(response)
         } catch (e: Exception) {
@@ -56,7 +56,7 @@ class ApiService {
     ): Result<List<FlightDTO>> {
         Logger.d { "Searching flights: from=$fromCity, to=$toCity, date=$date" }
         return try {
-            val httpResponse = client.get("http://192.168.62.173:8080/flights/search?") {
+            val httpResponse = client.get("http://10.34.60.173:8080/flights/search?") {
                 parameter("fromCity", fromCity)
                 parameter("toCity", toCity)
                 parameter("date", date)

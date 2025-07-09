@@ -46,7 +46,8 @@ val DarkGray = Color(51, 51, 51)
 fun ProfileScreen(
     uid: String?,
     authService: AuthService,
-    password: String
+    password: String,
+    onLogout: suspend () -> Unit = {}
 ) {
     val coroutineScope = rememberCoroutineScope()
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
@@ -190,6 +191,35 @@ fun ProfileScreen(
                         }
                     }
                 }
+            }
+        }
+
+        // Logout Button at the bottom
+        Box(
+            modifier = Modifier
+                .fillMaxSize(),
+            contentAlignment = Alignment.BottomCenter
+        ) {
+            Button(
+                onClick = {
+                    coroutineScope.launch {
+                        authService.signOut() // Add this line to sign out from Firebase
+                        onLogout()
+                    }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Color.Red),
+                shape = RoundedCornerShape(12.dp),
+                elevation = ButtonDefaults.buttonElevation(defaultElevation = 4.dp)
+            ) {
+                Text(
+                    text = "Logout",
+                    color = Color.White,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold
+                )
             }
         }
 

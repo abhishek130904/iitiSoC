@@ -4,6 +4,7 @@ expect class AuthService {
     suspend fun signInWithEmailAndPassword(email: String, password: String): Result<String>
     suspend fun createUserWithEmailAndPassword(email: String, password: String): Result<String>
     suspend fun saveUserProfile(uid: String, name: String, age: Int, email: String?): Unit
+    suspend fun signOut()
 }
 
 expect fun getCurrentFirebaseUserUid(): String?

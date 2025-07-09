@@ -6,6 +6,7 @@ import com.arkivanov.decompose.router.stack.StackNavigation
 import com.arkivanov.decompose.router.stack.childStack
 import com.arkivanov.decompose.router.stack.pop
 import com.arkivanov.decompose.router.stack.push
+import com.arkivanov.decompose.router.stack.replaceAll
 import com.arkivanov.decompose.value.Value
 import com.example.travel.viewmodel.FlightViewModel
 import org.example.project.travel.frontend.Screens.HotelScreenComponent
@@ -29,6 +30,7 @@ interface RootComponent {
 
     fun navigateTo(screen: Screen)
     fun pop()
+    fun replaceAll(screen: Screen)
 
     sealed class Child {
         data class Onboarding(val component: Any) : Child()
@@ -83,6 +85,12 @@ class RootComponentImpl(
         println("RootComponentImpl: Popping from stack")
         navigation.pop()
         println("RootComponentImpl: Navigation stack after pop - active screen=${childStack.value.active.configuration}")
+    }
+
+    override fun replaceAll(screen: Screen) {
+        println("RootComponentImpl: Replacing stack with $screen")
+        navigation.replaceAll(screen)
+        println("RootComponentImpl: Navigation stack after replaceAll - active screen=${childStack.value.active.configuration}")
     }
 
     private fun createChild(screen: Screen, componentContext: ComponentContext): RootComponent.Child {

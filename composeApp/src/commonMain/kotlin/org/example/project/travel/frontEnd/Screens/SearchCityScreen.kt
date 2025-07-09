@@ -74,10 +74,10 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
     }
 
     val famousPlaces = listOf(
-        FamousPlace(DestinationCity(id = 1, city = "Goa", state = "Goa", country = "India", cityCode = 101), "drawable/beach.jpg"),
-        FamousPlace(DestinationCity(id = 2, city = "Jaipur", state = "Rajasthan", country = "India", cityCode = 102), "drawable/fort.jpg"),
-        FamousPlace(DestinationCity(id = 3, city = "Agra", state = "Uttar Pradesh", country = "India", cityCode = 103), "drawable/tajmahal.png"),
-        FamousPlace(DestinationCity(id = 4, city = "Varanasi", state = "Uttar Pradesh", country = "India", cityCode = 104), "drawable/temple.jpg")
+        FamousPlace(DestinationCity(id = 800, city = "Goa", state = "Goa", country = "India", cityCode = 1260607), "drawable/beach.jpg"),
+        FamousPlace(DestinationCity(id = 1643, city = "Jaipur", state = "Rajasthan", country = "India", cityCode = 1269515), "drawable/fort.jpg"),
+        FamousPlace(DestinationCity(id = 2598, city = "Agra", state = "Uttar Pradesh", country = "India", cityCode = 1279259), "drawable/tajmahal.png"),
+        FamousPlace(DestinationCity(id = 76, city = "Varanasi", state = "Uttar Pradesh", country = "India", cityCode = 1253405), "drawable/temple.jpg")
     )
 
     Box(
@@ -107,16 +107,6 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
             )
 
             Spacer(modifier = Modifier.height(16.dp))
-
-            if (selectedCity != null) {
-                Text(
-                    "Selected: ${selectedCity!!.city}, ${selectedCity!!.country}",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color(0xFF4A90E2),
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-            }
 
             Box(modifier = Modifier.weight(1f)) {
                 when {
@@ -150,25 +140,6 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
                         }
                     }
                 }
-            }
-        }
-
-        if (selectedCity != null) {
-            Button(
-                onClick = { component.onCitySelected(selectedCity!!) },
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .padding(horizontal = 12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFF176FF3),
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(16.dp),
-                elevation = ButtonDefaults.buttonElevation(defaultElevation = 8.dp)
-            ) {
-                Text("Proceed with ${selectedCity!!.city}", fontSize = 18.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

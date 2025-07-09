@@ -6,8 +6,14 @@ import io.ktor.client.engine.cio.CIO
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.http.ContentType
+import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
+import org.example.project.travel.frontEnd.model.TripHistoryRequest
+import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.model.*
 
 object TravelApi {
@@ -20,12 +26,30 @@ object TravelApi {
         }
     }
 
+    suspend fun submitTripHistory(data: CitySearchViewModel.FeedbackData): Boolean {
+        val request = TripHistoryRequest(
+            userId = "currentUserId", // Replace with actual user ID (e.g., from Firebase Auth)
+            citiesVisited = data.citiesVisited,
+            activitiesDone = data.activitiesDone,
+            hotelsStayed = data.hotelsStayed,
+            ratings = data.rating,
+            budgetRange = data.budgetRange,
+            travelStyle = data.travelStyle,
+            tripEndDate = java.time.LocalDate.now().toString(), // Use actual trip end date
+            feedback = data.feedback.takeIf { it.isNotEmpty() }
+        )
+        return client.post("http://10.34.60.173:8080/api/trip-history") {
+            contentType(ContentType.Application.Json)
+            setBody(request)
+        }.body() // Assume response is Boolean for success
+    }
+
     suspend fun getCities(query: String): List<DestinationCity> {
-        return client.get("http://192.168.62.173:8080/api/destinations?name=$query").body()
+        return client.get("http://10.34.60.173:8080/api/destinations?name=$query").body()
     }
 
     suspend fun getCityDetails(cityId: String): CityDetailsResponse {
-        return client.get("http://192.168.62.173:8080/api/destinations/$cityId/details").body()
+        return client.get("http://10.34.60.173:8080/api/destinations/$cityId/details").body()
     }
 
     suspend fun getWikipediaSummary(city: String): WikipediaResponse {

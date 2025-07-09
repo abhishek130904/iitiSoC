@@ -42,6 +42,7 @@ import org.example.project.travel.frontend.auth.fetchUserProfile
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.TextButton
+import org.example.project.travel.frontEnd.AppSettings
 import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 
 @Composable
@@ -50,6 +51,18 @@ fun RootContent(
     authService: AuthService,
     googleSignInManager: GoogleSignInManager
 ) {
+    // Persistent login and onboarding: check onboarding flag and Firebase user on launch
+    val startScreen = when {
+        !AppSettings.hasSeenOnboarding() -> Screen.Onboarding
+        org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid() != null -> Screen.HomeScreen
+        else -> Screen.Login
+    }
+    // Only set initial screen on first launch
+    val didInit = remember { mutableStateOf(false) }
+    if (!didInit.value) {
+        component.replaceAll(startScreen)
+        didInit.value = true
+    }
     MaterialTheme {
         Children(
             stack = component.childStack,
@@ -88,12 +101,13 @@ fun RootContent(
                     ProfileScreen(
                         uid = uid,
                         authService = authService,
-                        password = ""
+                        password = "",
+                        onLogout = { component.replaceAll(Screen.Login) }
                     )
                 }
                 is RootComponent.Child.TripConfirmation -> TripConfirmationScreen(
-                    onConfirmTrip = {},
-                    onBack = { component.pop() }
+                    onHomeClick = { component.replaceAll(org.example.project.travel.frontend.navigation.Screen.HomeScreen) },
+                    onMyTripsClick = { /* TODO: Navigate to My Trips screen when implemented */ }
                 )
             }
         }

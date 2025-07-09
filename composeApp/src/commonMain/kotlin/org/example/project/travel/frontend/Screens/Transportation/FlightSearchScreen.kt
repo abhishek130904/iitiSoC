@@ -69,6 +69,7 @@ fun FlightSearchScreen(
     var showCityPicker by remember { mutableStateOf<String?>(null) }
     var showPassengerDialog by remember { mutableStateOf(false) }
     var showCabinClassDialog by remember { mutableStateOf(false) }
+    var showComingSoonDialog by remember { mutableStateOf(false) }
 
     val cities by cityViewModel.cities.collectAsState()
     val flights by flightViewModel.flights.collectAsState()
@@ -157,19 +158,16 @@ fun FlightSearchScreen(
             ) {
                 TabItem("Flights", Icons.Default.Flight, selectedTab) { selectedTab = "Flights" }
                 TabItem("Bus", Icons.Default.DirectionsBus, selectedTab) {
-                    selectedTab = "Bus"
+                    showComingSoonDialog = true
                     println("FlightSearchScreen: Bus tab clicked")
-                    // component.navigateTo(Screen.BusSearch)
                 }
                 TabItem("Trains", Icons.Default.Train, selectedTab) {
-                    selectedTab = "Trains"
+                    showComingSoonDialog = true
                     println("FlightSearchScreen: Trains tab clicked")
-                    // component.navigateTo(Screen.TrainSearch)
                 }
                 TabItem("Private Cab", Icons.Default.DirectionsCar, selectedTab) {
-                    selectedTab = "Private Cab"
+                    showComingSoonDialog = true
                     println("FlightSearchScreen: Private Cab tab clicked")
-                    // component.navigateTo(Screen.PrivateCabSearch)
                 }
             }
         }
@@ -221,7 +219,7 @@ fun FlightSearchScreen(
                         ) {
                             Text(
                                 searchState.fromCity,
-                                fontSize = 32.sp,
+                                 fontSize = 32.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black
                             )
@@ -438,80 +436,6 @@ fun FlightSearchScreen(
                         }
                     }
                 }
-
-                // Flight Search Results
-//                item {
-//                    Spacer(modifier = Modifier.height(16.dp))
-//                    if (isFlightsLoading || flights.isNotEmpty() || flightsError != null) {
-//                        Surface(
-//                            modifier = Modifier
-//                                .fillMaxWidth()
-//                                .padding(vertical = 8.dp),
-//                            shape = RoundedCornerShape(8.dp),
-//                            shadowElevation = 2.dp
-//                        ) {
-//                            Column(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp)
-//                            ) {
-//                                Text(
-//                                    "Flight Results",
-//                                    fontSize = 18.sp,
-//                                    fontWeight = FontWeight.Bold,
-//                                    color = Color.Black,
-//                                    modifier = Modifier.padding(bottom = 8.dp)
-//                                )
-//                                when {
-//                                    isFlightsLoading -> {
-//                                        CircularProgressIndicator(
-//                                            modifier = Modifier.align(Alignment.CenterHorizontally),
-//                                            color = Color(23, 111, 243)
-//                                        )
-//                                    }
-//                                    flightsError != null -> {
-//                                        Text(
-//                                            text = flightsError ?: "Unknown error",
-//                                            color = Color.Red,
-//                                            modifier = Modifier
-//                                                .fillMaxWidth()
-//                                                .padding(16.dp),
-//                                            textAlign = TextAlign.Center
-//                                        )
-//                                    }
-//                                    flights.isEmpty() -> {
-//                                        Text(
-//                                            "No flights found.",
-//                                            color = Color(0xFF424242),
-//                                            modifier = Modifier
-//                                                .fillMaxWidth()
-//                                                .padding(16.dp),
-//                                            textAlign = TextAlign.Center
-//                                        )
-//                                    }
-//                                    else -> {
-//                                        LazyColumn(
-//                                            modifier = Modifier
-//                                                .fillMaxWidth()
-//                                                .heightIn(max = 300.dp)
-//                                        ) {
-//                                            items(flights) { flight ->
-//                                                FlightItem(
-//                                                    flight = flight,
-//                                                    cabinClass = safeSearchState.cabinClass.displayName(),
-//                                                    totalPassengers =safeSearchState.adultCount + safeSearchState.childCount + safeSearchState.infantCount,
-//                                                    onClick = {
-//                                                        // We'll add navigation to FlightDetailScreen here
-//                                                    }
-//                                                )
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
                 // Spacer for bottom padding
                 item {
                     Spacer(modifier = Modifier.height(80.dp))
@@ -1010,6 +934,20 @@ fun FlightSearchScreen(
                     println("FlightSearchScreen: Date picker cancelled")
                 }) {
                     Text("Cancel", color = Color(23, 111, 243))
+                }
+            }
+        )
+    }
+
+    // Coming Soon Dialog
+    if (showComingSoonDialog) {
+        AlertDialog(
+            onDismissRequest = { showComingSoonDialog = false },
+            title = { Text("Coming Soon!") },
+            text = { Text("This feature will be available soon.") },
+            confirmButton = {
+                TextButton(onClick = { showComingSoonDialog = false }) {
+                    Text("OK")
                 }
             }
         )

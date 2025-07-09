@@ -39,6 +39,7 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import androidx.lifecycle.viewmodel.compose.viewModel
+import org.example.project.travel.frontEnd.initSettings
 
 
 //class MainActivity : ComponentActivity() {
@@ -74,6 +75,9 @@ class MainActivity : ComponentActivity() {
 
         // Initialize Firebase before creating AuthService
         FirebaseApp.initializeApp(this)
+
+        // Initialize multiplatform settings
+        initSettings(this)
 
         // Setup Decompose lifecycle manually
         val lifecycle = LifecycleRegistry()

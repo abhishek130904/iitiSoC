@@ -40,6 +40,7 @@ class FlightViewModel : ViewModel() {
 
     init {
         // Set default search state
+        val today = java.time.LocalDate.now().toString() // yyyy-MM-dd
         _searchState.value = _searchState.value.copy(
             fromCity = "DEL",
             fromCityName = "Delhi",
@@ -47,7 +48,7 @@ class FlightViewModel : ViewModel() {
             toCity = "BOM",
             toCityName = "Mumbai",
             toAirportName = "Chhatrapati Shivaji International Airport",
-            selectedDate = "2025-07-03"
+            selectedDate = today
         )
         println("FlightViewModel: Initialized with default searchState - fromCity=${_searchState.value.fromCity}, toCity=${_searchState.value.toCity}, selectedDate=${_searchState.value.selectedDate}, adults=${_searchState.value.adultCount}, children=${_searchState.value.childCount}, infants=${_searchState.value.infantCount}, cabinClass=${_searchState.value.cabinClass}")
     }

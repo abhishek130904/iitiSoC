@@ -26,6 +26,10 @@ import io.kamel.image.asyncPainterResource
 import org.example.project.travel.frontEnd.viewModel.CityDetailsViewModel
 import org.example.project.travel.frontend.model.Activity
 import org.example.project.travel.frontend.navigation.RootComponent
+import androidx.compose.foundation.clickable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 
 interface CityDetailsScreenComponent {
     val viewModel: CityDetailsViewModel
@@ -60,6 +64,8 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
     val unsplashPhotos by component.viewModel.unsplashPhotos.collectAsState()
     val isLoading by component.viewModel.isLoading.collectAsState()
     val error by component.viewModel.error.collectAsState()
+    val placeImages by component.viewModel.placeImages.collectAsState()
+    var selectedPlace by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
@@ -203,7 +209,18 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                                     )
                                 }
                                 items(cityDetails!!.activities.filter { !it.properties.name.isNullOrBlank() }) { activity ->
-                                    ActivityItem(activity)
+                                    val placeName = activity.properties.name
+                                    ActivityItem(
+                                        activity = activity,
+                                        isSelected = selectedPlace == placeName,
+                                        imageUrl = placeImages[placeName]?.results?.firstOrNull()?.urls?.regular,
+                                        onClick = {
+                                            selectedPlace = if (selectedPlace == placeName) null else placeName
+                                            if (selectedPlace != null && placeImages[placeName] == null) {
+                                                component.viewModel.fetchPlaceImage(placeName)
+                                            }
+                                        }
+                                    )
                                 }
                             }
                         }
@@ -214,9 +231,16 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
 }
 
 @Composable
-fun ActivityItem(activity: Activity) {
+fun ActivityItem(
+    activity: Activity,
+    isSelected: Boolean,
+    imageUrl: String?,
+    onClick: () -> Unit
+) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -233,6 +257,36 @@ fun ActivityItem(activity: Activity) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.Gray
             )
+            if (isSelected) {
+                Spacer(modifier = Modifier.height(12.dp))
+                if (imageUrl != null) {
+                    Card(
+                        shape = RoundedCornerShape(12.dp),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        KamelImage(
+                            resource = asyncPainterResource(data = imageUrl),
+                            contentDescription = "Tourist place image",
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(180.dp)
+                                .clip(RoundedCornerShape(12.dp)),
+                            contentScale = ContentScale.Crop
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Image is for illustration only. Actual place may vary.",
+                        color = Color(0xFFFF9800),
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(top = 4.dp)
+                    )
+                } else {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
+            }
         }
     }
 }

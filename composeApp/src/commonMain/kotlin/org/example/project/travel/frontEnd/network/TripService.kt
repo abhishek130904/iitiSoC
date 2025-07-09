@@ -3,7 +3,10 @@ package org.example.project.travel.frontEnd.network
 import com.example.travel.network.ApiClient
 import io.ktor.client.call.*
 import io.ktor.client.request.*
+import io.ktor.client.utils.EmptyContent.contentType
+import io.ktor.client.utils.EmptyContent.headers
 import io.ktor.http.contentType
+import io.ktor.http.headers
 import org.example.project.travel.frontEnd.model.TripRequestDTO
 import org.example.project.travel.frontEnd.model.TripActivity
 import org.example.project.travel.frontEnd.model.Meal
@@ -11,13 +14,13 @@ import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
 
 class TripService(private val authService: AuthService) {
-    private val client = ApiClient.clientx
+    private val client = ApiClient.client
 
     suspend fun saveTrip(trip: TripRequestDTO): Long {
         val userId = getCurrentFirebaseUserUid() ?: throw Exception("User not authenticated")
         println("[TripService] Sending trip data: $trip for userId: $userId")
         try {
-            val response = client.post("http://192.168.62.173:8080/api/trips") {
+            val response = client.post("http://10.34.60.173:8080/api/trips") {
                 headers {
                     append("X-User-Id", userId)
                     contentType(io.ktor.http.ContentType.Application.Json)

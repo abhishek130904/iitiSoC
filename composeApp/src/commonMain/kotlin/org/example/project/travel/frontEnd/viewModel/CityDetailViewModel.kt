@@ -2,6 +2,7 @@ package org.example.project.travel.frontEnd.viewModel
 
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
@@ -19,6 +20,10 @@ class CityDetailsViewModel(private val cityId: String) : ViewModel() {
 
     private val _unsplashPhotos = MutableStateFlow<UnsplashResponse?>(null)
     val unsplashPhotos: StateFlow<UnsplashResponse?> = _unsplashPhotos
+
+    // Map of place name to UnsplashResponse
+    private val _placeImages = MutableStateFlow<Map<String, UnsplashResponse?>>(emptyMap())
+    val placeImages: StateFlow<Map<String, UnsplashResponse?>> = _placeImages
 
     private val _isLoading = MutableStateFlow(true)
     val isLoading: StateFlow<Boolean> = _isLoading
@@ -45,6 +50,17 @@ class CityDetailsViewModel(private val cityId: String) : ViewModel() {
                 println("Error fetching details: ${e.message}")
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun fetchPlaceImage(placeName: String) {
+        viewModelScope.launch {
+            try {
+                val response = TravelApi.getCityPhotos(placeName)
+                _placeImages.update { it + (placeName to response) }
+            } catch (e: Exception) {
+                _placeImages.update { it + (placeName to null) }
             }
         }
     }

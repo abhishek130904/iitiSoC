@@ -11,73 +11,13 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import moe.tlaster.precompose.viewmodel.ViewModel
 import moe.tlaster.precompose.viewmodel.viewModelScope
-//import androidx.lifecycle.ViewModel
-//import androidx.lifecycle.viewModelScope
 import org.example.project.travel.frontend.model.DestinationCity
 import org.example.project.travel.frontend.network.TravelApi
-
-//class CitySearchViewModel<T> : ViewModel() {
-//    private val client = HttpClient(CIO) {
-//        install(ContentNegotiation) {
-//            json(Json {
-//                ignoreUnknownKeys = true
-//                isLenient = true
-//            })
-//        }
-//    }
-//
-//    private val _cities = MutableStateFlow<List<T>>(emptyList())
-//    val cities: StateFlow<List<T>> = _cities
-//
-//    private val _isLoading = MutableStateFlow(false)
-//    val isLoading: StateFlow<Boolean> = _isLoading
-//
-//    private val _error = MutableStateFlow<String?>(null)
-//    val error: StateFlow<String?> = _error
-//
-//    private var searchJob: Job? = null
-//
-//    init {
-//        // viewModelScope.launch {
-//        //     fetchCities()
-//        // }
-//    }
-//
-//    private suspend fun fetchCities(query: String = "") {
-//        searchJob?.cancel()
-//        searchJob = viewModelScope.launch {
-//            _isLoading.value = true
-//            _error.value = null
-//            delay(300)
-//            try {
-//                @Suppress("UNCHECKED_CAST")
-//                val cityList = client.get("http://192.168.212.251:8080/api/destinations") {
-//                    if (query.isNotEmpty()) parameter("name", query) // Match controller param
-//                }.body<List<DestinationCity>>() as List<T>
-//                _cities.value = cityList
-//            } catch (e: Exception) {
-//                _error.value = "Failed to load cities: ${e.message}"
-//            } finally {
-//                _isLoading.value = false
-//            }
-//        }
-//    }
-//
-//    fun searchCities(query: String) {
-//        viewModelScope.launch {
-//            fetchCities(query)
-//        }
-//    }
-//
-//    override fun onCleared() {
-//        super.onCleared()
-//        client.close()
-//    }
-//}
 
 open class CitySearchViewModel<T : DestinationCity> : ViewModel() {
     private val _cities = MutableStateFlow<List<T>>(emptyList())
@@ -88,6 +28,20 @@ open class CitySearchViewModel<T : DestinationCity> : ViewModel() {
 
     private val _error = MutableStateFlow<String?>(null)
     open val error: StateFlow<String?> = _error
+
+    // New state for feedback data
+    private val _feedbackData = MutableStateFlow<FeedbackData?>(null)
+    val feedbackData: StateFlow<FeedbackData?> = _feedbackData.asStateFlow()
+
+    data class FeedbackData(
+        val citiesVisited: String = "",
+        val activitiesDone: String = "",
+        val hotelsStayed: String = "",
+        val rating: Float = 0f,
+        val budgetRange: String = "",
+        val travelStyle: List<String> = emptyList(),
+        val feedback: String = ""
+    )
 
     fun searchCities(query: String) {
         viewModelScope.launch {
@@ -100,6 +54,47 @@ open class CitySearchViewModel<T : DestinationCity> : ViewModel() {
                 _error.value = "Error fetching cities: ${e.message}"
             } finally {
                 _isLoading.value = false
+            }
+        }
+    }
+
+    fun submitFeedback(
+        cities: String,
+        activities: String,
+        hotels: String,
+        rating: Float,
+        budget: String,
+        travelStyle: List<String>,
+        feedback: String
+    ) {
+        val data = FeedbackData(cities, activities, hotels, rating, budget, travelStyle, feedback)
+        _feedbackData.value = data
+        viewModelScope.launch {
+            _isLoading.value = true
+            _error.value = null
+            try {
+                // Simulate API call to save feedback (replace with real TravelApi endpoint)
+                val response = TravelApi.submitTripHistory(data) // Assume this returns a success indicator
+                if (response) {
+                    _feedbackData.value = null // Clear after success
+                } else {
+                    _error.value = "Failed to submit feedback"
+                }
+            } catch (e: Exception) {
+                _error.value = "Error submitting feedback: ${e.message}"
+            } finally {
+                _isLoading.value = false
+            }
+        }
+    }
+
+    // Function to check trip end (to be triggered externally)
+    fun checkTripEnd(tripEndDate: String) {
+        viewModelScope.launch {
+            val currentDate = java.time.LocalDate.now().toString()
+            if (currentDate >= tripEndDate) {
+                // Trigger navigation to feedback screen (to be handled by navigation logic)
+                println("Trip ended on $tripEndDate, show feedback form")
             }
         }
     }

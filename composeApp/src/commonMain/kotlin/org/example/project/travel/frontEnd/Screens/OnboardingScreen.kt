@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.airbnb.lottie.compose.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import org.example.project.travel.frontEnd.AppSettings
 
 @Composable
 fun OnboardingScreen(
@@ -122,6 +123,9 @@ fun OnboardingScreen(
                     if (pageIndex < pages.lastIndex) {
                         pageIndex++
                     } else {
+                        println("[Onboarding] Setting hasSeenOnboarding to true")
+                        AppSettings.setHasSeenOnboarding()
+                        println("[Onboarding] hasSeenOnboarding after set: ${AppSettings.hasSeenOnboarding()}")
                         onNavigateToSignIn()
                     }
                 },
@@ -136,7 +140,7 @@ fun OnboardingScreen(
                 )
             }
 
-            TextButton(onClick = onFinished) {
+            TextButton(onClick = {onNavigateToSignIn()}) {
                 Text("Skip", color = Color.Black)
             }
         }
