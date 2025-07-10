@@ -44,5 +44,14 @@ sealed class Screen {
     data object ProfileScreen : Screen()
 
     @Serializable
-    data class TripConfirmation(val tripId: String) : Screen()
+    data class TripConfirmation(
+        val destination: String,
+        val dates: String,
+        val flightDetails: String,
+        val hotelDetails: String,
+        val activities: String,
+        val meals: String,
+        val costBreakdown: String,
+        val notes: String?
+    ) : Screen()
 }

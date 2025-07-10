@@ -123,7 +123,32 @@ class TripItineraryScreenComponentImpl(
         )
         try {
             val tripId = networkService.saveTrip(tripData)
-            rootComponent.navigateTo(Screen.TripConfirmation(tripId.toString()))
+            // Gather trip details for confirmation screen
+            val formattedDeparture = formatInstant(selectedFlight.departure.time)
+            val formattedArrival = formatInstant(selectedFlight.arrival.time)
+            val formattedCheckIn = day.accommodation.checkIn // Already a string
+            val formattedCheckOut = day.accommodation.checkOut // Already a string
+
+            val destination = selectedCityName
+            val dates = "${formattedDeparture.first} to ${formattedCheckOut}" // Example
+            val flightDetails = "${selectedFlight.airlineCode} ${selectedFlight.flightNumber}, Departs: ${formattedDeparture.first}, ${formattedDeparture.second}"
+            val hotelDetails = "${selectedHotel.name}, ${selectedHotel.pricePerNight} per night"
+            val activities = day.activities.joinToString { it.name }
+            val meals = day.meals.joinToString { it.type }
+            val costBreakdown = "Flight: ₹${flightCost}, Hotel: ₹${hotelCost}/night, Activities: ₹${activitiesCost}, Meals: ₹${mealsCost}, Transport: ₹${transportationCost}"
+            val notesForSummary = tripNotes
+            rootComponent.navigateTo(
+                Screen.TripConfirmation(
+                    destination = destination,
+                    dates = dates,
+                    flightDetails = flightDetails,
+                    hotelDetails = hotelDetails,
+                    activities = activities,
+                    meals = meals,
+                    costBreakdown = costBreakdown,
+                    notes = notesForSummary
+                )
+            )
         } catch (e: Exception) {
             // Handle error (e.g., update state in UI)
         }

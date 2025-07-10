@@ -13,6 +13,7 @@ import kotlinx.serialization.json.Json
 import co.touchlab.kermit.Logger
 import com.example.travel.model.dto.FlightDTO
 import kotlinx.serialization.Serializable
+import com.example.travel.network.BASE_URL
 
 class ApiService {
     private val client = HttpClient {
@@ -30,7 +31,7 @@ class ApiService {
     suspend fun getCitiesWithAirports(): Result<List<CityDTO>> {
         Logger.d { "Fetching cities with airports" }
         return try {
-            val response: List<CityDTO> = client.get("http://10.34.60.173:8080/api/airports/cities").body()
+            val response: List<CityDTO> = client.get("$BASE_URL/api/airports/cities").body()
             Logger.d { "Fetched ${response.size} cities" }
             Result.success(response)
         } catch (e: Exception) {
@@ -56,7 +57,7 @@ class ApiService {
     ): Result<List<FlightDTO>> {
         Logger.d { "Searching flights: from=$fromCity, to=$toCity, date=$date" }
         return try {
-            val httpResponse = client.get("http://10.34.60.173:8080/flights/search?") {
+            val httpResponse = client.get("$BASE_URL/flights/search?") {
                 parameter("fromCity", fromCity)
                 parameter("toCity", toCity)
                 parameter("date", date)

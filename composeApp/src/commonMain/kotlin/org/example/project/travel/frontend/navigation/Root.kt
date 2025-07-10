@@ -15,7 +15,6 @@ import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.auth.GoogleSignInManager
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.screen.SearchCityScreen
-import ui.HomeScreen
 import org.example.project.travel.frontEnd.Screens.CityDetailsScreen
 import org.example.project.travel.frontend.Screens.TripItineraryScreen
 import androidx.compose.foundation.layout.Column
@@ -47,6 +46,8 @@ import org.example.project.travel.frontEnd.AppSettings
 import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 import org.example.project.travel.frontEnd.Screens.OfflineScreen
 import org.example.project.travel.frontEnd.network.NetworkMonitor
+import ui.HomeScreen
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun RootContent(
@@ -121,7 +122,16 @@ fun RootContent(
                         )
                     }
                     is RootComponent.Child.TripConfirmation -> TripConfirmationScreen(
-                        onHomeClick = { component.replaceAll(org.example.project.travel.frontend.navigation.Screen.HomeScreen) },
+                        context = LocalContext.current,
+                        destination = instance.screen.destination,
+                        dates = instance.screen.dates,
+                        flightDetails = instance.screen.flightDetails,
+                        hotelDetails = instance.screen.hotelDetails,
+                        activities = instance.screen.activities,
+                        meals = instance.screen.meals,
+                        costBreakdown = instance.screen.costBreakdown,
+                        notes = instance.screen.notes,
+                        onHomeClick = { component.replaceAll(Screen.HomeScreen) },
                         onMyTripsClick = { /* TODO: Navigate to My Trips screen when implemented */ }
                     )
                 }

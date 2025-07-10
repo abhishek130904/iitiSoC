@@ -15,6 +15,7 @@ import kotlinx.serialization.json.Json
 import org.example.project.travel.frontEnd.model.TripHistoryRequest
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.model.*
+import com.example.travel.network.BASE_URL
 
 object TravelApi {
     private val client = HttpClient(CIO) {
@@ -38,18 +39,18 @@ object TravelApi {
             tripEndDate = java.time.LocalDate.now().toString(), // Use actual trip end date
             feedback = data.feedback.takeIf { it.isNotEmpty() }
         )
-        return client.post("http://10.75.204.173:8080/api/trip-history") {
+        return client.post("$BASE_URL/api/trip-history") {
             contentType(ContentType.Application.Json)
             setBody(request)
         }.body() // Assume response is Boolean for success
     }
 
     suspend fun getCities(query: String): List<DestinationCity> {
-        return client.get("http://10.75.204.173:8080/api/destinations?name=$query").body()
+        return client.get("$BASE_URL/api/destinations?name=$query").body()
     }
 
     suspend fun getCityDetails(cityId: String): CityDetailsResponse {
-        return client.get("http://10.75.204.173:8080/api/destinations/$cityId/details").body()
+        return client.get("$BASE_URL/api/destinations/$cityId/details").body()
     }
 
     suspend fun getWikipediaSummary(city: String): WikipediaResponse {

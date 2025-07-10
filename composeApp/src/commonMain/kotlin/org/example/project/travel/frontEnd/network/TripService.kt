@@ -1,6 +1,7 @@
 package org.example.project.travel.frontEnd.network
 
 import com.example.travel.network.ApiClient
+import com.example.travel.network.BASE_URL
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.utils.EmptyContent.contentType
@@ -20,7 +21,7 @@ class TripService(private val authService: AuthService) {
         val userId = getCurrentFirebaseUserUid() ?: throw Exception("User not authenticated")
         println("[TripService] Sending trip data: $trip for userId: $userId")
         try {
-            val response = client.post("http://10.75.204.173:8080/api/trips") {
+            val response = client.post("$BASE_URL/api/trips") {
                 headers {
                     append("X-User-Id", userId)
                     contentType(io.ktor.http.ContentType.Application.Json)

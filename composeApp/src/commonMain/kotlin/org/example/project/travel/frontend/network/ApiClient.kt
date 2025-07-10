@@ -11,6 +11,8 @@ import io.ktor.client.request.parameter
 import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 
+const val BASE_URL = "http://10.75.204.173:8080"
+
 object ApiClient {
     val client = HttpClient(CIO) {
         install(ContentNegotiation) {
@@ -25,6 +27,6 @@ object ApiClient {
 
 class HotelApiClient(private val httpClient: HttpClient) {
     suspend fun getHotels(city: String): List<AccommodationDTO> {
-        return httpClient.get("http://10.34.60.173:8080/api/hotels?city=$city").body()
+        return httpClient.get("$BASE_URL/api/hotels?city=$city").body()
     }
 }

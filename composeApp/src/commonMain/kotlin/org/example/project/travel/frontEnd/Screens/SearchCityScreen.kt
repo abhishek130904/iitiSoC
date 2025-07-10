@@ -74,7 +74,7 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
     }
 
     val famousPlaces = listOf(
-        FamousPlace(DestinationCity(id = 800, city = "Goa", state = "Goa", country = "India", cityCode = 1260607), "drawable/beach.jpg"),
+        FamousPlace(DestinationCity(id = 800, city = "Panjim-Goa", state = "Goa", country = "India", cityCode = 1260607), "drawable/beach.jpg"),
         FamousPlace(DestinationCity(id = 1643, city = "Jaipur", state = "Rajasthan", country = "India", cityCode = 1269515), "drawable/fort.jpg"),
         FamousPlace(DestinationCity(id = 2598, city = "Agra", state = "Uttar Pradesh", country = "India", cityCode = 1279259), "drawable/tajmahal.png"),
         FamousPlace(DestinationCity(id = 76, city = "Varanasi", state = "Uttar Pradesh", country = "India", cityCode = 1253405), "drawable/temple.jpg")

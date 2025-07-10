@@ -26,24 +26,28 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.graphics.Brush
 import org.example.project.travel.frontEnd.pdf.TripSummary
 import org.example.project.travel.frontEnd.pdf.generateTripSummaryPdf
+import org.example.project.travel.frontEnd.pdf.saveTripSummaryPdfFile
+
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
 fun TripConfirmationScreen(
-    destination: String = "Sample Destination",
-    dates: String = "2024-06-01 to 2024-06-10",
-    flightDetails: String = "Flight XYZ123, 10:00 AM",
-    hotelDetails: String = "Hotel ABC, 5 nights",
-    activities: String = "Sightseeing, Museum, Beach",
-    meals: String = "Breakfast, Dinner",
-    costBreakdown: String = "$1200 (Flight: $500, Hotel: $400, Activities: $200, Meals: $100)",
-    notes: String? = "Special requests: None",
+    context: Any, // <-- added context parameter
+    destination: String,
+    dates: String,
+    flightDetails: String,
+    hotelDetails: String,
+    activities: String,
+    meals: String,
+    costBreakdown: String,
+    notes: String?,
     onHomeClick: () -> Unit = {},
     onMyTripsClick: () -> Unit = {}
 ) {
     val primaryBlue = Color(23, 111, 243)
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("tick.json"))
     val progress by animateLottieCompositionAsState(composition, iterations = 1)
+    // Removed: val context = LocalContext.current
 
     Box(
         modifier = Modifier
@@ -82,7 +86,7 @@ fun TripConfirmationScreen(
                             destination, dates, flightDetails, hotelDetails, activities, meals, costBreakdown, notes
                         )
                         val pdfBytes = generateTripSummaryPdf(summary)
-                        // TODO: Save or share the PDF (platform-specific)
+                        saveTripSummaryPdfFile(context, pdfBytes, "TripSummary.pdf")
                     },
                     modifier = Modifier.padding(top = 16.dp)
                 ) {
