@@ -37,6 +37,7 @@ import travelfrontend.composeapp.generated.resources.background_image
 interface CitySearchScreenComponent {
     fun onCitySelected(city: org.example.project.travel.frontend.model.DestinationCity)
     fun onBack()
+    fun onStateSelected(stateName: String)
 }
 
 class CitySearchScreenComponentImpl(
@@ -51,6 +52,10 @@ class CitySearchScreenComponentImpl(
     override fun onBack() {
         rootComponent.pop()
     }
+
+    override fun onStateSelected(stateName: String) {
+        rootComponent.navigateTo(Screen.StateScreen(stateName))
+    }
 }
 
 data class FamousPlace(
@@ -64,8 +69,18 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
     val cities by viewModel.cities.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
+    var citySearchQuery by remember { mutableStateOf("") }
     var selectedCity by remember { mutableStateOf<DestinationCity?>(null) }
+    var stateSearchQuery by remember { mutableStateOf("") }
+    var selectedState by remember { mutableStateOf<String?>(null) }
+    val allStates = listOf(
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
+        "Himachal Pradesh", "Jharkhand", "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+        "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan", "Sikkim", "Tamil Nadu", "Telangana",
+        "Tripura", "Uttar Pradesh", "Uttarakhand", "West Bengal"
+    )
+    val filteredStates = if (stateSearchQuery.isEmpty()) allStates else allStates.filter { it.contains(stateSearchQuery, ignoreCase = true) }
+    val filteredCities = if (citySearchQuery.isEmpty()) cities else cities.filter { it.city.contains(citySearchQuery, ignoreCase = true) }
 
     LaunchedEffect(cities) {
         if (cities.isNotEmpty() && selectedCity == null) {
@@ -87,15 +102,12 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
             .padding(16.dp)
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
+            // State search bar
             OutlinedTextField(
-                value = searchQuery,
-                onValueChange = {
-                    searchQuery = it
-                        viewModel.searchCities(it)
-
-                },
-                label = { Text("Search for a city") },
-                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                value = stateSearchQuery,
+                onValueChange = { stateSearchQuery = it },
+                label = { Text("Search for a state") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search State") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(Color.White, RoundedCornerShape(8.dp))
@@ -105,9 +117,47 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
                     unfocusedBorderColor = Color.Gray.copy(alpha = 0.4f)
                 )
             )
-
+            // State selection list
+            if (stateSearchQuery.isNotEmpty() && filteredStates.isNotEmpty()) {
+                LazyColumn(
+                    modifier = Modifier.heightIn(max = 200.dp)
+                ) {
+                    items(filteredStates) { state ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    selectedState = state
+                                    component.onStateSelected(state)
+                                },
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(Icons.Default.LocationCity, contentDescription = null, tint = Color(0xFF4A90E2), modifier = Modifier.padding(8.dp))
+                            Text(state, fontSize = 16.sp, modifier = Modifier.padding(8.dp))
+                        }
+                    }
+                }
+            }
             Spacer(modifier = Modifier.height(16.dp))
-
+            // City search bar
+            OutlinedTextField(
+                value = citySearchQuery,
+                onValueChange = {
+                    citySearchQuery = it
+                    viewModel.searchCities(it)
+                },
+                label = { Text("Search for a city") },
+                leadingIcon = { Icon(Icons.Default.Search, contentDescription = "Search City") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White, RoundedCornerShape(8.dp))
+                    .clip(RoundedCornerShape(8.dp)),
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color(0xFF4A90E2),
+                    unfocusedBorderColor = Color.Gray.copy(alpha = 0.4f)
+                )
+            )
+            Spacer(modifier = Modifier.height(16.dp))
             Box(modifier = Modifier.weight(1f)) {
                 when {
                     isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
@@ -116,19 +166,19 @@ fun SearchCityScreen(component: CitySearchScreenComponent, viewModel: CitySearch
                         color = Color.Red,
                         modifier = Modifier.align(Alignment.Center)
                     )
-                    searchQuery.isEmpty() -> FamousPlacesList(
+                    citySearchQuery.isEmpty() -> FamousPlacesList(
                         places = famousPlaces,
                         onCitySelected = {
                             selectedCity = it
                             component.onCitySelected(it)
                         }
                     )
-                    cities.isEmpty() && searchQuery.isNotEmpty() -> Text(
-                        "No cities found for \"$searchQuery\"",
+                    filteredCities.isEmpty() && citySearchQuery.isNotEmpty() -> Text(
+                        "No cities found for \"$citySearchQuery\"",
                         modifier = Modifier.align(Alignment.Center)
                     )
                     else -> LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(cities) { city ->
+                        items(filteredCities) { city ->
                             CityItem(
                                 city = city,
                                 isSelected = city == selectedCity,

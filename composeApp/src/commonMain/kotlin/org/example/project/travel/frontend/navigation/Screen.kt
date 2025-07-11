@@ -54,4 +54,7 @@ sealed class Screen {
         val costBreakdown: String,
         val notes: String?
     ) : Screen()
+
+    @Serializable
+    data class StateScreen(val stateName: String) : Screen()
 }

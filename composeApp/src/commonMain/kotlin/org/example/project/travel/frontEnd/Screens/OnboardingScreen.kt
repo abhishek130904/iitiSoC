@@ -67,7 +67,7 @@ fun OnboardingScreen(
             )
             val progress by animateLottieCompositionAsState(
                 composition = composition,
-                iterations = 1
+                iterations = LottieConstants.IterateForever
             )
 
             LottieAnimation(
