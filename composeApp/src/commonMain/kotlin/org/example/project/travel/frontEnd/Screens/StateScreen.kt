@@ -1,15 +1,26 @@
 package org.example.project.travel.frontEnd.Screens
 
-import androidx.compose.foundation.clickable
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Card
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Text
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.travel.network.BASE_URL
@@ -370,6 +381,7 @@ fun StateScreen(
             else -> emptyList()
         }
     }
+
     val httpClient = remember {
         HttpClient {
             install(ContentNegotiation) {
@@ -377,57 +389,284 @@ fun StateScreen(
             }
         }
     }
+
     var isLoading by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
 
-    Column(
-        modifier = Modifier.fillMaxSize().padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+    // State-specific theme
+    val stateTheme = getStateTheme(stateName)
+
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(
+                Brush.verticalGradient(
+                    colors = stateTheme.gradientColors
+                )
+            )
     ) {
-        Text("Top Tourist Cities in $stateName", fontSize = 22.sp, modifier = Modifier.padding(bottom = 16.dp))
-        if (topCities.isEmpty()) {
-            Text("No cities found for $stateName.")
-        } else {
-            LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                items(topCities) { city ->
-                    Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable {
-                                coroutineScope.launch {
-                                    isLoading = true
-                                    error = null
-                                    try {
-                                        val encodedCity = URLEncoder.encode(city.city, "UTF-8")
-                                        val encodedState = URLEncoder.encode(city.state, "UTF-8")
-                                        val url = "$BASE_URL/api/city-details?city=$encodedCity&state=$encodedState"
-                                        val response: HttpResponse = httpClient.get(url)
-                                        val raw = response.bodyAsText()
-                                        println("Raw response: $raw")
-                                        val result = response.body<DestinationCity>()
-                                        onCitySelected(result.id.toString(), result.city)
-                                    } catch (e: Exception) {
-                                        error = "City not found or network error: ${e.message}"
-                                    } finally {
-                                        isLoading = false
-                                    }
-                                }
-                            }
-                            .padding(8.dp)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Enhanced Header
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .shadow(8.dp, RoundedCornerShape(16.dp)),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.White.copy(alpha = 0.95f)
+                )
+            ) {
+                Column(
+                    modifier = Modifier.padding(20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Text(
+                        text = stateTheme.emoji,
+                        fontSize = 40.sp
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        "Top Tourist Cities in $stateName",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = stateTheme.primaryColor,
+                        textAlign = TextAlign.Center
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            if (topCities.isEmpty()) {
+                // Enhanced Empty State
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color.White.copy(alpha = 0.9f)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        Text(city.city, fontSize = 18.sp, modifier = Modifier.padding(16.dp))
+                        Text(
+                            text = "🏛️",
+                            fontSize = 48.sp
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text("No cities found for $stateName.")
+                    }
+                }
+            } else {
+                LazyColumn(
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    items(topCities) { city ->
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .shadow(6.dp, RoundedCornerShape(16.dp))
+                                .clickable {
+                                    coroutineScope.launch {
+                                        isLoading = true
+                                        error = null
+                                        try {
+                                            val encodedCity = URLEncoder.encode(city.city, "UTF-8")
+                                            val encodedState = URLEncoder.encode(city.state, "UTF-8")
+                                            val url = "$BASE_URL/api/city-details?city=$encodedCity&state=$encodedState"
+                                            val response: HttpResponse = httpClient.get(url)
+                                            val raw = response.bodyAsText()
+                                            println("Raw response: $raw")
+                                            val result = response.body<DestinationCity>()
+                                            onCitySelected(result.id.toString(), result.city)
+                                        } catch (e: Exception) {
+                                            error = "City not found or network error: ${e.message}"
+                                        } finally {
+                                            isLoading = false
+                                        }
+                                    }
+                                },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = CardDefaults.cardColors(containerColor = Color.White)
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(20.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                // City Icon
+                                Box(
+                                    modifier = Modifier
+                                        .size(50.dp)
+                                        .background(
+                                            brush = Brush.radialGradient(
+                                                colors = listOf(
+                                                    stateTheme.primaryColor,
+                                                    stateTheme.secondaryColor
+                                                )
+                                            ),
+                                            shape = CircleShape
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.LocationCity,
+                                        contentDescription = "City",
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(16.dp))
+
+                                // City Name
+                                Text(
+                                    city.city,
+                                    fontSize = 18.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.Black,
+                                    modifier = Modifier.weight(1f)
+                                )
+
+                                // Arrow Icon
+                                Icon(
+                                    Icons.Default.ArrowForward,
+                                    contentDescription = "Go to city",
+                                    tint = stateTheme.primaryColor,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
+                        }
                     }
                 }
             }
         }
+
+        // Enhanced Loading State
         if (isLoading) {
-            Spacer(modifier = Modifier.height(16.dp))
-            CircularProgressIndicator()
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(32.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            color = stateTheme.primaryColor,
+                            strokeWidth = 3.dp,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Text(
+                            "Loading city details...",
+                            fontSize = 16.sp,
+                            color = Color.Gray
+                        )
+                    }
+                }
+            }
         }
+
+        // Enhanced Error Display
         error?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(it, color = androidx.compose.ui.graphics.Color.Red)
+            Card(
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(16.dp)
+                    .fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = Color.Red.copy(alpha = 0.9f)
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.Error,
+                        contentDescription = "Error",
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = it,
+                        color = Color.White,
+                        fontSize = 14.sp
+                    )
+                }
+            }
         }
+    }
+}
+
+// Helper data class and function
+data class StateTheme(
+    val primaryColor: Color,
+    val secondaryColor: Color,
+    val gradientColors: List<Color>,
+    val emoji: String
+)
+
+private fun getStateTheme(stateName: String): StateTheme {
+    return when (stateName) {
+        "Rajasthan" -> StateTheme(
+            primaryColor = Color(0xFFE91E63),
+            secondaryColor = Color(0xFFFF5722),
+            gradientColors = listOf(Color(0xFFE91E63), Color(0xFFFF5722), Color(0xFFFFC107)),
+            emoji = "🏰"
+        )
+        "Kerala" -> StateTheme(
+            primaryColor = Color(0xFF4CAF50),
+            secondaryColor = Color(0xFF8BC34A),
+            gradientColors = listOf(Color(0xFF4CAF50), Color(0xFF8BC34A), Color(0xFFCDDC39)),
+            emoji = "🌴"
+        )
+        "Goa" -> StateTheme(
+            primaryColor = Color(0xFF00BCD4),
+            secondaryColor = Color(0xFF03DAC6),
+            gradientColors = listOf(Color(0xFF00BCD4), Color(0xFF03DAC6), Color(0xFF81C784)),
+            emoji = "🏖️"
+        )
+        "Himachal Pradesh" -> StateTheme(
+            primaryColor = Color(0xFF2196F3),
+            secondaryColor = Color(0xFF03DAC6),
+            gradientColors = listOf(Color(0xFF2196F3), Color(0xFF03DAC6), Color(0xFFE1F5FE)),
+            emoji = "🏔️"
+        )
+        "Maharashtra" -> StateTheme(
+            primaryColor = Color(0xFFFF9800),
+            secondaryColor = Color(0xFFFF5722),
+            gradientColors = listOf(Color(0xFFFF9800), Color(0xFFFF5722), Color(0xFFFFC107)),
+            emoji = "🏙️"
+        )
+        "Tamil Nadu" -> StateTheme(
+            primaryColor = Color(0xFF9C27B0),
+            secondaryColor = Color(0xFFE91E63),
+            gradientColors = listOf(Color(0xFF9C27B0), Color(0xFFE91E63), Color(0xFFF8BBD9)),
+            emoji = "🕌"
+        )
+        else -> StateTheme(
+            primaryColor = Color(0xFF667eea),
+            secondaryColor = Color(0xFF764ba2),
+            gradientColors = listOf(Color(0xFF667eea), Color(0xFF764ba2), Color(0xFFF093FB)),
+            emoji = "🏛️"
+        )
     }
 }
