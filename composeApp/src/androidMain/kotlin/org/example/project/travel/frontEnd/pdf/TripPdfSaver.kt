@@ -7,11 +7,17 @@ import java.io.File
 import java.io.FileOutputStream
 import androidx.core.content.FileProvider
 import android.content.Intent
-
 actual fun saveTripSummaryPdfFile(context: Any, pdfBytes: ByteArray, fileName: String) {
     val ctx = context as Context
-    val downloads = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS)
+    val downloads = ctx.getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS)
     val file = File(downloads, fileName)
+    try {
+        // Write the PDF bytes to the file
+        FileOutputStream(file).use { it.write(pdfBytes) }
+    } catch (e: Exception) {
+        Toast.makeText(ctx, "Failed to save PDF: ${e.message}", Toast.LENGTH_LONG).show()
+        return
+    }
     // Open the PDF
     val uri = FileProvider.getUriForFile(
         ctx,
@@ -27,4 +33,4 @@ actual fun saveTripSummaryPdfFile(context: Any, pdfBytes: ByteArray, fileName: S
     } catch (e: Exception) {
         Toast.makeText(ctx, "No PDF viewer found.", Toast.LENGTH_SHORT).show()
     }
-} 
+}
