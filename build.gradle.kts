@@ -56,11 +56,18 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter")
 
-	implementation("org.seleniumhq.selenium:selenium-java:4.19.0")
+	implementation("org.seleniumhq.selenium:selenium-java:4.19.1")
+	implementation("org.seleniumhq.selenium:selenium-chrome-driver:4.19.1")
+
 	implementation("io.github.bonigarcia:webdrivermanager:5.8.0")
 
+	implementation("com.github.haifengl:smile-core:2.6.0")
+// Alternative ML library for Java
 
+	implementation("org.jsoup:jsoup:1.17.2")
 
+	//web scraping
+	
 
 }
 

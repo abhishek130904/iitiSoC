@@ -1,10 +1,12 @@
 package com.example.travel.controller
 
+import com.example.travel.dto.CityDTO
 import com.example.travel.dto.DestinationCity
 import com.example.travel.network.OpenTripMapService
 import com.example.travel.service.DestinationCityService
 import com.example.travel.service.GeocodingService
 import org.springframework.web.bind.annotation.*
+import org.springframework.http.ResponseEntity
 
 @RestController
 @RequestMapping("/api/destinations")
@@ -51,5 +53,37 @@ class DestinationCityController(
             )
         }
         return null
+    }
+}
+
+@RestController
+@RequestMapping("/api/city-details")
+class CityController(
+    private val service: DestinationCityService
+) {
+    @GetMapping
+    fun getCityDetails(
+        @RequestParam city: String,
+        @RequestParam state: String
+    ): ResponseEntity<DestinationCity> {
+        val cityDetails = service.findBestMatchCity(city, state)
+        return if (cityDetails != null) {
+            ResponseEntity.ok(cityDetails)
+        } else {
+            ResponseEntity.notFound().build()
+        }
+    }
+
+    // New endpoint to get city details by name only
+    @GetMapping("/by-name")
+    fun getCityDetailsByName(
+        @RequestParam name: String
+    ): ResponseEntity<DestinationCity> {
+        val cityDetails = service.findCityByName(name)
+        return if (cityDetails != null) {
+            ResponseEntity.ok(cityDetails)
+        } else {
+            ResponseEntity.notFound().build()
+        }
     }
 }

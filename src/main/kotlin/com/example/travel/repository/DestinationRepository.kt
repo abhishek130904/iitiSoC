@@ -8,5 +8,7 @@ import org.springframework.stereotype.Repository
 @Repository
 interface DestinationCityRepository : JpaRepository<DestinationCity, Long> {
     fun findByCityContainingIgnoreCase(city: String): List<DestinationCity>
-
+    
+    // New method to find city by exact name (case-insensitive)
+    fun findByCityIgnoreCase(city: String): DestinationCity?
 }
