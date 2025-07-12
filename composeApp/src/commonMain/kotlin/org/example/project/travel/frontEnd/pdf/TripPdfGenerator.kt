@@ -1,5 +1,7 @@
 package org.example.project.travel.frontEnd.pdf
 
+import org.example.project.travel.frontend.navigation.Screen
+
 data class TripSummary(
     val destination: String,
     val dates: String,
@@ -11,4 +13,4 @@ data class TripSummary(
     val notes: String?
 )
 
-expect fun generateTripSummaryPdf(trip: TripSummary): ByteArray 
+expect fun generateTripSummaryPdf(trip: TripSummary): ByteArray

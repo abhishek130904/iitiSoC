@@ -32,6 +32,7 @@ import ui.TravelCategory
 import androidx.compose.ui.platform.LocalContext
 import org.example.project.travel.frontEnd.Screens.StateScreen as StateScreenComposable
 import org.example.project.travel.frontEnd.Screens.CategoryDetailsScreen
+import org.example.project.travel.frontEnd.Screens.MyTripsScreen
 
 @Composable
 fun RootContent(
@@ -125,7 +126,12 @@ fun RootContent(
                         costBreakdown = instance.screen.costBreakdown,
                         notes = instance.screen.notes,
                         onHomeClick = { component.replaceAll(Screen.HomeScreen) },
-                        onMyTripsClick = { /* TODO: Navigate to My Trips screen when implemented */ }
+                        onMyTripsClick = {
+                            val userId = getCurrentFirebaseUserUid()
+                            if (userId != null) {
+                                component.navigateTo(Screen.MyTrips(userId))
+                            }
+                        }
                     )
                     is RootComponent.Child.StateScreen -> StateScreenComposable(
                         instance.screen.stateName, 
@@ -149,6 +155,7 @@ fun RootContent(
                         },
                         onBackClick = { component.pop() }
                     )
+                    is RootComponent.Child.MyTrips -> MyTripsScreen(userId = instance.screen.userId)
                 }
             }
         }

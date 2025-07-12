@@ -64,4 +64,7 @@ sealed class Screen {
         val categoryDescription: String,
         val destinations: List<String>
     ) : Screen()
+
+    @Serializable
+    data class MyTrips(val userId: String) : Screen()
 }

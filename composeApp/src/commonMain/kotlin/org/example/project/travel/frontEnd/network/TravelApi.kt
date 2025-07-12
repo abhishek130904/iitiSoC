@@ -16,6 +16,7 @@ import org.example.project.travel.frontEnd.model.TripHistoryRequest
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.model.*
 import com.example.travel.network.BASE_URL
+import org.example.project.travel.frontEnd.Screens.TripItinerary
 
 object TravelApi {
     private val client = HttpClient(CIO) {
@@ -74,6 +75,12 @@ object TravelApi {
         return client.get("https://api.unsplash.com/search/photos") {
             parameter("query", city)
             parameter("client_id", "NEHMVuobdQVmCfXiH4XfIp-K7rY0965QnPKn7tS602A")
+        }.body()
+    }
+
+    suspend fun getMyTrips(userId: String): List<TripItinerary> {
+        return client.get("$BASE_URL/api/my-trips") {
+            parameter("userId", userId)
         }.body()
     }
 }

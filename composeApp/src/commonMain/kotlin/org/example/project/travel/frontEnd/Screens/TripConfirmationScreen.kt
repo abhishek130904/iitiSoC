@@ -30,6 +30,8 @@ import org.example.project.travel.frontEnd.pdf.TripSummary
 import org.example.project.travel.frontEnd.pdf.generateTripSummaryPdf
 import org.example.project.travel.frontEnd.pdf.saveTripSummaryPdfFile
 import kotlinx.coroutines.delay
+import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
+import org.example.project.travel.frontend.navigation.Screen
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -44,7 +46,7 @@ fun TripConfirmationScreen(
     costBreakdown: String,
     notes: String?,
     onHomeClick: () -> Unit = {},
-    onMyTripsClick: () -> Unit = {}
+    onMyTripsClick: (() -> Unit)? = null
 ) {
     val primaryBlue = Color(23, 111, 243)
     val composition by rememberLottieComposition(LottieCompositionSpec.Asset("tick.json"))
@@ -175,7 +177,12 @@ fun TripConfirmationScreen(
             EnhancedBottomBar(
                 primaryBlue = primaryBlue,
                 onHomeClick = onHomeClick,
-                onMyTripsClick = onMyTripsClick
+                onMyTripsClick = {
+                    val userId = getCurrentFirebaseUserUid()
+                    if (userId != null && onMyTripsClick != null) {
+                        onMyTripsClick()
+                    }
+                }
             )
         }
     }
