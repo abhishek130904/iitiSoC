@@ -28,8 +28,10 @@ import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 import org.example.project.travel.frontEnd.Screens.OfflineScreen
 import org.example.project.travel.frontEnd.network.NetworkMonitor
 import ui.HomeScreen
+import ui.TravelCategory
 import androidx.compose.ui.platform.LocalContext
 import org.example.project.travel.frontEnd.Screens.StateScreen as StateScreenComposable
+import org.example.project.travel.frontEnd.Screens.CategoryDetailsScreen
 
 @Composable
 fun RootContent(
@@ -85,7 +87,16 @@ fun RootContent(
                     is RootComponent.Child.HomeScreen -> HomeScreen(
                         userName = "TRAVELER", // Pass userName from component
                         onNavigateToCitySearch = { component.navigateTo(Screen.CitySearchScreen) },
-                        onProfileClick = { component.navigateTo(Screen.ProfileScreen) }
+                        onProfileClick = { component.navigateTo(Screen.ProfileScreen) },
+                        onCategoryClick = { category ->
+                            component.navigateTo(
+                                Screen.CategoryDetails(
+                                    categoryTitle = category.title,
+                                    categoryDescription = category.description,
+                                    destinations = category.popularDestinations
+                                )
+                            )
+                        }
                     )
                     is RootComponent.Child.FlightSearch -> FlightSearchScreen(instance.component)
                     is RootComponent.Child.FlightDetail -> FlightDetailScreen(instance.component)
@@ -116,10 +127,28 @@ fun RootContent(
                         onHomeClick = { component.replaceAll(Screen.HomeScreen) },
                         onMyTripsClick = { /* TODO: Navigate to My Trips screen when implemented */ }
                     )
-                    is RootComponent.Child.StateScreen -> StateScreenComposable(instance.screen.stateName, onCitySelected = { cityId, cityName -> component.navigateTo(Screen.CityDetails(
-                        cityId.toString(),
-                        cityName.toString()
-                    )) })
+                    is RootComponent.Child.StateScreen -> StateScreenComposable(
+                        instance.screen.stateName, 
+                        onCitySelected = { cityId, cityName -> 
+                            component.navigateTo(Screen.CityDetails(
+                                cityId.toString(),
+                                cityName.toString()
+                            )) 
+                        }
+                    )
+                    is RootComponent.Child.CategoryDetails -> CategoryDetailsScreen(
+                        categoryTitle = instance.screen.categoryTitle,
+                        categoryDescription = instance.screen.categoryDescription,
+                        destinations = instance.screen.destinations,
+                        onDestinationClick = { destination ->
+                            // Navigate to CityDetails with cityName only (cityId = null)
+                            component.navigateTo(Screen.CityDetails(
+                                cityId = null.toString(),
+                                cityName = destination
+                            ))
+                        },
+                        onBackClick = { component.pop() }
+                    )
                 }
             }
         }

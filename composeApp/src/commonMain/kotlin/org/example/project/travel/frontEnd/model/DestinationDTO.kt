@@ -9,7 +9,7 @@ data class CityDetailsResponse(
     val city: String,
     val state: String,
     val cityCode: Long,
-    val activities: List<Activity>
+    val activities: List<Activity> = emptyList()
 )
 
 @Serializable

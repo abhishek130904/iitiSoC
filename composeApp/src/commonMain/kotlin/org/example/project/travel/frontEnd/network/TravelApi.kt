@@ -53,6 +53,12 @@ object TravelApi {
         return client.get("$BASE_URL/api/destinations/$cityId/details").body()
     }
 
+    suspend fun getCityDetailsByName(cityName: String): CityDetailsResponse {
+        return client.get("$BASE_URL/api/city-details/by-name") {
+            parameter("name", cityName)
+        }.body()
+    }
+
     suspend fun getWikipediaSummary(city: String): WikipediaResponse {
         return client.get("https://en.wikipedia.org/w/api.php") {
             parameter("action", "query")

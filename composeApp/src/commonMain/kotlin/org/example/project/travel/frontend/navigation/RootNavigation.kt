@@ -46,6 +46,7 @@ interface RootComponent {
         data class ProfileScreen(val component: Any) : Child()
         data class TripConfirmation(val screen: org.example.project.travel.frontend.navigation.Screen.TripConfirmation) : Child()
         data class StateScreen(val screen: org.example.project.travel.frontend.navigation.Screen.StateScreen) : Child()
+        data class CategoryDetails(val screen: org.example.project.travel.frontend.navigation.Screen.CategoryDetails) : Child()
     }
 }
 
@@ -158,6 +159,9 @@ class RootComponentImpl(
             }
             is Screen.StateScreen -> {
                 RootComponent.Child.StateScreen(screen)
+            }
+            is Screen.CategoryDetails -> {
+                RootComponent.Child.CategoryDetails(screen)
             }
         }
     }

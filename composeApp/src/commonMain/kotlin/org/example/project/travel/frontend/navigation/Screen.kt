@@ -57,4 +57,11 @@ sealed class Screen {
 
     @Serializable
     data class StateScreen(val stateName: String) : Screen()
+
+    @Serializable
+    data class CategoryDetails(
+        val categoryTitle: String,
+        val categoryDescription: String,
+        val destinations: List<String>
+    ) : Screen()
 }

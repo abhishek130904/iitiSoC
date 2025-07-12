@@ -51,7 +51,7 @@ import kotlin.math.roundToInt
 
 interface CityDetailsScreenComponent {
     val viewModel: CityDetailsViewModel
-    val cityName: String
+    val cityName: String?
     fun onBack()
     fun onContinue()
 }
@@ -59,11 +59,11 @@ interface CityDetailsScreenComponent {
 class CityDetailsScreenComponentImpl(
     componentContext: ComponentContext,
     private val rootComponent: RootComponent,
-    cityId: String,
-    override val cityName: String
+    cityId: String?,
+    override val cityName: String? = null
 ) : CityDetailsScreenComponent, ComponentContext by componentContext {
 
-    override val viewModel = CityDetailsViewModel(cityId)
+    override val viewModel = CityDetailsViewModel(cityId, cityName)
 
     override fun onBack() {
         rootComponent.pop()
@@ -106,7 +106,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(cityDetails?.city ?: component.cityName) },
+                title = { Text(cityDetails?.city ?: component.cityName ?: "") },
                 navigationIcon = {
                     IconButton(onClick = component::onBack) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")

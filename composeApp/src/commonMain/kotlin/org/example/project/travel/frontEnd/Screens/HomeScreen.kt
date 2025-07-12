@@ -2,6 +2,7 @@ package ui
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.LazyListState
@@ -37,23 +38,102 @@ interface HomeScreenComponent {
     fun onNavigateToCitySearch()
 }
 
+// Category data class for better organization
+data class TravelCategory(
+    val title: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector,
+    val bgColor: Color,
+    val description: String,
+    val popularDestinations: List<String>
+)
+
 @OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit, onProfileClick: () -> Unit,) {
+fun HomeScreen(
+    userName: String, 
+    onNavigateToCitySearch: () -> Unit, 
+    onProfileClick: () -> Unit,
+    onCategoryClick: (TravelCategory) -> Unit = {} // New callback for category clicks
+) {
     val blue = Color(0xFF176FF3)
     val white = Color.White
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
     var isVisible by remember { mutableStateOf(false) }
 
+    // Enhanced categories with more data
     val categories = listOf(
-        Triple("Beaches", Icons.Default.BeachAccess, Color(0xFFE0F7FA)),
-        Triple("Mountains", Icons.Default.Terrain, Color(0xFFE8F5E9)),
-        Triple("Hill Stations", Icons.Default.Landscape, Color(0xFFFFF3E0)),
-        Triple("Forests", Icons.Default.Nature, Color(0xFFEDE7F6)),
-        Triple("Historical", Icons.Default.AccountBalance, Color(0xFFFFEBEE)),
-        Triple("Wildlife", Icons.Default.Pets, Color(0xFFE1F5FE)),
-        Triple("Temples", Icons.Default.TempleBuddhist, Color(0xFFFFFDE7)),
-        Triple("Adventure", Icons.Default.DirectionsBike, Color(0xFFE8EAF6))
+        TravelCategory(
+            title = "Beaches",
+            icon = Icons.Default.BeachAccess,
+            bgColor = Color(0xFFE0F7FA),
+            description = "Discover pristine beaches and coastal paradises",
+            popularDestinations = listOf(
+                "Panjim", "Vasco da Gama", "Sancoale", "Mapusa", "Puducherry", "Alibag", "Gokarna"
+            )
+        ),
+        TravelCategory(
+            title = "Mountains",
+            icon = Icons.Default.Terrain,
+            bgColor = Color(0xFFE8F5E9),
+            description = "Explore majestic mountains and scenic trails",
+            popularDestinations = listOf(
+                "Manali", "Shimla", "Mussoorie", "Naini Tal", "Darjeeling", "Dehradun", "Tawang", "Kasauli", "Lansdowne", "Munnar"
+            )
+        ),
+        TravelCategory(
+            title = "Hill Stations",
+            icon = Icons.Default.Landscape,
+            bgColor = Color(0xFFFFF3E0),
+            description = "Escape to cool hill stations and mountain retreats",
+            popularDestinations = listOf(
+                "Ooty", "Munnar", "Shimla", "Darjeeling", "Mussoorie", "Kodaikanal", "Mahabaleshwar", "Panchgani", "Mount Abu", "Coonoor"
+            )
+        ),
+        TravelCategory(
+            title = "Forests",
+            icon = Icons.Default.Nature,
+            bgColor = Color(0xFFEDE7F6),
+            description = "Immerse in nature and wildlife sanctuaries",
+            popularDestinations = listOf(
+                "Ramnagar", "Bandipur", "Kanhan", "Pench", "Kaziranga", "Chandrapur", "Sasan Gir", "Gosaba"
+            )
+        ),
+        TravelCategory(
+            title = "Historical",
+            icon = Icons.Default.AccountBalance,
+            bgColor = Color(0xFFFFEBEE),
+            description = "Journey through ancient monuments and heritage sites",
+            popularDestinations = listOf(
+                "Hampi", "Aurangabad", "Fatehpur Sikri", "Khajuraho", "Jaipur", "Agra", "Delhi", "Mysore", "Gwalior", "Bidar"
+            )
+        ),
+        TravelCategory(
+            title = "Wildlife",
+            icon = Icons.Default.Pets,
+            bgColor = Color(0xFFE1F5FE),
+            description = "Experience wildlife adventures and safaris",
+            popularDestinations = listOf(
+                "Sawai Madhopur", "Umaria", "Bokakhat", "Ramnagar", "Sasan Gir", "Mandla", "Seoni", "Chandrapur"
+            )
+        ),
+        TravelCategory(
+            title = "Temples",
+            icon = Icons.Default.TempleBuddhist,
+            bgColor = Color(0xFFFFFDE7),
+            description = "Visit sacred temples and spiritual destinations",
+            popularDestinations = listOf(
+                "Varanasi", "Tirupati", "Shirdi", "Amritsar", "Madurai", "Puri", "Rameswaram", "Ujjain", "Dwarka", "Kanchipuram"
+            )
+        ),
+        TravelCategory(
+            title = "Adventure",
+            icon = Icons.Default.DirectionsBike,
+            bgColor = Color(0xFFE8EAF6),
+            description = "Thrilling adventures and outdoor activities",
+            popularDestinations = listOf(
+                "Rishikesh", "Manali", "Auli", "Bir", "Munnar", "Dandeli", "Spiti", "Gulmarg", "Ranikhet", "Leh"
+            )
+        )
     )
 
     val imageResourcesWithLabels = listOf(
@@ -158,6 +238,7 @@ fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit, onProfileCl
                 color = blue
             )
 
+            // Functional Categories Grid
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -167,35 +248,12 @@ fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit, onProfileCl
                         modifier = Modifier.weight(1f),
                         verticalArrangement = Arrangement.spacedBy(14.dp)
                     ) {
-                        categories.drop(colIndex * 4).take(4).forEach { (title, icon, bgColor) ->
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(58.dp),
-                                shape = RoundedCornerShape(14.dp),
-                                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                                colors = CardDefaults.cardColors(containerColor = bgColor)
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Icon(
-                                        imageVector = icon,
-                                        contentDescription = title,
-                                        tint = blue,
-                                        modifier = Modifier.size(20.dp)
-                                    )
-                                    Spacer(Modifier.width(8.dp))
-                                    Text(
-                                        text = title,
-                                        fontSize = 14.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = Color.Black
-                                    )
-                                }
-                            }
+                        categories.drop(colIndex * 4).take(4).forEach { category ->
+                            FunctionalCategoryCard(
+                                category = category,
+                                blue = blue,
+                                onClick = { onCategoryClick(category) }
+                            )
                         }
                     }
                 }
@@ -211,6 +269,43 @@ fun HomeScreen(userName: String, onNavigateToCitySearch: () -> Unit, onProfileCl
             InfiniteCarousel(items = imageResourcesWithLabels, listState = listState)
 
             Spacer(modifier = Modifier.height(8.dp))
+        }
+    }
+}
+
+@Composable
+fun FunctionalCategoryCard(
+    category: TravelCategory,
+    blue: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(58.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(containerColor = category.bgColor)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Icon(
+                imageVector = category.icon,
+                contentDescription = category.title,
+                tint = blue,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(Modifier.width(8.dp))
+            Text(
+                text = category.title,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium,
+                color = Color.Black
+            )
         }
     }
 }

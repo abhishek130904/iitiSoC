@@ -11,7 +11,7 @@ import org.example.project.travel.frontend.model.UnsplashResponse
 import org.example.project.travel.frontend.model.WikipediaResponse
 import org.example.project.travel.frontend.network.TravelApi
 
-class CityDetailsViewModel(private val cityId: String) : ViewModel() {
+class CityDetailsViewModel(private val cityId: String?, private val cityName: String? = null) : ViewModel() {
     private val _cityDetails = MutableStateFlow<CityDetailsResponse?>(null)
     val cityDetails: StateFlow<CityDetailsResponse?> = _cityDetails
 
@@ -40,7 +40,15 @@ class CityDetailsViewModel(private val cityId: String) : ViewModel() {
             _isLoading.value = true
             _error.value = null
             try {
-                _cityDetails.value = TravelApi.getCityDetails(cityId)
+                _cityDetails.value = if (!cityId.isNullOrBlank() && cityId != "null") {
+                    TravelApi.getCityDetails(cityId)
+                } else if (!cityName.isNullOrBlank()) {
+                    // Fetch by name, then by id for full details (StateScreen logic)
+                    val byName = TravelApi.getCityDetailsByName(cityName)
+                    TravelApi.getCityDetails(byName.id.toString())
+                } else {
+                    throw IllegalArgumentException("No cityId or cityName provided")
+                }
                 _cityDetails.value?.let {
                     _wikipediaData.value = TravelApi.getWikipediaSummary(it.city)
                     _unsplashPhotos.value = TravelApi.getCityPhotos(it.city)
