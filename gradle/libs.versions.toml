@@ -28,6 +28,7 @@ navigationRuntimeDesktop = "2.9.0-beta01"
 navigationRuntimeAndroid = "2.9.0"
 firebaseFirestoreKtx = "25.1.4"
 firebaseAuthKtx = "23.2.1"
+composeMaterial = "1.4.1"
 
 [libraries]
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
@@ -56,7 +57,8 @@ androidx-navigation-runtime-desktop = { group = "androidx.navigation", name = "n
 androidx-navigation-runtime-android = { group = "androidx.navigation", name = "navigation-runtime-android", version.ref = "navigationRuntimeAndroid" }
 compose-material-icons = { module = "org.jetbrains.compose.material:material-icons", version.ref = "composeMultiplatform" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx", version.ref = "firebaseFirestoreKtx" }
-firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" } # Added
+firebase-auth-ktx = { group = "com.google.firebase", name = "firebase-auth-ktx", version.ref = "firebaseAuthKtx" }
+androidx-compose-material = { group = "androidx.wear.compose", name = "compose-material", version.ref = "composeMaterial" } # Added
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

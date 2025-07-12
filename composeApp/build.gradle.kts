@@ -166,6 +166,7 @@ dependencies {
     implementation(libs.androidx.navigation.runtime.android)
     implementation(libs.firebase.firestore.ktx)
     implementation(libs.firebase.auth.ktx)
+    implementation(libs.androidx.compose.material)
 //    implementation(project(":composeApp"))
     debugImplementation(compose.uiTooling)
 
