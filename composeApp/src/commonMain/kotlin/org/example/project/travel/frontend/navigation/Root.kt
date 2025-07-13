@@ -112,7 +112,10 @@ fun RootContent(
                             authService = authService,
                             password = "",
                             onLogout = { component.replaceAll(Screen.Login) },
-                            onHomeClick = { component.replaceAll(Screen.HomeScreen) }
+                            onHomeClick = { component.replaceAll(Screen.HomeScreen) },
+                            onMyTripsClick = { userId ->
+                                component.navigateTo(Screen.MyTrips(userId))
+                            }
                         )
                     }
                     is RootComponent.Child.TripConfirmation -> TripConfirmationScreen(

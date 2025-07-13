@@ -50,7 +50,8 @@ fun ProfileScreen(
     uid: String?,
     authService: AuthService,
     password: String,
-    onLogout: suspend () -> Unit = {}
+    onLogout: suspend () -> Unit = {},
+    onMyTripsClick: ((String) -> Unit)? = null
 ) {
     val coroutineScope = rememberCoroutineScope()
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
@@ -258,7 +259,11 @@ fun ProfileScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
                         .weight(1f)
-                        .clickable { /* TODO: Implement My Trips navigation */ }
+                        .clickable {
+                            if (uid != null && onMyTripsClick != null) {
+                                onMyTripsClick(uid)
+                            }
+                        }
                 ) {
                     Icon(
                         imageVector = Icons.Default.ListAlt,

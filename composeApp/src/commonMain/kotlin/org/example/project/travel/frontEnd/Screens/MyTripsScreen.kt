@@ -6,10 +6,14 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.serialization.Serializable
 import org.example.project.travel.frontend.network.TravelApi
+import org.example.project.travel.frontEnd.pdf.TripSummary
+import org.example.project.travel.frontEnd.pdf.generateTripSummaryPdf
+import org.example.project.travel.frontEnd.pdf.saveTripSummaryPdfFile
 
 @Serializable
 data class TripActivity(
@@ -36,7 +40,7 @@ data class TripItinerary(
     val hotelName: String,
     val activities: List<TripActivity>,
     val meals: List<TripMeal>,
-    val notes: String?,
+    val notes: String? = null,
     val createdAt: String
 )
 
@@ -45,6 +49,7 @@ fun MyTripsScreen(userId: String) {
     var trips by remember { mutableStateOf<List<TripItinerary>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
 
     LaunchedEffect(userId) {
         try {
@@ -65,14 +70,14 @@ fun MyTripsScreen(userId: String) {
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(trips) { trip ->
-                TripCard(trip)
+                TripCard(trip, context)
             }
         }
     }
 }
 
 @Composable
-fun TripCard(trip: TripItinerary) {
+fun TripCard(trip: TripItinerary, context: android.content.Context) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -97,6 +102,26 @@ fun TripCard(trip: TripItinerary) {
             trip.notes?.takeIf { it.isNotBlank() }?.let {
                 Spacer(Modifier.height(4.dp))
                 Text("Notes: $it")
+            }
+            Spacer(Modifier.height(8.dp))
+            Button(
+                onClick = {
+                    val summary = TripSummary(
+                        destination = trip.cityName,
+                        dates = trip.createdAt,
+                        flightDetails = trip.flightId,
+                        hotelDetails = trip.hotelName,
+                        activities = trip.activities.joinToString { it.name },
+                        meals = trip.meals.joinToString { it.type },
+                        costBreakdown = "", // Add cost breakdown if available
+                        notes = trip.notes
+                    )
+                    val pdfBytes = generateTripSummaryPdf(summary)
+                    saveTripSummaryPdfFile(context, pdfBytes, "TripSummary_${trip.id}.pdf")
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Download Summary PDF")
             }
         }
     }
