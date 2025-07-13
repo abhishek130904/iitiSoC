@@ -108,7 +108,13 @@ fun SignInScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = AppBlue,
+                        focusedBorderColor = AppBlue,
+                        unfocusedBorderColor = Color.Gray,
+                        focusedTextColor = Color.White,
+                    )
                 )
 
                 OutlinedTextField(
@@ -120,7 +126,13 @@ fun SignInScreen(
                     singleLine = true,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 8.dp)
+                        .padding(vertical = 8.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        cursorColor = AppBlue,
+                        focusedBorderColor = AppBlue,
+                        unfocusedBorderColor = Color.Gray,
+                        focusedTextColor = Color.White,
+                    )
                 )
 
                 Button(

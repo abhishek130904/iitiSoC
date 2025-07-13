@@ -76,50 +76,58 @@ fun SignUpScreen(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it},
-                label = { Text("Name")},
+                label = { Text("Name", color = Color.White)},
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = AppBlue,
-                    cursorColor = AppBlue
+                    focusedTextColor = Color.White,
+                    cursorColor = AppBlue,
+                    focusedBorderColor = AppBlue,
+                    unfocusedBorderColor = Color.Gray
                 )
             )
             OutlinedTextField(
                 value = age,
                 onValueChange = { age = it},
-                label = { Text("Age") },
+                label = { Text("Age", color = Color.White) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedTextColor = AppBlue,
-                    cursorColor = AppBlue
+                    focusedTextColor = Color.White,
+                    cursorColor = AppBlue,
+                    focusedBorderColor = AppBlue,
+                    unfocusedBorderColor = Color.Gray
                 )
             )
 
             OutlinedTextField(
                 value = email,
                 onValueChange = { email = it },
-                label = { Text("Email") },
+                label = { Text("Email", color = Color.White) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = AppBlue,
-                    cursorColor = AppBlue
+                    cursorColor = AppBlue,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.Gray,
+                    focusedTextColor = AppBlue
                 )
             )
 
             OutlinedTextField(
                 value = password,
                 onValueChange = { password = it },
-                label = { Text("Password") },
+                label = { Text("Password", color = Color.White) },
                 singleLine = true,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
+                    cursorColor = AppBlue,
                     focusedBorderColor = AppBlue,
-                    cursorColor = AppBlue
+                    unfocusedBorderColor = Color.Gray,
+                    focusedTextColor = Color.White,
                 )
             )
 
