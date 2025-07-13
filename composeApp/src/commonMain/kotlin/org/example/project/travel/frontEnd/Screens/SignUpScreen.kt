@@ -9,8 +9,11 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -25,6 +28,7 @@ import travelfrontend.composeapp.generated.resources.gg
 import travelfrontend.composeapp.generated.resources.login_background
 import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
 import com.google.firebase.auth.FirebaseAuth
+import org.jetbrains.skia.paragraph.TextStyle
 
 // Custom blue color
 val AppBlue = Color(red = 23, green = 111, blue = 243)
@@ -71,7 +75,20 @@ fun SignUpScreen(
                 .fillMaxWidth()
                 .padding(horizontal = 24.dp)
         ) {
-            Text(text = "Sign Up", fontSize = 32.sp, color = Color.White)
+            Text(
+                text = "Sign Up",
+                fontSize = 32.sp,
+                color = Color.White,
+                style = androidx.compose.ui.text.TextStyle(
+                    shadow = Shadow(
+                        color = Color.Black.copy(alpha = 0.5f),
+                        offset = Offset(2f, 2f),
+                        blurRadius = 4f
+                    )
+                )
+            )
+
+
 
             OutlinedTextField(
                 value = name,
@@ -139,6 +156,20 @@ fun SignUpScreen(
                 onClick = {
                     coroutineScope.launch {
                         isSigningUp = true
+                        // Firestore check for existing user by email FIRST
+                        val userExists = try {
+                            authService.doesUserExist(email.trim().lowercase())
+                        } catch (e: Exception) {
+                            errorMessage = "Error checking user existence: ${e.message}"
+                            isSigningUp = false
+                            return@launch
+                        }
+                        if (userExists) {
+                            errorMessage = "Account already exists, please sign in"
+                            isSigningUp = false
+                            return@launch
+                        }
+                        // Only ask for name/age if email does not exist
                         val userAge = age.toIntOrNull()
                         if (userAge == null || name.isBlank()) {
                             errorMessage = "Please enter a valid name and age."
@@ -181,6 +212,21 @@ fun SignUpScreen(
                             googleSignInManager.signInWithGoogle().onSuccess {
                                 errorMessage = null
                                 val uid = getCurrentFirebaseUserUid()
+                                val user = FirebaseAuth.getInstance().currentUser
+                                val email = user?.email
+                                // Firestore check for existing user by email (Google sign-up) BEFORE showing dialog
+                                val userExists = try {
+                                    if (email != null) authService.doesUserExist(email.trim().lowercase()) else false
+                                } catch (e: Exception) {
+                                    errorMessage = "Error checking user existence: ${e.message}"
+                                    isSigningUpWithGoogle = false
+                                    return@launch
+                                }
+                                if (userExists) {
+                                    errorMessage = "Account already exists, please sign in"
+                                    isSigningUpWithGoogle = false
+                                    return@launch
+                                }
                                 if (uid != null) {
                                     googleUid = uid
                                     showGoogleProfileDialog = true
@@ -231,6 +277,18 @@ fun SignUpScreen(
                             coroutineScope.launch {
                                 val user = FirebaseAuth.getInstance().currentUser
                                 val email = user?.email
+                                // Firestore check for existing user by email (Google sign-up)
+                                val userExists = try {
+                                    if (email != null) authService.doesUserExist(email.trim().lowercase()) else false
+                                } catch (e: Exception) {
+                                    errorMessage = "Error checking user existence: ${e.message}"
+                                    return@launch
+                                }
+                                if (userExists) {
+                                    errorMessage = "Account already exists, please sign in"
+                                    showGoogleProfileDialog = false
+                                    return@launch
+                                }
                                 authService.saveUserProfile(googleUid, googleName.trim(), userAge, email)
                                 showGoogleProfileDialog = false
                                 onSignUpSuccess()

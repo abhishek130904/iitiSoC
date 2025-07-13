@@ -2,6 +2,7 @@ package org.example.project.travel.frontend.auth
 
 import com.google.firebase.Firebase
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
 import kotlinx.coroutines.tasks.await
 import com.google.firebase.firestore.ktx.firestore
@@ -38,6 +39,17 @@ actual class AuthService {
     }
     actual suspend fun signOut() {
         auth.signOut()
+    }
+
+    actual suspend fun doesUserExist(email: String): Boolean {
+        val db = Firebase.firestore
+        val normalizedEmail = email.trim().lowercase()
+        val querySnapshot = db.collection("users")
+            .whereEqualTo("email", normalizedEmail)
+            .get()
+            .await()
+        android.util.Log.d("AuthDebug", "Firestore check for email=$normalizedEmail, found=${!querySnapshot.isEmpty}")
+        return !querySnapshot.isEmpty
     }
 }
 
