@@ -392,11 +392,6 @@ private fun EnhancedBanner(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Text(
-                    text = "🏨",
-                    fontSize = 48.sp
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
                     text = "Find Your Perfect Stay",
                     color = Color.White,
                     fontWeight = FontWeight.ExtraBold,
@@ -404,7 +399,7 @@ private fun EnhancedBanner(
                     textAlign = TextAlign.Center
                 )
                 Text(
-                    text = "Discover amazing hotels worldwide",
+                    text = "Discover amazing hotels in India",
                     color = Color.White.copy(alpha = 0.9f),
                     fontSize = 16.sp,
                     textAlign = TextAlign.Center,
