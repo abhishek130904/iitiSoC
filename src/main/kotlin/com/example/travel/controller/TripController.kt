@@ -2,6 +2,7 @@ package com.example.travel.controller
 
 import com.example.travel.model.ActivityEntity
 import com.example.travel.model.MealEntity
+import com.example.travel.model.TripEntity
 import com.example.travel.service.TripService
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
@@ -36,6 +37,10 @@ class TravelController(
                 .contentType(MediaType.APPLICATION_JSON)
                 .build()
         }
+    }
+    @GetMapping("/my-trips")
+    fun getTripsByUserId(@RequestParam userId: String): List<TripEntity> {
+        return tripService.getTripsByUserIdOrderByCreatedAtDesc(userId)
     }
 }
 

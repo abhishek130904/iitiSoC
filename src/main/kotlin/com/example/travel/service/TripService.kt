@@ -25,4 +25,10 @@ class TripService(
         )
         return tripRepository.save(trip).id
     }
+
+    fun getTripsByUserId(userId: String): List<TripEntity> =
+        tripRepository.findByUserId(userId)
+
+    fun getTripsByUserIdOrderByCreatedAtDesc(userId: String): List<TripEntity> =
+        tripRepository.findByUserIdOrderByCreatedAtDesc(userId)
 }
