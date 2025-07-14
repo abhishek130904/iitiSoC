@@ -433,7 +433,7 @@ fun HotelScreen(
                                 )
                             ) {
                                 Text(
-                                    text = hotelError!!,
+                                    text = "Sorry, No hotels found, Try another destination",
                                     color = Color.Red,
                                     modifier = Modifier.padding(16.dp),
                                     textAlign = TextAlign.Center

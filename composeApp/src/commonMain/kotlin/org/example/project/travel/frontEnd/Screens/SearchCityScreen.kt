@@ -188,138 +188,131 @@ fun SearchCityScreen(
                 )
             )
     ) {
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(20.dp)
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
-            // --- Search Cards at the top ---
-            SearchSection(
-                stateSearchQuery = stateSearchQuery,
-                onStateSearchChange = {
-                    stateSearchQuery = it
-                    showStateDropdown = it.isNotEmpty()
-                },
-                citySearchQuery = citySearchQuery,
-                onCitySearchChange = {
-                    citySearchQuery = it
-                    viewModel.searchCities(it)
-                },
-                showStateDropdown = showStateDropdown,
-                filteredStates = filteredStates,
-                onStateSelected = { state ->
-                    selectedState = state
-                    showStateDropdown = false
-                    stateSearchQuery = state
-                    component.onStateSelected(state)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- Famous Places Section (middle) ---
-            FamousPlacesSection(
-                places = famousPlaces,
-                onCitySelected = {
-                    selectedCity = it
-                    component.onCitySelected(it)
-                }
-            )
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // --- Personalized Recommendations Section (bottom) ---
-            Text(
-                text = "Personalized Recommendations",
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
-            when {
-                userId == null -> {
-                    Text("Please sign in to see personalized recommendations.", color = Color.White.copy(alpha = 0.8f))
-                }
-                recLoading || loadingImages -> {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        CircularProgressIndicator(color = Color.White)
+            // Search bar at the top
+            item {
+                SearchSection(
+                    stateSearchQuery = stateSearchQuery,
+                    onStateSearchChange = {
+                        stateSearchQuery = it
+                        showStateDropdown = it.isNotEmpty()
+                    },
+                    citySearchQuery = citySearchQuery,
+                    onCitySearchChange = {
+                        citySearchQuery = it
+                        viewModel.searchCities(it)
+                    },
+                    showStateDropdown = showStateDropdown,
+                    filteredStates = filteredStates,
+                    onStateSelected = { state ->
+                        selectedState = state
+                        showStateDropdown = false
+                        stateSearchQuery = state
+                        component.onStateSelected(state)
                     }
-                }
-                recError != null -> {
-                    Text("Error: $recError", color = Color.Red)
-                }
-                recommendations != null -> {
-                    val rec = recommendations!!
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp)
-                            .background(Color(0xFFF5F5F5), RoundedCornerShape(16.dp))
-                            .padding(16.dp)
-                    ) {
-                        // Next City
-                        if (!rec.next_city_recommendation.isNullOrBlank()) {
-                            Text("Next City", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3))
-                            Spacer(modifier = Modifier.height(8.dp))
-                            val city = rec.next_city_recommendation
-                            val imageUrl = cityImages[city]
-                            CityRecommendationCard(city, imageUrl, modifier = Modifier.fillMaxWidth()) {
-                                // Use cityId = null and pass city name for navigation
-                                component.onCitySelected(DestinationCity(
-                                    id = 0L, city = city, state = "", country = "", cityCode = 0L
-                                ))
-                                // Instead, navigate with cityId = null and cityName = city
-                                // rootComponent.navigateTo(Screen.CityDetails(cityId = null, cityName = city))
-                            }
-                        }
-                        // Similar Destinations
-                        if (rec.similar_destinations.isNotEmpty()) {
-                            Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3), modifier = Modifier.padding(top = 16.dp))
-                            Spacer(modifier = Modifier.height(8.dp))
-                            val similarCities = rec.similar_destinations.filter { it.isNotBlank() }
-                            LazyVerticalGrid(
-                                columns = GridCells.Fixed(2),
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(max = Dp(similarCities.size * 110f)),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                verticalArrangement = Arrangement.spacedBy(12.dp),
-                                userScrollEnabled = false // disables grid's own scroll, uses parent scroll
-                            ) {
-                                items(similarCities) { city ->
-                                    val imageUrl = cityImages[city]
-                                    CityRecommendationCard(city, imageUrl) {
-                                        component.onCitySelected(DestinationCity(
-                                            id = 0L, city = city, state = "", country = "", cityCode = 0L
-                                        ))
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                )
             }
-            // --- End Recommendations Section ---
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Content Section
-            Box(modifier = Modifier.weight(1f)) {
-                when {
-                    isLoading -> LoadingSection()
-                    error != null -> ErrorSection(error = error ?: "Unknown error")
-                    filteredCities.isEmpty() -> EmptyStateSection(query = citySearchQuery)
-                    else -> CitiesListSection(
-                        cities = filteredCities,
-                        selectedCity = selectedCity,
+            // City list just below search bar
+            when {
+                isLoading -> item { LoadingSection() }
+                error != null -> item { ErrorSection(error = error ?: "Unknown error") }
+                filteredCities.isEmpty() -> item { EmptyStateSection(query = citySearchQuery) }
+                else -> items(filteredCities) { city ->
+                    EnhancedCityItem(
+                        city = city,
+                        isSelected = city == selectedCity,
                         onCitySelected = {
                             selectedCity = it
                             component.onCitySelected(it)
                         }
                     )
+                }
+            }
+            // Famous Places Section
+            item {
+                FamousPlacesSection(
+                    places = famousPlaces,
+                    onCitySelected = {
+                        selectedCity = it
+                        component.onCitySelected(it)
+                    }
+                )
+            }
+            // Recommendations Section
+            item {
+                Text(
+                    text = "Personalized Recommendations",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White
+                )
+                when {
+                    userId == null -> {
+                        Text("Please sign in to see personalized recommendations.", color = Color.White.copy(alpha = 0.8f))
+                    }
+                    recLoading || loadingImages -> {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            CircularProgressIndicator(color = Color.White)
+                        }
+                    }
+                    recError != null -> {
+                        Text("Error: $recError", color = Color.Red)
+                    }
+                    recommendations != null -> {
+                        val rec = recommendations!!
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(8.dp)
+                                .background(Color(0xFFF5F5F5), RoundedCornerShape(16.dp))
+                                .padding(16.dp)
+                        ) {
+                            // Next City
+                            if (!rec.next_city_recommendation.isNullOrBlank()) {
+                                Text("Next City", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val city = rec.next_city_recommendation
+                                val imageUrl = cityImages[city]
+                                CityRecommendationCard(city, imageUrl, modifier = Modifier.fillMaxWidth()) {
+                                    component.onCitySelected(DestinationCity(
+                                        id = 0L, city = city, state = "", country = "", cityCode = 0L
+                                    ))
+                                }
+                            }
+                            // Similar Destinations
+                            if (rec.similar_destinations.isNotEmpty()) {
+                                Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3), modifier = Modifier.padding(top = 16.dp))
+                                Spacer(modifier = Modifier.height(8.dp))
+                                val similarCities = rec.similar_destinations.filter { it.isNotBlank() }
+                                LazyVerticalGrid(
+                                    columns = GridCells.Fixed(2),
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = Dp(similarCities.size * 110f)),
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                                    userScrollEnabled = false
+                                ) {
+                                    items(similarCities) { city ->
+                                        val imageUrl = cityImages[city]
+                                        CityRecommendationCard(city, imageUrl) {
+                                            component.onCitySelected(DestinationCity(
+                                                id = 0L, city = city, state = "", country = "", cityCode = 0L
+                                            ))
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }
