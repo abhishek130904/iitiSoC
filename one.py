@@ -7,6 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 from sklearn.decomposition import TruncatedSVD
 import joblib
 import json
+from collections import Counter
 
 class TripRecommendationEngine:
     def __init__(self):
@@ -85,8 +86,66 @@ class TripRecommendationEngine:
         user_clusters = kmeans.fit_predict(user_data_matrix)
         return kmeans, user_clusters
 
+    def get_next_city_recommendation(self, user_id):
+        """
+        Recommend the next likely city for the user based on sequential trip patterns of all users.
+        """
+        # Ensure trips data is loaded
+        if self.trips is None:
+            self.load_data()
+        # Get the user's most recent city
+        user_trips = self.trips[self.trips['user_id'] == user_id]
+        if user_trips.empty:
+            return None
+        # Use created_at for trip order
+        if 'created_at' in user_trips.columns:
+            last_trip = user_trips.sort_values('created_at', ascending=False).iloc[0]
+        else:
+            last_trip = user_trips.iloc[-1]
+        # Extra defensive checks
+        if last_trip is None or not isinstance(last_trip, pd.Series):
+            return None
+        if 'city_name' not in last_trip or pd.isna(last_trip['city_name']) or not last_trip['city_name']:
+            return None
+        last_city = last_trip['city_name']
+        # Find all transitions: (user_id, city_name, created_at)
+        df = self.trips.copy()
+        if 'created_at' in df.columns:
+            df = df.sort_values(['user_id', 'created_at'])
+        else:
+            df = df.sort_values(['user_id'])
+        # For each user's trips, get (from_city, to_city)
+        transitions = []
+        for uid, group in df.groupby('user_id'):
+            cities = group['city_name'].tolist()
+            for i in range(len(cities)-1):
+                if cities[i] and cities[i+1]:
+                    transitions.append((cities[i], cities[i+1]))
+        # Count transitions from last_city
+        next_cities = [to_city for from_city, to_city in transitions if from_city == last_city]
+        if not next_cities:
+            return None
+        most_common = Counter(next_cities).most_common(1)
+        return most_common[0][0] if most_common else None
+
     def generate_recommendations(self, user_id):
         print(f"🎁 Generating recommendations for user {user_id}...")
+        if self.trips is None:
+            loaded = self.load_data()
+            if not loaded or self.trips is None:
+                return {
+                    'similar_destinations': [],
+                    'other_hotels': [],
+                    'generic_packing_tips': [
+                        "Pack according to the weather of your destination city.",
+                        "Keep your travel documents and essentials handy."
+                    ],
+                    'generic_deals': [
+                        "Check for last-minute hotel deals in your destination city.",
+                        "Look for bundled offers with flights and hotels."
+                    ],
+                    'next_city_recommendation': None
+                }
         recommendations = {
             'similar_destinations': [],
             'other_hotels': [],
@@ -101,16 +160,21 @@ class TripRecommendationEngine:
         }
         # Get user's cities and hotels
         user_trips = self.trips[self.trips['user_id'] == user_id]
-        user_cities = set(user_trips['city_name'])
-        user_hotels = set(user_trips['hotel_name'])
+        if user_trips.empty:
+            return recommendations
+        user_cities = set(user_trips['city_name'].dropna())
+        user_hotels = set(user_trips['hotel_name'].dropna())
         # Recommend cities visited by other users but not by this user
-        other_cities = set(self.trips['city_name']) - user_cities
+        other_cities = set(self.trips['city_name'].dropna()) - user_cities
         recommendations['similar_destinations'] = list(other_cities)[:5]
         # Recommend hotels in user's cities that the user hasn't stayed at
         hotels_in_user_cities = self.trips[
             self.trips['city_name'].isin(user_cities) & ~self.trips['hotel_name'].isin(user_hotels)
-        ]['hotel_name'].unique().tolist()
+        ]['hotel_name'].dropna().unique().tolist()
         recommendations['other_hotels'] = hotels_in_user_cities[:5]
+        # Add next likely city recommendation
+        next_city = self.get_next_city_recommendation(user_id)
+        recommendations['next_city_recommendation'] = next_city
         return recommendations
 
     def close_connection(self):

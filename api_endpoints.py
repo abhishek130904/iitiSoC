@@ -6,6 +6,7 @@ import pandas as pd
 from datetime import datetime, timedelta
 from one import TripRecommendationEngine
 import os
+import traceback
 
 app = Flask(__name__)
 CORS(app)
@@ -30,33 +31,27 @@ def trip_completed():
         if engine.connect_database():
             cursor = engine.conn.cursor()
             
-            # Insert into user_trip_history
+            # Insert into trips
             query = """
-            INSERT INTO user_trip_history 
-            (user_id, trip_name, cities_visited, activities_done, hotels_stayed, 
-             budget_range, travel_style, rating, trip_duration, season, trip_date)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+            INSERT INTO trips 
+            (user_id, city_name, hotel_name, created_at, notes, flight_id)
+            VALUES (%s, %s, %s, %s, %s, %s)
             """
             
             cursor.execute(query, (
                 user_id,
-                trip_data.get('trip_name'),
-                trip_data.get('cities_visited'),
-                trip_data.get('activities_done'),
-                trip_data.get('hotels_stayed'),
-                trip_data.get('budget_range'),
-                trip_data.get('travel_style'),
-                trip_data.get('rating'),
-                trip_data.get('trip_duration'),
-                trip_data.get('season'),
-                datetime.now().date()
+                trip_data.get('city_name'),
+                trip_data.get('hotel_name'),
+                trip_data.get('created_at') or datetime.now(),
+                trip_data.get('notes'),
+                trip_data.get('flight_id')
             ))
             
             engine.conn.commit()
             cursor.close()
             
             # Generate recommendations
-            recommendations = generate_post_trip_recommendations(user_id, trip_data)
+            recommendations = engine.generate_recommendations(user_id)
             
             return jsonify({
                 'success': True,
@@ -65,35 +60,24 @@ def trip_completed():
             })
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/recommendations/<int:user_id>', methods=['GET'])
+@app.route('/api/recommendations/<user_id>', methods=['GET'])
 def get_recommendations(user_id):
     """Get recommendations for a user"""
     try:
         if engine.connect_database():
             # Get user's trip history
             cursor = engine.conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM user_trip_history WHERE user_id = %s ORDER BY trip_date DESC", (user_id,))
+            cursor.execute("SELECT * FROM trips WHERE user_id = %s ORDER BY created_at DESC", (user_id,))
             trip_history = cursor.fetchall()
             
             if not trip_history:
                 return jsonify({'success': False, 'message': 'No trip history found for user'})
             
-            # Convert to format expected by recommendation engine
-            formatted_history = []
-            for trip in trip_history:
-                formatted_history.append({
-                    'cities_visited': trip['cities_visited'],
-                    'activities_done': trip['activities_done'],
-                    'travel_style': trip['travel_style'],
-                    'budget_range': trip['budget_range'],
-                    'season': trip['season'],
-                    'rating': float(trip['rating'])
-                })
-            
             # Generate recommendations
-            recommendations = engine.generate_recommendations(user_id, formatted_history)
+            recommendations = engine.generate_recommendations(user_id)
             
             # Store recommendations in database
             store_recommendations(user_id, recommendations)
@@ -104,9 +88,10 @@ def get_recommendations(user_id):
             })
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/recommendations/<int:user_id>/feedback', methods=['POST'])
+@app.route('/api/recommendations/<user_id>/feedback', methods=['POST'])
 def submit_recommendation_feedback(user_id):
     """Submit feedback on recommendations"""
     try:
@@ -126,9 +111,10 @@ def submit_recommendation_feedback(user_id):
             return jsonify({'success': True, 'message': 'Feedback submitted successfully'})
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/deals/<int:user_id>', methods=['GET'])
+@app.route('/api/deals/<user_id>', methods=['GET'])
 def get_personalized_deals(user_id):
     """Get personalized deals for a user"""
     try:
@@ -137,16 +123,16 @@ def get_personalized_deals(user_id):
             
             # Get user's preferred cities from trip history
             cursor.execute("""
-                SELECT DISTINCT cities_visited 
-                FROM user_trip_history 
+                SELECT DISTINCT city_name 
+                FROM trips 
                 WHERE user_id = %s
             """, (user_id,))
             
             user_cities = cursor.fetchall()
             preferred_cities = []
             for row in user_cities:
-                if row['cities_visited']:
-                    preferred_cities.extend(row['cities_visited'].split(','))
+                if row['city_name']:
+                    preferred_cities.append(row['city_name'])
             
             # Get active deals for preferred cities
             deals = []
@@ -169,9 +155,10 @@ def get_personalized_deals(user_id):
             })
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/packing-tips/<int:user_id>', methods=['GET'])
+@app.route('/api/packing-tips/<user_id>', methods=['GET'])
 def get_packing_tips(user_id):
     """Get personalized packing tips"""
     try:
@@ -180,10 +167,10 @@ def get_packing_tips(user_id):
             
             # Get user's recent trip
             cursor.execute("""
-                SELECT travel_style, season, cities_visited 
-                FROM user_trip_history 
+                SELECT city_name, hotel_name, created_at 
+                FROM trips 
                 WHERE user_id = %s 
-                ORDER BY trip_date DESC 
+                ORDER BY created_at DESC 
                 LIMIT 1
             """, (user_id,))
             
@@ -191,7 +178,11 @@ def get_packing_tips(user_id):
             cursor.close()
             
             if recent_trip:
-                tips = engine.generate_packing_tips([recent_trip])
+                # You may want to update this to use only available fields
+                tips = [
+                    f"Pack for your trip to {recent_trip['city_name']}!",
+                    "Don't forget your essentials."
+                ]
                 return jsonify({
                     'success': True,
                     'packing_tips': tips
@@ -203,6 +194,7 @@ def get_packing_tips(user_id):
                 })
                 
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 def generate_post_trip_recommendations(user_id, trip_data):
@@ -270,9 +262,10 @@ def train_models():
             })
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
-@app.route('/api/similar-users/<int:user_id>', methods=['GET'])
+@app.route('/api/similar-users/<user_id>', methods=['GET'])
 def get_similar_users(user_id):
     """Find users with similar travel preferences"""
     try:
@@ -284,7 +277,7 @@ def get_similar_users(user_id):
             
             # Get user's trip history
             cursor = engine.conn.cursor(dictionary=True)
-            cursor.execute("SELECT * FROM user_trip_history WHERE user_id = %s", (user_id,))
+            cursor.execute("SELECT * FROM trips WHERE user_id = %s", (user_id,))
             user_trips = cursor.fetchall()
             
             if not user_trips:
@@ -296,7 +289,7 @@ def get_similar_users(user_id):
             
             cursor.execute("""
                 SELECT DISTINCT user_id, COUNT(*) as trip_count
-                FROM user_trip_history 
+                FROM trips 
                 WHERE travel_style = %s AND budget_range = %s AND user_id != %s
                 GROUP BY user_id
                 ORDER BY trip_count DESC
@@ -312,6 +305,7 @@ def get_similar_users(user_id):
             })
             
     except Exception as e:
+        traceback.print_exc()
         return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':

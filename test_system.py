@@ -81,6 +81,8 @@ def test_get_recommendations():
             print(f"🎯 Missed activities: {len(recommendations.get('missed_activities', []))}")
             print(f"🧳 Packing tips: {len(recommendations.get('packing_tips', []))}")
             print(f"💰 Deals: {len(recommendations.get('deals_offers', []))}")
+            # Print next city recommendation
+            print(f"➡️ Next city recommendation: {recommendations.get('next_city_recommendation')}")
             
             return True
         else:
