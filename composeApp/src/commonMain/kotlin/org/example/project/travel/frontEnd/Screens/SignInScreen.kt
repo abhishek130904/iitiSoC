@@ -114,6 +114,7 @@ fun SignInScreen(
                         focusedBorderColor = AppBlue,
                         unfocusedBorderColor = Color.Gray,
                         focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
                     )
                 )
 
@@ -132,6 +133,7 @@ fun SignInScreen(
                         focusedBorderColor = AppBlue,
                         unfocusedBorderColor = Color.Gray,
                         focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White
                     )
                 )
 

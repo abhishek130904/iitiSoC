@@ -384,12 +384,13 @@ private fun EnhancedTripsList(
     primaryBlue: Color,
     showContent: Boolean
 ) {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.spacedBy(16.dp),
-        contentPadding = PaddingValues(vertical = 8.dp)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState()),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        itemsIndexed(trips) { index, trip ->
+        trips.forEachIndexed { index, trip ->
             val animationDelay = if (showContent) index * 150 else 0
 
             EnhancedTripCard(

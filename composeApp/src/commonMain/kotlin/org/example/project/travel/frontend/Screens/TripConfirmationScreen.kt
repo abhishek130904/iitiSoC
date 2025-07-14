@@ -104,15 +104,15 @@ fun TripConfirmationScreen(
                     colors = CardDefaults.cardColors(
                         containerColor = Color.White.copy(alpha = 0.98f)
                     )
-                ) {
-                    Column(
-                        modifier = Modifier.padding(32.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+        ) {
+            Column(
+                modifier = Modifier.padding(32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
                         // Success Animation
-                        LottieAnimation(
-                            composition = composition,
-                            progress = { progress },
+                LottieAnimation(
+                    composition = composition,
+                    progress = { progress },
                             modifier = Modifier.size(200.dp)
                         )
 
@@ -133,7 +133,7 @@ fun TripConfirmationScreen(
                             color = Color.Gray,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.padding(top = 8.dp)
-                        )
+                )
 
                         Spacer(modifier = Modifier.height(32.dp))
 
@@ -146,16 +146,16 @@ fun TripConfirmationScreen(
 
                         Spacer(modifier = Modifier.height(24.dp))
 
-                        // Download PDF Button
+                // Download PDF Button
                         EnhancedDownloadButton(
                             primaryBlue = primaryBlue,
-                            onClick = {
-                                val summary = TripSummary(
+                    onClick = {
+                        val summary = TripSummary(
                                     destination, dates, flightDetails, hotelDetails,
                                     activities, meals, costBreakdown, notes
-                                )
-                                val pdfBytes = generateTripSummaryPdf(summary)
-                                saveTripSummaryPdfFile(context, pdfBytes, "TripSummary.pdf")
+                        )
+                        val pdfBytes = generateTripSummaryPdf(summary)
+                        saveTripSummaryPdfFile(context, pdfBytes, "TripSummary.pdf")
                             }
                         )
                     }
@@ -173,7 +173,7 @@ fun TripConfirmationScreen(
                 animationSpec = tween(600, easing = FastOutSlowInEasing)
             ),
             modifier = Modifier.align(Alignment.BottomCenter)
-        ) {
+                ) {
             EnhancedBottomBar(
                 primaryBlue = primaryBlue,
                 onHomeClick = onHomeClick,
@@ -197,8 +197,8 @@ private fun FloatingParticles() {
                 y = (0..100).random(),
                 size = (4..12).random()
             )
-        }
-    }
+                }
+            }
 
     particles.forEach { particle ->
         var animatedY by remember { mutableStateOf(particle.y.toFloat()) }
@@ -246,8 +246,8 @@ private fun TripSummaryCard(
     primaryBlue: Color
 ) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
+            modifier = Modifier
+                .fillMaxWidth()
             .shadow(8.dp, RoundedCornerShape(20.dp)),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
@@ -309,17 +309,17 @@ private fun TripDetailRow(
     primaryBlue: Color
 ) {
     Row(
-        modifier = Modifier
+                    modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
+                ) {
+                    Icon(
             imageVector = icon,
             contentDescription = label,
-            tint = primaryBlue,
+                        tint = primaryBlue,
             modifier = Modifier.size(20.dp)
-        )
+                    )
         Spacer(modifier = Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(
@@ -379,7 +379,7 @@ private fun EnhancedDownloadButton(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Bold
             )
-        }
+                }
     }
 
     LaunchedEffect(isPressed) {
@@ -429,7 +429,7 @@ private fun EnhancedBottomBar(
                     .background(Color.Gray.copy(alpha = 0.3f))
             )
 
-            // My Trips Button
+                // My Trips Button
             EnhancedNavButton(
                 icon = Icons.Default.ListAlt,
                 label = "My Trips",
@@ -449,9 +449,9 @@ private fun EnhancedNavButton(
 ) {
     var isPressed by remember { mutableStateOf(false) }
 
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier
             .clickable {
                 isPressed = true
                 onClick()
@@ -480,13 +480,13 @@ private fun EnhancedNavButton(
                     shape = CircleShape
                 ),
             contentAlignment = Alignment.Center
-        ) {
-            Icon(
+                ) {
+                    Icon(
                 imageVector = icon,
                 contentDescription = label,
-                tint = primaryBlue,
+                        tint = primaryBlue,
                 modifier = Modifier.size(24.dp)
-            )
+                    )
         }
 
         Spacer(modifier = Modifier.height(4.dp))
@@ -497,7 +497,7 @@ private fun EnhancedNavButton(
             fontWeight = FontWeight.SemiBold,
             fontSize = 14.sp
         )
-    }
+                }
 
     LaunchedEffect(isPressed) {
         if (isPressed) {
@@ -550,4 +550,4 @@ private fun ActivityImage(title: String) {
             modifier = Modifier.padding(4.dp)
         )
     }
-}
+} 

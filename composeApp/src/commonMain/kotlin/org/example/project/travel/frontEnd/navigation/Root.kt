@@ -124,15 +124,15 @@ fun RootContent(
                         BackHandler(enabled = true) { /* Do nothing: block back */ }
                         TripConfirmationScreen(
                             context = LocalContext.current,
-                            destination = instance.screen.destination,
-                            dates = instance.screen.dates,
-                            flightDetails = instance.screen.flightDetails,
-                            hotelDetails = instance.screen.hotelDetails,
-                            activities = instance.screen.activities,
-                            meals = instance.screen.meals,
-                            costBreakdown = instance.screen.costBreakdown,
-                            notes = instance.screen.notes,
-                            onHomeClick = { component.replaceAll(Screen.HomeScreen) },
+                        destination = instance.screen.destination,
+                        dates = instance.screen.dates,
+                        flightDetails = instance.screen.flightDetails,
+                        hotelDetails = instance.screen.hotelDetails,
+                        activities = instance.screen.activities,
+                        meals = instance.screen.meals,
+                        costBreakdown = instance.screen.costBreakdown,
+                        notes = instance.screen.notes,
+                        onHomeClick = { component.replaceAll(Screen.HomeScreen) },
                             onMyTripsClick = {
                                 val userId = getCurrentFirebaseUserUid()
                                 if (userId != null) {

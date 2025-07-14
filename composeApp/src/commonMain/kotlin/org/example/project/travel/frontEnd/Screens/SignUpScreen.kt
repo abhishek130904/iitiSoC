@@ -100,7 +100,8 @@ fun SignUpScreen(
                     focusedTextColor = Color.White,
                     cursorColor = AppBlue,
                     focusedBorderColor = AppBlue,
-                    unfocusedBorderColor = Color.Gray
+                    unfocusedBorderColor = Color.Gray,
+                    unfocusedTextColor = Color.White
                 )
             )
             OutlinedTextField(
@@ -114,7 +115,8 @@ fun SignUpScreen(
                     focusedTextColor = Color.White,
                     cursorColor = AppBlue,
                     focusedBorderColor = AppBlue,
-                    unfocusedBorderColor = Color.Gray
+                    unfocusedBorderColor = Color.Gray,
+                    unfocusedTextColor = Color.White
                 )
             )
 
@@ -128,7 +130,8 @@ fun SignUpScreen(
                     cursorColor = AppBlue,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.Gray,
-                    focusedTextColor = AppBlue
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 )
             )
 
@@ -145,6 +148,7 @@ fun SignUpScreen(
                     focusedBorderColor = AppBlue,
                     unfocusedBorderColor = Color.Gray,
                     focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White
                 )
             )
 

@@ -158,9 +158,9 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                         contentPadding = PaddingValues(16.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        item {
+                            item {
                             weather?.let {
-                                Card(
+                                    Card(
                                     shape = RoundedCornerShape(15.dp),
                                     elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
                                     colors = CardDefaults.cardColors(containerColor = Color(0xFFe0eafc))
@@ -205,59 +205,59 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                             val images = unsplashPhotos?.results?.map { it.urls.regular to (it.alt_description ?: "") } ?: emptyList()
                             if (images.isNotEmpty()) {
                                 CityImageCarousel(images)
+                                }
                             }
-                        }
 
-                        item {
-                            Text(
-                                text = cityDetails!!.city,
-                                fontSize = 36.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Color(0xFF333333)
-                            )
-                            Text(
-                                text = "${cityDetails!!.state}, ${cityDetails!!.country}",
-                                fontSize = 20.sp,
-                                color = Color.Gray
-                            )
-                        }
+                            item {
+                                Text(
+                                    text = cityDetails!!.city,
+                                    fontSize = 36.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF333333)
+                                )
+                                Text(
+                                    text = "${cityDetails!!.state}, ${cityDetails!!.country}",
+                                    fontSize = 20.sp,
+                                    color = Color.Gray
+                                )
+                            }
 
-                        item {
-                            Card(
-                                elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                                colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB))
-                            ) {
-                                Column(modifier = Modifier.padding(20.dp)) {
-                                    wikipediaData?.query?.pages?.values?.firstOrNull()?.let { page ->
-                                        Text(
-                                            text = "About ${page.title}",
-                                            fontSize = 28.sp,
-                                            fontWeight = FontWeight.ExtraBold,
-                                            color = Color(0xFF222222),
-                                            letterSpacing = 0.5.sp
-                                        )
-                                        Spacer(modifier = Modifier.height(12.dp))
+                            item {
+                                Card(
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+                                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF9FAFB))
+                                ) {
+                                    Column(modifier = Modifier.padding(20.dp)) {
+                                        wikipediaData?.query?.pages?.values?.firstOrNull()?.let { page ->
+                                            Text(
+                                                text = "About ${page.title}",
+                                                fontSize = 28.sp,
+                                                fontWeight = FontWeight.ExtraBold,
+                                                color = Color(0xFF222222),
+                                                letterSpacing = 0.5.sp
+                                            )
+                                            Spacer(modifier = Modifier.height(12.dp))
 
-                                        val aboutText = stripHtmlTags(page.extract)
-                                        val wordCount = aboutText.trim().split("\\s+".toRegex()).size
-                                        val finalText = if (wordCount < 15) {
-                                            "${page.title} is more than just a place on the map—it's a journey into the heart of culture, tradition, and breathtaking landscapes. With every step, you'll uncover hidden stories, timeless architecture, and experiences that will stay with you forever. Whether you seek the thrill of discovery or the peace of scenic beauty, this place offers an unforgettable adventure waiting to unfold."
-                                        } else {
-                                            aboutText
+                                            val aboutText = stripHtmlTags(page.extract)
+                                            val wordCount = aboutText.trim().split("\\s+".toRegex()).size
+                                            val finalText = if (wordCount < 15) {
+                                                "${page.title} is more than just a place on the map—it's a journey into the heart of culture, tradition, and breathtaking landscapes. With every step, you'll uncover hidden stories, timeless architecture, and experiences that will stay with you forever. Whether you seek the thrill of discovery or the peace of scenic beauty, this place offers an unforgettable adventure waiting to unfold."
+                                            } else {
+                                                aboutText
+                                            }
+
+                                            Text(
+                                                text = finalText,
+                                                fontSize = 16.sp,
+                                                lineHeight = 28.sp,
+                                                color = Color(0xFF444444),
+                                                letterSpacing = 0.25.sp,
+                                                textAlign = TextAlign.Start
+                                            )
                                         }
-
-                                        Text(
-                                            text = finalText,
-                                            fontSize = 16.sp,
-                                            lineHeight = 28.sp,
-                                            color = Color(0xFF444444),
-                                            letterSpacing = 0.25.sp,
-                                            textAlign = TextAlign.Start
-                                        )
                                     }
                                 }
                             }
-                        }
 
                         item {
                             Spacer(modifier = Modifier.height(16.dp))
