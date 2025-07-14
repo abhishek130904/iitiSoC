@@ -8,6 +8,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,16 +26,25 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.arkivanov.decompose.ComponentContext
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
+import org.example.project.travel.frontend.model.UnsplashResponse
 import org.example.project.travel.frontend.model.DestinationCity
+import org.example.project.travel.frontend.network.TravelApi
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.background_image
+import org.example.project.travel.frontEnd.network.RecommendationApi
+import org.example.project.travel.frontEnd.model.Recommendations
+import kotlinx.coroutines.launch
+import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
+import io.kamel.image.KamelImage
+import io.kamel.image.asyncPainterResource
 
 interface CitySearchScreenComponent {
     fun onCitySelected(city: DestinationCity)
@@ -45,7 +57,7 @@ class CitySearchScreenComponentImpl(
     private val rootComponent: RootComponent
 ) : CitySearchScreenComponent, ComponentContext by componentContext {
     override fun onCitySelected(city: DestinationCity) {
-        rootComponent.navigateTo(Screen.CityDetails(city.id.toString(), city.city))
+        rootComponent.navigateTo(Screen.CityDetails(cityId = null.toString(), cityName = city.city))
     }
     override fun onBack() {
         rootComponent.pop()
@@ -68,6 +80,7 @@ fun SearchCityScreen(
     component: CitySearchScreenComponent,
     viewModel: CitySearchViewModel<DestinationCity>
 ) {
+    val userId = getCurrentFirebaseUserUid()
     val cities by viewModel.cities.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
     val error by viewModel.error.collectAsState()
@@ -76,6 +89,54 @@ fun SearchCityScreen(
     var stateSearchQuery by remember { mutableStateOf("") }
     var selectedState by remember { mutableStateOf<String?>(null) }
     var showStateDropdown by remember { mutableStateOf(false) }
+
+    // Recommendation state
+    var recommendations by remember { mutableStateOf<Recommendations?>(null) }
+    var recLoading by remember { mutableStateOf(true) }
+    var recError by remember { mutableStateOf<String?>(null) }
+    val coroutineScope = rememberCoroutineScope()
+
+    // Fetch recommendations on first composition if userId is not null
+    LaunchedEffect(userId) {
+        if (userId != null) {
+            recLoading = true
+            recError = null
+            try {
+                val api = RecommendationApi("http://10.249.14.173:5000") // or use BASE_URL
+                val rec = api.getRecommendations(userId)
+                recommendations = rec
+            } catch (e: Exception) {
+                recError = e.message
+            } finally {
+                recLoading = false
+            }
+        } else {
+            recLoading = false
+        }
+    }
+
+    // Add state for city images and loading
+    var cityImages by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var loadingImages by remember { mutableStateOf(true) }
+
+    // Fetch images for next city and similar destinations when recommendations change
+    LaunchedEffect(recommendations) {
+        loadingImages = true
+        val cityNames = buildList {
+            recommendations?.next_city_recommendation?.let { if (it.isNotBlank()) add(it) }
+            recommendations?.similar_destinations?.filter { it.isNotBlank() }?.forEach { add(it) }
+        }
+        val images = mutableMapOf<String, String>()
+        for (city in cityNames) {
+            try {
+                val response = TravelApi.getCityPhotos(city)
+                val url = response.results.firstOrNull()?.urls?.regular
+                if (url != null) images[city] = url
+            } catch (_: Exception) {}
+        }
+        cityImages = images
+        loadingImages = false
+    }
 
     val allStates = listOf(
         "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh", "Goa", "Gujarat", "Haryana",
@@ -130,14 +191,10 @@ fun SearchCityScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
                 .padding(20.dp)
         ) {
-            // Header Section
-            AnimatedHeader()
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            // Search Cards
+            // --- Search Cards at the top ---
             SearchSection(
                 stateSearchQuery = stateSearchQuery,
                 onStateSearchChange = {
@@ -161,18 +218,99 @@ fun SearchCityScreen(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            // --- Famous Places Section (middle) ---
+            FamousPlacesSection(
+                places = famousPlaces,
+                onCitySelected = {
+                    selectedCity = it
+                    component.onCitySelected(it)
+                }
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // --- Personalized Recommendations Section (bottom) ---
+            Text(
+                text = "Personalized Recommendations",
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+            when {
+                userId == null -> {
+                    Text("Please sign in to see personalized recommendations.", color = Color.White.copy(alpha = 0.8f))
+                }
+                recLoading || loadingImages -> {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        CircularProgressIndicator(color = Color.White)
+                    }
+                }
+                recError != null -> {
+                    Text("Error: $recError", color = Color.Red)
+                }
+                recommendations != null -> {
+                    val rec = recommendations!!
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(8.dp)
+                            .background(Color(0xFFF5F5F5), RoundedCornerShape(16.dp))
+                            .padding(16.dp)
+                    ) {
+                        // Next City
+                        if (!rec.next_city_recommendation.isNullOrBlank()) {
+                            Text("Next City", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val city = rec.next_city_recommendation
+                            val imageUrl = cityImages[city]
+                            CityRecommendationCard(city, imageUrl, modifier = Modifier.fillMaxWidth()) {
+                                // Use cityId = null and pass city name for navigation
+                                component.onCitySelected(DestinationCity(
+                                    id = 0L, city = city, state = "", country = "", cityCode = 0L
+                                ))
+                                // Instead, navigate with cityId = null and cityName = city
+                                // rootComponent.navigateTo(Screen.CityDetails(cityId = null, cityName = city))
+                            }
+                        }
+                        // Similar Destinations
+                        if (rec.similar_destinations.isNotEmpty()) {
+                            Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3), modifier = Modifier.padding(top = 16.dp))
+                            Spacer(modifier = Modifier.height(8.dp))
+                            val similarCities = rec.similar_destinations.filter { it.isNotBlank() }
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(max = Dp(similarCities.size * 110f)),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                userScrollEnabled = false // disables grid's own scroll, uses parent scroll
+                            ) {
+                                items(similarCities) { city ->
+                                    val imageUrl = cityImages[city]
+                                    CityRecommendationCard(city, imageUrl) {
+                                        component.onCitySelected(DestinationCity(
+                                            id = 0L, city = city, state = "", country = "", cityCode = 0L
+                                        ))
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            // --- End Recommendations Section ---
+
+            Spacer(modifier = Modifier.height(24.dp))
+
             // Content Section
             Box(modifier = Modifier.weight(1f)) {
                 when {
                     isLoading -> LoadingSection()
                     error != null -> ErrorSection(error = error ?: "Unknown error")
-                    citySearchQuery.isEmpty() -> FamousPlacesSection(
-                        places = famousPlaces,
-                        onCitySelected = {
-                            selectedCity = it
-                            component.onCitySelected(it)
-                        }
-                    )
                     filteredCities.isEmpty() -> EmptyStateSection(query = citySearchQuery)
                     else -> CitiesListSection(
                         cities = filteredCities,
@@ -719,6 +857,56 @@ private fun EnhancedCityItem(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+fun CityRecommendationCard(city: String, imageUrl: String?, modifier: Modifier = Modifier, onClick: () -> Unit) {
+    Card(
+        modifier = modifier
+            .padding(4.dp)
+            .width(150.dp)
+            .height(180.dp)
+            .clickable { onClick() },
+        shape = RoundedCornerShape(18.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        colors = CardDefaults.cardColors(containerColor = Color.White)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            if (imageUrl != null) {
+                KamelImage(
+                    resource = asyncPainterResource(data = imageUrl),
+                    contentDescription = city,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(16.dp)),
+                    contentScale = ContentScale.Crop
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(110.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.LightGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                }
+            }
+            Text(
+                text = city,
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = Color.Black,
+                modifier = Modifier.padding(top = 8.dp)
+            )
         }
     }
 }
