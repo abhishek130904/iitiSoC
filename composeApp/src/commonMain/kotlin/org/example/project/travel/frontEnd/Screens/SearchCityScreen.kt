@@ -19,10 +19,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -45,6 +47,7 @@ import kotlinx.coroutines.launch
 import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
 import io.kamel.image.KamelImage
 import io.kamel.image.asyncPainterResource
+import kotlinx.coroutines.delay
 
 interface CitySearchScreenComponent {
     fun onCitySelected(city: DestinationCity)
@@ -59,9 +62,11 @@ class CitySearchScreenComponentImpl(
     override fun onCitySelected(city: DestinationCity) {
         rootComponent.navigateTo(Screen.CityDetails(cityId = null.toString(), cityName = city.city))
     }
+
     override fun onBack() {
         rootComponent.pop()
     }
+
     override fun onStateSelected(stateName: String) {
         rootComponent.navigateTo(Screen.StateScreen(stateName))
     }
@@ -147,6 +152,7 @@ fun SearchCityScreen(
 
     val filteredStates = if (stateSearchQuery.isEmpty()) allStates
     else allStates.filter { it.contains(stateSearchQuery, ignoreCase = true) }
+
     val filteredCities = if (citySearchQuery.isEmpty()) cities
     else cities.filter { it.city.contains(citySearchQuery, ignoreCase = true) }
 
@@ -175,6 +181,13 @@ fun SearchCityScreen(
         )
     )
 
+    var showContent by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        delay(200)
+        showContent = true
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -183,17 +196,49 @@ fun SearchCityScreen(
                     colors = listOf(
                         Color(0xFF667eea),
                         Color(0xFF764ba2),
-                        Color(0xFFF093FB)
+                        Color(0xFFF093FB),
+                        Color(0xFFF8BBD9)
                     )
                 )
             )
     ) {
+        // Floating background elements
+        FloatingElements()
+
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(24.dp)
         ) {
+            // Quote at the top
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color.White)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Text(
+                            text = "\"The world is a book, and those who do not travel read only one page.\"",
+                            fontSize = 16.sp,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            color = Color(0xFF667eea),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            text = "– Saint Augustine",
+                            fontSize = 13.sp,
+                            color = Color.Gray,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
             // Search bar at the top
             item {
                 SearchSection(
@@ -217,20 +262,22 @@ fun SearchCityScreen(
                     }
                 )
             }
-            // City list just below search bar
-            when {
-                isLoading -> item { LoadingSection() }
-                error != null -> item { ErrorSection(error = error ?: "Unknown error") }
-                filteredCities.isEmpty() -> item { EmptyStateSection(query = citySearchQuery) }
-                else -> items(filteredCities) { city ->
-                    EnhancedCityItem(
-                        city = city,
-                        isSelected = city == selectedCity,
-                        onCitySelected = {
-                            selectedCity = it
-                            component.onCitySelected(it)
-                        }
-                    )
+            // City list just below search bar (only if searching)
+            if (citySearchQuery.isNotEmpty()) {
+                when {
+                    isLoading -> item { LoadingSection() }
+                    error != null -> item { ErrorSection(error = error ?: "Unknown error") }
+                    filteredCities.isEmpty() -> item { EmptyStateSection(query = citySearchQuery) }
+                    else -> items(filteredCities) { city: DestinationCity ->
+                        EnhancedCityItem(
+                            city = city,
+                            isSelected = city == selectedCity,
+                            onCitySelected = {
+                                selectedCity = it
+                                component.onCitySelected(it)
+                            }
+                        )
+                    }
                 }
             }
             // Famous Places Section
@@ -245,65 +292,60 @@ fun SearchCityScreen(
             }
             // Recommendations Section
             item {
-                Text(
-                    text = "Personalized Recommendations",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.White
-                )
-                when {
-                    userId == null -> {
-                        Text("Please sign in to see personalized recommendations.", color = Color.White.copy(alpha = 0.8f))
-                    }
-                    recLoading || loadingImages -> {
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center
-                        ) {
-                            CircularProgressIndicator(color = Color.White)
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = "Personalized Recommendations",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF176FF3)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    when {
+                        userId == null -> {
+                            Text(
+                                "Please sign in to see personalized recommendations.",
+                                color = Color.Gray,
+                                textAlign = TextAlign.Center,
+                                fontSize = 14.sp
+                            )
                         }
-                    }
-                    recError != null -> {
-                        Text("Error: $recError", color = Color.Red)
-                    }
-                    recommendations != null -> {
-                        val rec = recommendations!!
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp)
-                                .background(Color(0xFFF5F5F5), RoundedCornerShape(16.dp))
-                                .padding(16.dp)
-                        ) {
-                            // Next City
+                        recLoading || loadingImages -> {
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.Center
+                            ) {
+                                CircularProgressIndicator(color = Color(0xFF176FF3))
+                            }
+                        }
+                        recError != null -> {
+                            Text("Error: $recError", color = Color.Red)
+                        }
+                        recommendations != null -> {
+                            val rec = recommendations!!
                             if (!rec.next_city_recommendation.isNullOrBlank()) {
-                                Text("Next City", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3))
-                                Spacer(modifier = Modifier.height(8.dp))
+                                Text("Next City for You", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF176FF3))
                                 val city = rec.next_city_recommendation
                                 val imageUrl = cityImages[city]
-                                CityRecommendationCard(city, imageUrl, modifier = Modifier.fillMaxWidth()) {
+                                EnhancedCityRecommendationCard(city, imageUrl) {
                                     component.onCitySelected(DestinationCity(
                                         id = 0L, city = city, state = "", country = "", cityCode = 0L
                                     ))
                                 }
                             }
-                            // Similar Destinations
                             if (rec.similar_destinations.isNotEmpty()) {
-                                Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 18.sp, color = Color(0xFF176FF3), modifier = Modifier.padding(top = 16.dp))
                                 Spacer(modifier = Modifier.height(8.dp))
+                                Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF176FF3))
                                 val similarCities = rec.similar_destinations.filter { it.isNotBlank() }
-                                LazyVerticalGrid(
-                                    columns = GridCells.Fixed(2),
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(max = Dp(similarCities.size * 110f)),
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                                    userScrollEnabled = false
+                                LazyRow(
+                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     items(similarCities) { city ->
                                         val imageUrl = cityImages[city]
-                                        CityRecommendationCard(city, imageUrl) {
+                                        EnhancedCityRecommendationCard(city, imageUrl) {
                                             component.onCitySelected(DestinationCity(
                                                 id = 0L, city = city, state = "", country = "", cityCode = 0L
                                             ))
@@ -320,13 +362,62 @@ fun SearchCityScreen(
 }
 
 @Composable
+private fun FloatingElements() {
+    val travelIcons = listOf("✈️", "🏨", "🗺️", "🎒", "📸", "🌍", "🚗", "⛰️", "🏖️", "🎡")
+
+    travelIcons.forEachIndexed { index, icon ->
+        var animatedY by remember { mutableStateOf((0..100).random().toFloat()) }
+        var animatedX by remember { mutableStateOf((0..100).random().toFloat()) }
+
+        LaunchedEffect(Unit) {
+            while (true) {
+                animate(
+                    initialValue = animatedY,
+                    targetValue = if (animatedY > 50) 0f else 100f,
+                    animationSpec = tween(
+                        durationMillis = (8000..15000).random(),
+                        easing = LinearEasing
+                    )
+                ) { value, _ ->
+                    animatedY = value
+                }
+                animate(
+                    initialValue = animatedX,
+                    targetValue = if (animatedX > 50) 0f else 100f,
+                    animationSpec = tween(
+                        durationMillis = (6000..12000).random(),
+                        easing = LinearEasing
+                    )
+                ) { value, _ ->
+                    animatedX = value
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .wrapContentSize(Alignment.TopStart)
+                .offset(
+                    x = (animatedX * 3.5).dp,
+                    y = (animatedY * 8).dp
+                )
+        ) {
+            Text(
+                text = icon,
+                fontSize = (18..24).random().sp,
+                modifier = Modifier.alpha((0.15f..0.35f).start)
+            )
+        }
+    }
+}
+
+@Composable
 private fun AnimatedHeader() {
     var visible by remember { mutableStateOf(false) }
-
     LaunchedEffect(Unit) {
         visible = true
     }
-
     AnimatedVisibility(
         visible = visible,
         enter = slideInVertically(
@@ -369,13 +460,52 @@ private fun SearchSection(
     Column(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        // Enhanced header
+        Card(
+            modifier = Modifier
+                .fillMaxWidth()
+                .shadow(12.dp, RoundedCornerShape(20.dp)),
+            shape = RoundedCornerShape(20.dp),
+            colors = CardDefaults.cardColors(
+                containerColor = Color.White.copy(alpha = 0.95f)
+            )
+        ) {
+            Column(
+                modifier = Modifier.padding(20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "✈️",
+                        fontSize = 28.sp
+                    )
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Text(
+                        text = "Discover India",
+                        fontSize = 24.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF2D3748)
+                    )
+                }
+                Text(
+                    text = "Find your perfect destination",
+                    fontSize = 14.sp,
+                    color = Color.Gray,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
+        }
+
         // State Search
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(8.dp, RoundedCornerShape(16.dp)),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .shadow(10.dp, RoundedCornerShape(18.dp)),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f))
         ) {
             Column {
                 OutlinedTextField(
@@ -392,17 +522,20 @@ private fun SearchSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
-                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                    colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = Color(0xFF667eea),
                         unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
                         cursorColor = Color(0xFF667eea)
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(14.dp)
                 )
 
                 // State Dropdown
                 AnimatedVisibility(
-                    visible = showStateDropdown && filteredStates.isNotEmpty()
+                    visible = showStateDropdown && filteredStates.isNotEmpty(),
+                    enter = expandVertically(
+                        animationSpec = tween(300, easing = FastOutSlowInEasing)
+                    ) + fadeIn(animationSpec = tween(300))
                 ) {
                     LazyColumn(
                         modifier = Modifier
@@ -424,9 +557,9 @@ private fun SearchSection(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .shadow(8.dp, RoundedCornerShape(16.dp)),
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+                .shadow(10.dp, RoundedCornerShape(18.dp)),
+            shape = RoundedCornerShape(18.dp),
+            colors = CardDefaults.cardColors(containerColor = Color.White.copy(alpha = 0.95f))
         ) {
             OutlinedTextField(
                 value = citySearchQuery,
@@ -442,12 +575,12 @@ private fun SearchSection(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
-                colors = TextFieldDefaults.outlinedTextFieldColors(
+                colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color(0xFF764ba2),
                     unfocusedBorderColor = Color.Gray.copy(alpha = 0.3f),
                     cursorColor = Color(0xFF764ba2)
                 ),
-                shape = RoundedCornerShape(12.dp)
+                shape = RoundedCornerShape(14.dp)
             )
         }
     }
@@ -466,20 +599,31 @@ private fun StateItem(
         colors = CardDefaults.cardColors(
             containerColor = Color(0xFFF8F9FA)
         ),
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(12.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(12.dp),
+                .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                Icons.Default.LocationCity,
-                contentDescription = null,
-                tint = Color(0xFF667eea),
-                modifier = Modifier.size(20.dp)
-            )
+            Box(
+                modifier = Modifier
+                    .size(32.dp)
+                    .background(
+                        Color(0xFF667eea),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.LocationCity,
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(16.dp)
+                )
+            }
             Spacer(modifier = Modifier.width(12.dp))
             Text(
                 text = state,
@@ -487,29 +631,49 @@ private fun StateItem(
                 fontWeight = FontWeight.Medium,
                 color = Color.Black
             )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                Icons.Default.ArrowForward,
+                contentDescription = "Select",
+                tint = Color(0xFF667eea),
+                modifier = Modifier.size(20.dp)
+            )
         }
     }
 }
 
 @Composable
 private fun LoadingSection() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(12.dp, RoundedCornerShape(20.dp)),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        )
     ) {
         Column(
+            modifier = Modifier.padding(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             CircularProgressIndicator(
-                color = Color.White,
+                color = Color(0xFF667eea),
                 strokeWidth = 3.dp,
                 modifier = Modifier.size(48.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
-                "Searching amazing places...",
-                color = Color.White,
-                fontSize = 16.sp
+                "🔍 Searching amazing places...",
+                color = Color(0xFF2D3748),
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                "Discovering your next adventure",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
@@ -520,27 +684,33 @@ private fun ErrorSection(error: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .shadow(12.dp, RoundedCornerShape(20.dp)),
         colors = CardDefaults.cardColors(
-            containerColor = Color.Red.copy(alpha = 0.1f)
+            containerColor = Color.White.copy(alpha = 0.95f)
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Icon(
-                Icons.Default.Error,
-                contentDescription = "Error",
-                tint = Color.Red,
-                modifier = Modifier.size(48.dp)
+            Text(
+                text = "😔",
+                fontSize = 48.sp
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
+                text = "Oops! Something went wrong",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D3748),
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
                 text = error,
                 color = Color.Red,
-                fontSize = 16.sp,
+                fontSize = 14.sp,
                 textAlign = TextAlign.Center
             )
         }
@@ -552,34 +722,41 @@ private fun EmptyStateSection(query: String) {
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(16.dp),
+            .shadow(12.dp, RoundedCornerShape(20.dp)),
         colors = CardDefaults.cardColors(
-            containerColor = Color.White.copy(alpha = 0.9f)
+            containerColor = Color.White.copy(alpha = 0.95f)
         ),
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
-            modifier = Modifier.padding(32.dp),
+            modifier = Modifier.padding(40.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
                 text = "🔍",
-                fontSize = 48.sp
+                fontSize = 64.sp
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             Text(
-                text = "No cities found for \"$query\"",
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign = TextAlign.Center,
-                color = Color.Gray
+                text = "No cities found",
+                fontSize = 24.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF2D3748)
             )
+            if (query.isNotEmpty()) {
+                Text(
+                    text = "for \"$query\"",
+                    fontSize = 18.sp,
+                    color = Color.Gray,
+                    modifier = Modifier.padding(top = 4.dp)
+                )
+            }
             Text(
                 text = "Try searching with a different name",
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
                 color = Color.Gray,
-                modifier = Modifier.padding(top = 8.dp)
+                modifier = Modifier.padding(top = 12.dp)
             )
         }
     }
@@ -590,45 +767,44 @@ private fun FamousPlacesSection(
     places: List<FamousPlace>,
     onCitySelected: (DestinationCity) -> Unit
 ) {
-    Column {
-        Card(
-            modifier = Modifier.fillMaxWidth(),
-            colors = CardDefaults.cardColors(
-                containerColor = Color.White.copy(alpha = 0.95f)
-            ),
-            shape = RoundedCornerShape(16.dp)
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .shadow(16.dp, RoundedCornerShape(24.dp)),
+        colors = CardDefaults.cardColors(
+            containerColor = Color.White.copy(alpha = 0.95f)
+        ),
+        shape = RoundedCornerShape(24.dp)
+    ) {
+        Column(
+            modifier = Modifier.padding(24.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(20.dp)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.padding(bottom = 20.dp)
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "🌟",
-                        fontSize = 24.sp
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        "Famous Destinations",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF2D3748)
-                    )
-                }
+                Text(
+                    text = "🌟",
+                    fontSize = 28.sp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    "Famous Destinations",
+                    fontSize = 22.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF2D3748)
+                )
+            }
 
-                Spacer(modifier = Modifier.height(16.dp))
-
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
-                ) {
-                    items(places) { place ->
-                        EnhancedFamousPlaceItem(
-                            place = place,
-                            onCitySelected = { onCitySelected(place.destination) }
-                        )
-                    }
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                contentPadding = PaddingValues(horizontal = 4.dp)
+            ) {
+                items(places) { place ->
+                    EnhancedFamousPlaceItem(
+                        place = place,
+                        onCitySelected = { onCitySelected(place.destination) }
+                    )
                 }
             }
         }
@@ -640,12 +816,23 @@ private fun EnhancedFamousPlaceItem(
     place: FamousPlace,
     onCitySelected: () -> Unit
 ) {
+    var isPressed by remember { mutableStateOf(false) }
+
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        animationSpec = tween(150)
+    )
+
     Card(
         modifier = Modifier
             .width(180.dp)
             .height(240.dp)
-            .shadow(8.dp, RoundedCornerShape(20.dp))
-            .clickable { onCitySelected() },
+            .shadow(12.dp, RoundedCornerShape(20.dp))
+            .graphicsLayer(scaleX = animatedScale, scaleY = animatedScale)
+            .clickable {
+                isPressed = true
+                onCitySelected()
+            },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
@@ -666,7 +853,8 @@ private fun EnhancedFamousPlaceItem(
                         Brush.verticalGradient(
                             colors = listOf(
                                 Color.Transparent,
-                                Color.Black.copy(alpha = 0.7f)
+                                Color.Black.copy(alpha = 0.3f),
+                                Color.Black.copy(alpha = 0.8f)
                             ),
                             startY = 100f
                         )
@@ -721,6 +909,13 @@ private fun EnhancedFamousPlaceItem(
             }
         }
     }
+
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
+            delay(150)
+            isPressed = false
+        }
+    }
 }
 
 @Composable
@@ -750,26 +945,32 @@ private fun EnhancedCityItem(
     onCitySelected: (DestinationCity) -> Unit
 ) {
     val animatedElevation by animateDpAsState(
-        targetValue = if (isSelected) 12.dp else 4.dp,
+        targetValue = if (isSelected) 16.dp else 8.dp,
+        animationSpec = tween(300)
+    )
+
+    val animatedScale by animateFloatAsState(
+        targetValue = if (isSelected) 1.02f else 1f,
         animationSpec = tween(300)
     )
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .shadow(animatedElevation, RoundedCornerShape(16.dp))
+            .shadow(animatedElevation, RoundedCornerShape(20.dp))
+            .graphicsLayer(scaleX = animatedScale, scaleY = animatedScale)
             .border(
                 width = if (isSelected) 2.dp else 0.dp,
                 color = if (isSelected) Color(0xFF667eea) else Color.Transparent,
-                shape = RoundedCornerShape(16.dp)
+                shape = RoundedCornerShape(20.dp)
             )
             .clickable { onCitySelected(city) },
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(
             containerColor = if (isSelected)
                 Color(0xFF667eea).copy(alpha = 0.1f)
             else
-                Color.White
+                Color.White.copy(alpha = 0.95f)
         )
     ) {
         Row(
@@ -855,51 +1056,115 @@ private fun EnhancedCityItem(
 }
 
 @Composable
-fun CityRecommendationCard(city: String, imageUrl: String?, modifier: Modifier = Modifier, onClick: () -> Unit) {
+fun EnhancedCityRecommendationCard(city: String, imageUrl: String?, modifier: Modifier = Modifier, onClick: () -> Unit) {
     Card(
         modifier = modifier
             .padding(4.dp)
             .width(150.dp)
             .height(180.dp)
             .clickable { onClick() },
-        shape = RoundedCornerShape(18.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         colors = CardDefaults.cardColors(containerColor = Color.White)
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+        Box(modifier = Modifier.fillMaxSize()) {
             if (imageUrl != null) {
                 KamelImage(
                     resource = asyncPainterResource(data = imageUrl),
                     contentDescription = city,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(16.dp)),
+                        .fillMaxSize()
+                        .clip(RoundedCornerShape(20.dp)),
                     contentScale = ContentScale.Crop
                 )
+
+                // Enhanced gradient overlay
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color.Black.copy(alpha = 0.3f),
+                                    Color.Black.copy(alpha = 0.8f)
+                                ),
+                                startY = 80f
+                            )
+                        )
+                )
+
+                // City name with better styling
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(16.dp)
+                        .background(
+                            Color.Black.copy(alpha = 0.3f),
+                            RoundedCornerShape(8.dp)
+                        )
+                        .padding(horizontal = 8.dp, vertical = 4.dp)
+                ) {
+                    Text(
+                        text = city,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = Color.White
+                    )
+                }
             } else {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(110.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.LightGray),
+                        .fillMaxSize()
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    Color(0xFF667eea).copy(alpha = 0.2f),
+                                    Color(0xFF764ba2).copy(alpha = 0.2f)
+                                )
+                            )
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(32.dp),
+                            color = Color(0xFF667eea),
+                            strokeWidth = 3.dp
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        Text(
+                            text = city,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp,
+                            color = Color(0xFF2D3748),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 }
             }
-            Text(
-                text = city,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
-                color = Color.Black,
-                modifier = Modifier.padding(top = 8.dp)
-            )
+
+            // Floating action indicator
+            Box(
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp)
+                    .size(24.dp)
+                    .background(
+                        Color.White.copy(alpha = 0.9f),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Default.ArrowForward,
+                    contentDescription = "Go",
+                    tint = Color(0xFF667eea),
+                    modifier = Modifier.size(16.dp)
+                )
+            }
         }
     }
 }
