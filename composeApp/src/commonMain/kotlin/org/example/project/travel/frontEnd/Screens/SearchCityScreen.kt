@@ -292,63 +292,89 @@ fun SearchCityScreen(
             }
             // Recommendations Section
             item {
-                Column(
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(8.dp)
+                        .shadow(12.dp, RoundedCornerShape(20.dp)),
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = Color(0xFFF8F9FA))
                 ) {
-                    Text(
-                        text = "Personalized Recommendations",
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF176FF3)
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    when {
-                        userId == null -> {
-                            Text(
-                                "Please sign in to see personalized recommendations.",
-                                color = Color.Gray,
-                                textAlign = TextAlign.Center,
-                                fontSize = 14.sp
-                            )
-                        }
-                        recLoading || loadingImages -> {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                CircularProgressIndicator(color = Color(0xFF176FF3))
+                    Column(modifier = Modifier.padding(20.dp)) {
+                        // Header
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text("🎯", fontSize = 28.sp)
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                Text(
+                                    "Personalized Recommendations",
+                                    fontSize = 20.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color(0xFF176FF3)
+                                )
+                                Text(
+                                    "Curated just for you",
+                                    fontSize = 14.sp,
+                                    color = Color.Gray
+                                )
                             }
                         }
-                        recError != null -> {
-                            Text("Error: $recError", color = Color.Red)
-                        }
-                        recommendations != null -> {
-                            val rec = recommendations!!
-                            if (!rec.next_city_recommendation.isNullOrBlank()) {
-                                Text("Next City for You", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF176FF3))
-                                val city = rec.next_city_recommendation
-                                val imageUrl = cityImages[city]
-                                EnhancedCityRecommendationCard(city, imageUrl) {
-                                    component.onCitySelected(DestinationCity(
-                                        id = 0L, city = city, state = "", country = "", cityCode = 0L
-                                    ))
+                        Spacer(Modifier.height(16.dp))
+                        when {
+                            userId == null -> {
+                                Text(
+                                    "Please sign in to see personalized recommendations.",
+                                    color = Color.Gray,
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 14.sp
+                                )
+                            }
+                            recLoading || loadingImages -> {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    CircularProgressIndicator(color = Color(0xFF176FF3))
                                 }
                             }
-                            if (rec.similar_destinations.isNotEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF176FF3))
-                                val similarCities = rec.similar_destinations.filter { it.isNotBlank() }
-                                LazyRow(
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    items(similarCities) { city ->
-                                        val imageUrl = cityImages[city]
-                                        EnhancedCityRecommendationCard(city, imageUrl) {
-                                            component.onCitySelected(DestinationCity(
-                                                id = 0L, city = city, state = "", country = "", cityCode = 0L
-                                            ))
+                            recError != null -> {
+                                Text("Plan a trip to see personalized recommendations", color = Color.Black)
+                            }
+                            recommendations != null -> {
+                                val rec = recommendations!!
+                                if (!rec.next_city_recommendation.isNullOrBlank()) {
+                                    Text("Next City Recommended for you", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF176FF3))
+                                    Spacer(Modifier.height(8.dp))
+                                    EnhancedCityRecommendationCard(
+                                        city = rec.next_city_recommendation,
+                                        imageUrl = cityImages[rec.next_city_recommendation],
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(180.dp)
+                                            .clip(RoundedCornerShape(16.dp))
+                                    ) {
+                                        component.onCitySelected(DestinationCity(
+                                            id = 0L, city = rec.next_city_recommendation, state = "", country = "", cityCode = 0L
+                                        ))
+                                    }
+                                }
+                                if (rec.similar_destinations.isNotEmpty()) {
+                                    Spacer(Modifier.height(16.dp))
+                                    Text("Similar Destinations", fontWeight = FontWeight.Bold, fontSize = 16.sp, color = Color(0xFF176FF3))
+                                    Spacer(Modifier.height(8.dp))
+                                    LazyRow(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                                        items(rec.similar_destinations.filter { it.isNotBlank() }) { city ->
+                                            EnhancedCityRecommendationCard(
+                                                city = city,
+                                                imageUrl = cityImages[city],
+                                                modifier = Modifier
+                                                    .width(140.dp)
+                                                    .height(160.dp)
+                                                    .clip(RoundedCornerShape(14.dp))
+                                            ) {
+                                                component.onCitySelected(DestinationCity(
+                                                    id = 0L, city = city, state = "", country = "", cityCode = 0L
+                                                ))
+                                            }
                                         }
                                     }
                                 }

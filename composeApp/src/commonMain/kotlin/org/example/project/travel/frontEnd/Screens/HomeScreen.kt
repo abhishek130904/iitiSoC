@@ -27,10 +27,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import org.example.project.travel.frontend.auth.UserProfile
-import org.example.project.travel.frontend.auth.fetchUserProfile
-import org.example.project.travel.frontEnd.network.RecommendationApi
-import org.example.project.travel.frontEnd.model.Recommendations
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -53,11 +49,9 @@ data class TravelCategory(
 @OptIn(ExperimentalResourceApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
-    userName: String, 
-    onNavigateToCitySearch: () -> Unit, 
+    onNavigateToCitySearch: () -> Unit,
     onProfileClick: () -> Unit,
-    onCategoryClick: (TravelCategory) -> Unit = {}, // New callback for category clicks
-    userId: String = "7wdsSa9aGkVIlBkJsHVmtrbty3p1" // TODO: Replace with actual userId from auth
+    onCategoryClick: (TravelCategory) -> Unit = {}
 ) {
     val blue = Color(0xFF176FF3)
     val white = Color.White

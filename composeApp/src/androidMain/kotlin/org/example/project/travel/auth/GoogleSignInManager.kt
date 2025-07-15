@@ -37,9 +37,14 @@ actual class GoogleSignInManager(private val context: ComponentActivity) {
                 println("Google account: $account")
                 callback?.invoke(Result.success(account.idToken!!))
             } catch (e: ApiException) {
-                println("ApiException: ${e.statusCode}, ${e.message}")
+                println("ApiException:  ${e.statusCode}, ${e.message}")
                 e.printStackTrace()
-                callback?.invoke(Result.failure(e))
+                if (e.statusCode == 12501) { // SIGN_IN_CANCELLED
+                    // User cancelled sign-in (pressed back), handle gracefully
+                    callback?.invoke(Result.failure(Exception("Sign-in cancelled by user")))
+                } else {
+                    callback?.invoke(Result.failure(e))
+                }
             } finally {
                 callback = null
             }

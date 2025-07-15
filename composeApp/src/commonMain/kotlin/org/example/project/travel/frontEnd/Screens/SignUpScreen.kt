@@ -213,32 +213,44 @@ fun SignUpScreen(
                         coroutineScope.launch {
                             isSigningUpWithGoogle = true
                             googleSignInManager.signOut()
-                            googleSignInManager.signInWithGoogle().onSuccess {
-                                errorMessage = null
-                                val uid = getCurrentFirebaseUserUid()
-                                val user = FirebaseAuth.getInstance().currentUser
-                                val email = user?.email
-                                // Firestore check for existing user by email (Google sign-up) BEFORE showing dialog
-                                val userExists = try {
-                                    if (email != null) authService.doesUserExist(email.trim().lowercase()) else false
-                                } catch (e: Exception) {
-                                    errorMessage = "Error checking user existence: ${e.message}"
-                                    isSigningUpWithGoogle = false
-                                    return@launch
+                            try {
+                                googleSignInManager.signInWithGoogle().onSuccess {
+                                    errorMessage = null
+                                    val uid = getCurrentFirebaseUserUid()
+                                    val user = FirebaseAuth.getInstance().currentUser
+                                    val email = user?.email
+                                    // Firestore check for existing user by email (Google sign-up) BEFORE showing dialog
+                                    val userExists = try {
+                                        if (email != null) authService.doesUserExist(email.trim().lowercase()) else false
+                                    } catch (e: Exception) {
+                                        errorMessage = "Error checking user existence: ${e.message}"
+                                        isSigningUpWithGoogle = false
+                                        return@launch
+                                    }
+                                    if (userExists) {
+                                        errorMessage = "Account already exists, please sign in"
+                                        isSigningUpWithGoogle = false
+                                        return@launch
+                                    }
+                                    if (uid != null) {
+                                        googleUid = uid
+                                        showGoogleProfileDialog = true
+                                    } else {
+                                        errorMessage = "Google sign-in failed: No user found."
+                                    }
+                                }.onFailure { e ->
+                                    errorMessage = if (e.message == "Sign-in cancelled by user") {
+                                        "Google sign-in cancelled."
+                                    } else {
+                                        "Google Sign-Up Failed: ${e.message}"
+                                    }
                                 }
-                                if (userExists) {
-                                    errorMessage = "Account already exists, please sign in"
-                                    isSigningUpWithGoogle = false
-                                    return@launch
-                                }
-                                if (uid != null) {
-                                    googleUid = uid
-                                    showGoogleProfileDialog = true
+                            } catch (e: Exception) {
+                                errorMessage = if (e.message == "Sign-in cancelled by user") {
+                                    "Google sign-in cancelled."
                                 } else {
-                                    errorMessage = "Google sign-in failed: No user found."
+                                    "Google Sign-Up Failed: ${e.message}"
                                 }
-                            }.onFailure { e ->
-                                errorMessage = "Google Sign-Up Failed: ${e.message}"
                             }
                             isSigningUpWithGoogle = false
                         }

@@ -28,7 +28,6 @@ import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 import org.example.project.travel.frontEnd.Screens.OfflineScreen
 import org.example.project.travel.frontEnd.network.NetworkMonitor
 import ui.HomeScreen
-import ui.TravelCategory
 import androidx.compose.ui.platform.LocalContext
 import org.example.project.travel.frontEnd.Screens.StateScreen as StateScreenComposable
 import org.example.project.travel.frontEnd.Screens.CategoryDetailsScreen
@@ -87,7 +86,7 @@ fun RootContent(
                         onSignUpSuccess = { component.navigateTo(Screen.HomeScreen) }
                     )
                     is RootComponent.Child.HomeScreen -> HomeScreen(
-                        userName = "TRAVELER", // Pass userName from component
+                        // Pass userName from component
                         onNavigateToCitySearch = { component.navigateTo(Screen.CitySearchScreen) },
                         onProfileClick = { component.navigateTo(Screen.ProfileScreen) },
                         onCategoryClick = { category ->

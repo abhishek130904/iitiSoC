@@ -181,12 +181,23 @@ fun SignInScreen(
                             coroutineScope.launch {
                                 isSigningInWithGoogle = true
                                 googleSignInManager.signOut()
-                                googleSignInManager.signInWithGoogle().onSuccess {
-                                    message = "Google Sign In Successful!"
-                                    onLoginSuccess()
-                                }.onFailure { exception ->
-                                    message = "Error: ${exception.message}"
-
+                                try {
+                                    googleSignInManager.signInWithGoogle().onSuccess {
+                                        message = "Google Sign In Successful!"
+                                        onLoginSuccess()
+                                    }.onFailure { exception ->
+                                        message = if (exception.message == "Sign-in cancelled by user") {
+                                            "Google sign-in cancelled."
+                                        } else {
+                                            "Error: ${exception.message}"
+                                        }
+                                    }
+                                } catch (e: Exception) {
+                                    message = if (e.message == "Sign-in cancelled by user") {
+                                        "Google sign-in cancelled."
+                                    } else {
+                                        "Error: ${e.message}"
+                                    }
                                 }
                                 isSigningInWithGoogle = false
                             }
