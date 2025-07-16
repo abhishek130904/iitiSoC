@@ -48,6 +48,7 @@ import io.ktor.client.statement.*
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlin.math.roundToInt
+import com.airbnb.lottie.compose.*
 
 interface CityDetailsScreenComponent {
     val viewModel: CityDetailsViewModel
@@ -120,15 +121,18 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
             )
         },
         bottomBar = {
-            Button(
-                onClick = { component.onContinue() },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp),
-                shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF176FF3))
-            ){
-                Text("Continue", color = Color.White, fontSize = 18.sp)
+            // Show Continue button only when not loading
+            if (!isLoading) {
+                Button(
+                    onClick = { component.onContinue() },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF176FF3))
+                ){
+                    Text("Continue", color = Color.White, fontSize = 18.sp)
+                }
             }
         }
     ) { paddingValues ->
@@ -138,8 +142,29 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                 .padding(paddingValues)
                 .background(Color(0xFFF0F4F8))
         ) {
+            // --- Lottie Loading Animation Overlay ---
+            if (isLoading) {
+                val composition by rememberLottieComposition(LottieCompositionSpec.Asset("loc.json"))
+                val progress by animateLottieCompositionAsState(
+                    composition = composition,
+                    iterations = LottieConstants.IterateForever
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.White.copy(alpha = 0.8f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    LottieAnimation(
+                        composition = composition,
+                        progress = { progress },
+                        modifier = Modifier.size(220.dp)
+                    )
+                }
+            }
+            // --- End Lottie Loading Animation ---
             when {
-                isLoading -> CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+                isLoading -> {}
                 error != null -> {
                     Column(
                         modifier = Modifier.align(Alignment.Center),

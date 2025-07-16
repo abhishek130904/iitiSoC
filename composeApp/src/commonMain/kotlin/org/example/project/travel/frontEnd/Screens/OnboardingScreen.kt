@@ -23,7 +23,7 @@ fun OnboardingScreen(
     onNavigateToSignIn: () -> Unit
 ) {
     val pages = listOf(
-        OnboardingPage("Find your perfect place to stay!", "Explore stays and destinations with ease.", "welcome.json"),
+        OnboardingPage("Find your perfect place to stay!", "Explore stays and destinations with ease.", "welcome2.json"),
         OnboardingPage("Book appointment in easiest way!", "Smooth planning and booking at your fingertips.", "travel2.json"),
         OnboardingPage("Let's discover & enjoy the world!", "Get ready for your next unforgettable journey.", "loading.json")
     )
