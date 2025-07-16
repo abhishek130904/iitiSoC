@@ -1,6 +1,5 @@
 package org.example.project.travel
 
-import TravelCategoryScreen
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
