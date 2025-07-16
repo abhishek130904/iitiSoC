@@ -75,7 +75,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE8F5E9),
             description = "Explore majestic mountains and scenic trails",
             popularDestinations = listOf(
-                "Manali", "Shimla", "Mussoorie", "Naini Tal", "Darjeeling", "Dehradun", "Tawang", "Kasauli", "Lansdowne", "Munnar"
+                "Manali", "Shimla", "Mussoorie", "Naini Tal", "Darjiling", "Dehra Dun", "Leh", "Kargil", "Munnar"
             )
         ),
         TravelCategory(
@@ -84,7 +84,7 @@ fun HomeScreen(
             bgColor = Color(0xFFFFF3E0),
             description = "Escape to cool hill stations and mountain retreats",
             popularDestinations = listOf(
-                "Ooty", "Munnar", "Shimla", "Darjeeling", "Mussoorie", "Kodaikanal", "Mahabaleshwar", "Panchgani", "Mount Abu", "Coonoor"
+                "Ooty", "Munnar", "Shimla", "Darjiling", "Mussoorie", "Kodaikanal", "lonavla", "Dhramsala", "pithoragarhr"
             )
         ),
         TravelCategory(
@@ -93,7 +93,7 @@ fun HomeScreen(
             bgColor = Color(0xFFEDE7F6),
             description = "Immerse in nature and wildlife sanctuaries",
             popularDestinations = listOf(
-                "Ramnagar", "Bandipur", "Kanhan", "Pench", "Kaziranga", "Chandrapur", "Sasan Gir", "Gosaba"
+                "Ramnagar", "Bandipur", "Kanhan", "nahan", "pauri", "Chandrapura",  "Gosaba"
             )
         ),
         TravelCategory(
@@ -102,7 +102,7 @@ fun HomeScreen(
             bgColor = Color(0xFFFFEBEE),
             description = "Journey through ancient monuments and heritage sites",
             popularDestinations = listOf(
-                "Hampi", "Aurangabad", "Fatehpur Sikri", "Khajuraho", "Jaipur", "Agra", "Delhi", "Mysore", "Gwalior", "Bidar"
+                "pune", "Aurangabad", "Fatehpur Sikri", "Khajuraho", "Jaipur", "Agra", "Delhi", "Mysuru", "Gwalior", "Bidar"
             )
         ),
         TravelCategory(
@@ -111,7 +111,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE1F5FE),
             description = "Experience wildlife adventures and safaris",
             popularDestinations = listOf(
-                "Sawai Madhopur", "Umaria", "Bokakhat", "Ramnagar", "Sasan Gir", "Mandla", "Seoni", "Chandrapur"
+                "dandeli", "Umaria", "Bokakhat", "Ramnagar",  "Mandla", "Seoni", "Chandrapura"
             )
         ),
         TravelCategory(
@@ -129,7 +129,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE8EAF6),
             description = "Thrilling adventures and outdoor activities",
             popularDestinations = listOf(
-                "Rishikesh", "Manali", "Auli", "Bir", "Munnar", "Dandeli", "Spiti", "Gulmarg", "Ranikhet", "Leh"
+                "Rishikesh", "Manali", "goa", "jaisalmer", "Munnar", "Dandeli", "Gulmarg", "Ranikhet", "Leh"
             )
         )
     )
