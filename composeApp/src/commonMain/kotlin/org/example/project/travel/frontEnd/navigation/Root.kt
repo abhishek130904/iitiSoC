@@ -26,13 +26,13 @@ import androidx.compose.runtime.collectAsState
 import org.example.project.travel.frontEnd.AppSettings
 import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 import org.example.project.travel.frontEnd.Screens.OfflineScreen
-import org.example.project.travel.frontEnd.network.NetworkMonitor
 import ui.HomeScreen
 import androidx.compose.ui.platform.LocalContext
 import org.example.project.travel.frontEnd.Screens.StateScreen as StateScreenComposable
 import org.example.project.travel.frontEnd.Screens.CategoryDetailsScreen
 import org.example.project.travel.frontEnd.Screens.MyTripsScreen
-import androidx.activity.compose.BackHandler
+import moe.tlaster.precompose.navigation.BackHandler
+import org.example.project.travel.frontEnd.network.ui.NetworkMonitor
 
 @Composable
 fun RootContent(

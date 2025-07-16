@@ -1,7 +1,7 @@
 package org.example.project.travel.frontEnd
 
 import com.russhwolf.settings.Settings
-import org.example.project.travel.frontEnd.ui.getSettings
+import org.example.project.travel.frontend.ui.getSettings
 
 object AppSettings {
     private val settings: Settings = getSettings()

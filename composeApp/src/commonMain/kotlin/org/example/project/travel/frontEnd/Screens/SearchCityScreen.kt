@@ -164,7 +164,7 @@ fun SearchCityScreen(
 
     val famousPlaces = listOf(
         FamousPlace(
-            DestinationCity(id = 800, city = "Panjim-Goa", state = "Goa", country = "India", cityCode = 1260607),
+            DestinationCity(id = 800, city = "Panjim", state = "Goa", country = "India", cityCode = 1260607),
             "drawable/beach.jpg", "Beautiful beaches & nightlife", 4.5f
         ),
         FamousPlace(

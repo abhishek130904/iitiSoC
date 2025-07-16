@@ -1,4 +1,4 @@
-package org.example.project.travel.frontEnd.ui
+package org.example.project.travel.frontend.ui
 
 import android.content.Context
 import com.russhwolf.settings.Settings

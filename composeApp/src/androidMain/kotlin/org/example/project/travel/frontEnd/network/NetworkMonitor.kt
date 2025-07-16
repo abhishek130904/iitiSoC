@@ -1,4 +1,4 @@
-package org.example.project.travel.frontEnd.network
+package org.example.project.travel.frontEnd.network.ui
 
 import android.content.BroadcastReceiver
 import android.content.Context

@@ -1,5 +1,6 @@
 package org.example.project.travel
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -38,7 +39,19 @@ import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import androidx.lifecycle.viewmodel.compose.viewModel
-import org.example.project.travel.frontEnd.ui.initSettings
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
+import android.app.AlarmManager
+import org.example.project.travel.R
+import org.example.project.travel.frontend.ui.initSettings
+import android.util.Log
 
 
 //class MainActivity : ComponentActivity() {
@@ -72,6 +85,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        // Request notification permission for Android 13+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            requestPermissions(arrayOf(android.Manifest.permission.POST_NOTIFICATIONS), 0)
+        }
+
         // Initialize Firebase before creating AuthService
         FirebaseApp.initializeApp(this)
 
@@ -92,15 +110,79 @@ class MainActivity : ComponentActivity() {
         )
 
         // Initialize network monitor with application context
-        org.example.project.travel.frontEnd.network.NetworkMonitor.init(applicationContext)
+        org.example.project.travel.frontEnd.network.ui.NetworkMonitor.init(applicationContext)
 
-        
+        // --- Local Notification Channel Setup ---
+        createNotificationChannel()
+        // Example: Show notification immediately (uncomment to test)
+        // showTripNotification("Trip Reminder", "Your trip to Goa starts tomorrow!")
+        // Example: Schedule notification for 10 seconds later (uncomment to test)
+        // scheduleTripNotification("Trip Reminder", "Your trip to Goa starts tomorrow!", System.currentTimeMillis() + 10000)
+        // --- End Notification Setup ---
+
         setContent {
             RootContent(
                 component = root,
                 authService = authService,
                 googleSignInManager = googleSignInManager
             )
+        }
+    }
+
+    private fun createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                "trip_channel_id",
+                "Trip Notifications",
+                NotificationManager.IMPORTANCE_DEFAULT
+            )
+            val manager = getSystemService(NotificationManager::class.java)
+            manager.createNotificationChannel(channel)
+        }
+    }
+
+    @SuppressLint("MissingPermission", "NotificationPermission")
+    fun showTripNotification(title: String, message: String) {
+        val builder = NotificationCompat.Builder(this, "trip_channel_id")
+            .setSmallIcon(R.drawable.ic_launcher_foreground) // Restore to app icon
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+
+        with(NotificationManagerCompat.from(this)) {
+            notify(System.currentTimeMillis().toInt(), builder.build())
+        }
+    }
+
+    fun scheduleTripNotification(title: String, message: String, triggerAtMillis: Long) {
+        val intent = Intent(this, TripReminderReceiver::class.java).apply {
+            putExtra("title", title)
+            putExtra("message", message)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            this,
+            0,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        val alarmManager = getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        alarmManager.setExact(AlarmManager.RTC_WAKEUP, triggerAtMillis, pendingIntent)
+    }
+}
+
+// --- BroadcastReceiver for scheduled notifications ---
+class TripReminderReceiver : BroadcastReceiver() {
+    @SuppressLint("MissingPermission", "NotificationPermission")
+    override fun onReceive(context: Context, intent: Intent) {
+        val title = intent.getStringExtra("title") ?: "Trip Reminder"
+        val message = intent.getStringExtra("message") ?: "You have a trip event!"
+        val builder = NotificationCompat.Builder(context, "trip_channel_id")
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+        with(NotificationManagerCompat.from(context)) {
+            notify(System.currentTimeMillis().toInt(), builder.build())
         }
     }
 }

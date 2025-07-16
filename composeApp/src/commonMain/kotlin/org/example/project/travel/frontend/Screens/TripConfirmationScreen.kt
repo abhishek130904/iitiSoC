@@ -32,6 +32,7 @@ import org.example.project.travel.frontEnd.pdf.saveTripSummaryPdfFile
 import kotlinx.coroutines.delay
 import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
 import org.example.project.travel.frontend.navigation.Screen
+import org.example.project.travel.frontEnd.notification.showTestNotification
 
 @OptIn(ExperimentalResourceApi::class)
 @Composable
@@ -54,6 +55,12 @@ fun TripConfirmationScreen(
 
     var showContent by remember { mutableStateOf(false) }
     var showBottomBar by remember { mutableStateOf(false) }
+
+    // --- Trip Confirmed Notification ---
+    LaunchedEffect(Unit) {
+        showTestNotification(context)
+    }
+    // --- End Notification ---
 
     LaunchedEffect(Unit) {
         delay(500)

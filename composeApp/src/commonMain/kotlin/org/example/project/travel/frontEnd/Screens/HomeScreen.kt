@@ -31,6 +31,8 @@ import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.*
+import androidx.compose.ui.platform.LocalContext
+import org.example.project.travel.frontEnd.notification.showTestNotification
 
 interface HomeScreenComponent {
     val userName: String // Fetched from authService or user profile
@@ -57,6 +59,7 @@ fun HomeScreen(
     val white = Color.White
     var userProfile by remember { mutableStateOf<UserProfile?>(null) }
     var isVisible by remember { mutableStateOf(false) }
+    val context = LocalContext.current
 
     // Enhanced categories with more data
     val categories = listOf(
@@ -84,7 +87,7 @@ fun HomeScreen(
             bgColor = Color(0xFFFFF3E0),
             description = "Escape to cool hill stations and mountain retreats",
             popularDestinations = listOf(
-                "Ooty", "Munnar", "Shimla", "Darjiling", "Mussoorie", "Kodaikanal", "lonavla", "Dhramsala", "pithoragarhr"
+                "Ooty", "Munnar", "Shimla", "Darjiling", "Mussoorie", "Kodaikanal", "Lonavla", "Dhramsala", "Pithoragarhr"
             )
         ),
         TravelCategory(
@@ -93,7 +96,7 @@ fun HomeScreen(
             bgColor = Color(0xFFEDE7F6),
             description = "Immerse in nature and wildlife sanctuaries",
             popularDestinations = listOf(
-                "Ramnagar", "Bandipur", "Kanhan", "nahan", "pauri", "Chandrapura",  "Gosaba"
+                "Ramnagar", "Bandipur", "Kanhan", "Nahan", "Pauri", "Chandrapura", "Gosaba"
             )
         ),
         TravelCategory(
@@ -102,7 +105,7 @@ fun HomeScreen(
             bgColor = Color(0xFFFFEBEE),
             description = "Journey through ancient monuments and heritage sites",
             popularDestinations = listOf(
-                "pune", "Aurangabad", "Fatehpur Sikri", "Khajuraho", "Jaipur", "Agra", "Delhi", "Mysuru", "Gwalior", "Bidar"
+                "Pune", "Aurangabad", "Fatehpur Sikri", "Khajuraho", "Jaipur", "Agra", "Delhi", "Mysuru", "Gwalior", "Bidar"
             )
         ),
         TravelCategory(
@@ -111,7 +114,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE1F5FE),
             description = "Experience wildlife adventures and safaris",
             popularDestinations = listOf(
-                "dandeli", "Umaria", "Bokakhat", "Ramnagar",  "Mandla", "Seoni", "Chandrapura"
+                "Dandeli", "Umaria", "Bokakhat", "Ramnagar",  "Mandla", "Seoni", "Chandrapura"
             )
         ),
         TravelCategory(
@@ -129,7 +132,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE8EAF6),
             description = "Thrilling adventures and outdoor activities",
             popularDestinations = listOf(
-                "Rishikesh", "Manali", "goa", "jaisalmer", "Munnar", "Dandeli", "Gulmarg", "Ranikhet", "Leh"
+                "Rishikesh", "Manali", "Jaisalmer", "Munnar", "Dandeli", "Gulmarg", "Ranikhet", "Leh"
             )
         )
     )
@@ -265,8 +268,6 @@ fun HomeScreen(
             )
 
             InfiniteCarousel(items = imageResourcesWithLabels, listState = listState)
-
-            Spacer(modifier = Modifier.height(8.dp))
         }
     }
 }
