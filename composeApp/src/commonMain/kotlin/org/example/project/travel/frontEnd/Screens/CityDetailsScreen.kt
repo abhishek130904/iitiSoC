@@ -122,7 +122,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
         },
         bottomBar = {
             // Show Continue button only when not loading
-            if (!isLoading) {
+//            if (!isLoading) {
                 Button(
                     onClick = { component.onContinue() },
                     modifier = Modifier
@@ -133,7 +133,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                 ){
                     Text("Continue", color = Color.White, fontSize = 18.sp)
                 }
-            }
+//            }
         }
     ) { paddingValues ->
         Box(

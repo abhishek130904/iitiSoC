@@ -67,4 +67,10 @@ sealed class Screen {
 
     @Serializable
     data class MyTrips(val userId: String) : Screen()
+
+    @Serializable
+    data object TrainSearch : Screen()
+
+    @Serializable
+    data class TrainDetails(val fromStation: String, val toStation: String) : Screen()
 }

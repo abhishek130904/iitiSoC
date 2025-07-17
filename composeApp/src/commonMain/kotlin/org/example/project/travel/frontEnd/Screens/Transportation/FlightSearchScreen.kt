@@ -28,6 +28,8 @@ import com.example.travel.viewmodel.FlightViewModel
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
 import com.airbnb.lottie.compose.*
+import org.example.project.travel.frontEnd.utils.formatDate
+import org.example.project.travel.frontEnd.utils.isLeapYear
 
 interface FlightSearchScreenComponent {
 //    val cityViewModel: CityViewModel
@@ -162,8 +164,8 @@ fun FlightSearchScreen(
                     println("FlightSearchScreen: Bus tab clicked")
                 }
                 TabItem("Trains", Icons.Default.Train, selectedTab) {
-                    showComingSoonDialog = true
-                    println("FlightSearchScreen: Trains tab clicked")
+                    component.navigateTo(org.example.project.travel.frontend.navigation.Screen.TrainSearch)
+                    println("FlightSearchScreen: Trains tab clicked, navigating to TrainSearch screen")
                 }
                 TabItem("Private Cab", Icons.Default.DirectionsCar, selectedTab) {
                     showComingSoonDialog = true
@@ -1006,7 +1008,7 @@ private fun CityOption(
 }
 
 @Composable
-private fun TabItem(
+fun TabItem(
     title: String,
     icon: ImageVector,
     selectedTab: String,
@@ -1037,18 +1039,6 @@ private fun TabItem(
             modifier = Modifier.width(72.dp)
         )
     }
-}
-
-private fun isLeapYear(year: Int): Boolean {
-    return year % 4 == 0 && (year % 100 != 0 || year % 400 == 0)
-}
-
-private fun formatDate(date: LocalDate): String {
-    val dayOfWeek = date.dayOfWeek.name.take(3)
-    val day = date.dayOfMonth.toString().padStart(2, '0')
-    val month = date.month.name.take(3)
-    val year = date.year.toString().takeLast(2)
-    return "$dayOfWeek, $day $month $year"
 }
 
 @Composable

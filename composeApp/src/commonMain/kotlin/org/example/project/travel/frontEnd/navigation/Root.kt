@@ -33,6 +33,8 @@ import org.example.project.travel.frontEnd.Screens.CategoryDetailsScreen
 import org.example.project.travel.frontEnd.Screens.MyTripsScreen
 import moe.tlaster.precompose.navigation.BackHandler
 import org.example.project.travel.frontEnd.network.ui.NetworkMonitor
+import org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreen
+import org.example.project.travel.frontend.Screens.Transportation.TrainDetailsScreen
 
 @Composable
 fun RootContent(
@@ -165,6 +167,11 @@ fun RootContent(
                     is RootComponent.Child.MyTrips -> MyTripsScreen(
                         userId = instance.screen.userId,
                         onHomeClick = { component.replaceAll(Screen.HomeScreen) }
+                    )
+                    is RootComponent.Child.TrainSearch -> org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreen(instance.component)
+                    is RootComponent.Child.TrainDetails -> TrainDetailsScreen(
+                        fromStation = instance.fromStation,
+                        toStation = instance.toStation
                     )
                 }
             }

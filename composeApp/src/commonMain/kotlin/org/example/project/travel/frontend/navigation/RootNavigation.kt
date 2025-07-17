@@ -48,6 +48,8 @@ interface RootComponent {
         data class StateScreen(val screen: org.example.project.travel.frontend.navigation.Screen.StateScreen) : Child()
         data class CategoryDetails(val screen: org.example.project.travel.frontend.navigation.Screen.CategoryDetails) : Child()
         data class MyTrips(val screen: org.example.project.travel.frontend.navigation.Screen.MyTrips) : Child()
+        data class TrainSearch(val component: org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreenComponent) : Child()
+        data class TrainDetails(val fromStation: String, val toStation: String, val component: Any) : Child()
     }
 }
 
@@ -166,6 +168,15 @@ class RootComponentImpl(
             }
             is Screen.MyTrips -> {
                 RootComponent.Child.MyTrips(screen)
+            }
+            Screen.TrainSearch -> {
+                val component = org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreenComponentImpl(componentContext, this)
+                println("RootComponentImpl: Created TrainSearchScreenComponent")
+                RootComponent.Child.TrainSearch(component)
+            }
+            is Screen.TrainDetails -> {
+                println("RootComponentImpl: Created TrainDetails placeholder component")
+                RootComponent.Child.TrainDetails(screen.fromStation, screen.toStation, Any())
             }
         }
     }
