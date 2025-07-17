@@ -1,48 +1,28 @@
 package com.example.travel.model
 
-import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import java.time.LocalTime
+
 
 @Entity
 @Table(name = "train")
 data class TrainEntity(
     @Id
-    @Column(name = "train_no")
-    val trainNo: String,
-
-    @Column(name = "train_name")
-    val trainName: String,
-
-    @Column(name = "stop_number")
-    val stopNumber: Int,
-
-    @Column(name = "station_code")
-    val stationCode: String,
-
-    @Column(name = "station_name")
-    val stationName: String,
-
-    @Column(name = "arrival_time")
-    val arrivalTime: LocalTime?,
-
-    @Column(name = "departure_time")
-    val departureTime: LocalTime?,
-
-    @Column(name = "distance")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long = 0,
+    val train_no: String,
+    val train_name: String,
+    val stop_number: Int,
+    val station_code: String,
+    val station_name: String,
+    val arrival_time: String,
+    val departure_time: String,
     val distance: Int,
-
-    @Column(name = "source_station_code")
-    val sourceStationCode: String,
-
-    @Column(name = "source_station_name")
-    val sourceStationName: String,
-
-    @Column(name = "destination_station_code")
-    val destinationStationCode: String,
-
-    @Column(name = "destination_station_name")
-    val destinationStationName: String
+    val source_station_code: String,
+    val source_station_name: String,
+    val destination_station_code: String,
+    val destination_station_name: String
 ) 

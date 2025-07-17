@@ -4,50 +4,36 @@ import com.example.travel.model.TrainEntity
 import com.example.travel.repository.TrainRepository
 import org.springframework.stereotype.Service
 
-// DTO for train with distance
-data class TrainWithDistanceDTO(
-    val trainNo: String,
-    val trainName: String,
-    val fromStation: String,
-    val toStation: String,
-    val distance: Int,
-    val stops: List<TrainEntity>
-)
-
 @Service
 class TrainService(private val trainRepository: TrainRepository) {
-    fun getAllTrains(): List<TrainEntity> = trainRepository.findAll()
-
-    fun getTrainsByNumber(trainNo: String): List<TrainEntity> = trainRepository.findByTrainNo(trainNo)
-
-    fun getDistanceBetweenStations(trainNo: String, from: String, to: String): Int? {
-        val stops = trainRepository.findByTrainNo(trainNo)
-        val fromStop = stops.find { it.stationCode == from }
-        val toStop = stops.find { it.stationCode == to }
-        return if (fromStop != null && toStop != null) {
-            kotlin.math.abs(toStop.distance - fromStop.distance)
-        } else null
-    }
-
-    // Use only findAll() and do all filtering/grouping in memory
-    fun getTrainsWithDistanceBetweenStations(from: String, to: String): List<TrainWithDistanceDTO> {
-        val allStops = trainRepository.findAll()
-        return allStops
-            .groupBy { it.trainNo }
-            .mapNotNull { (trainNo, stopsList) ->
-                val sortedStops = stopsList.sortedBy { it.stopNumber }
-                val fromStop = sortedStops.find { it.stationCode == from }
-                val toStop = sortedStops.find { it.stationCode == to }
-                if (fromStop != null && toStop != null && fromStop.stopNumber < toStop.stopNumber) {
-                    TrainWithDistanceDTO(
-                        trainNo = trainNo,
-                        trainName = fromStop.trainName,
-                        fromStation = from,
-                        toStation = to,
-                        distance = kotlin.math.abs(toStop.distance - fromStop.distance),
-                        stops = sortedStops
-                    )
-                } else null
-            }
+    fun findTrainsBetweenStations(fromStation: String, toStation: String): List<TrainSearchResultDTO> {
+        return trainRepository.findTrainPairsBetweenStations(fromStation, toStation).map { pair ->
+            val from = pair[0]
+            val to = pair[1]
+            TrainSearchResultDTO(
+                train_no = from.train_no,
+                train_name = from.train_name,
+                from_station_code = from.station_code,
+                from_station_name = from.station_name,
+                to_station_code = to.station_code,
+                to_station_name = to.station_name,
+                from_departure_time = from.departure_time,
+                to_arrival_time = to.arrival_time,
+                distance = to.distance - from.distance
+            )
+        }
     }
 }
+
+// DTO for train search result with distance
+data class TrainSearchResultDTO(
+    val train_no: String,
+    val train_name: String,
+    val from_station_code: String,
+    val from_station_name: String,
+    val to_station_code: String,
+    val to_station_name: String,
+    val from_departure_time: String,
+    val to_arrival_time: String,
+    val distance: Int
+) 
