@@ -50,6 +50,12 @@ interface RootComponent {
         data class MyTrips(val screen: org.example.project.travel.frontend.navigation.Screen.MyTrips) : Child()
         data class TrainSearch(val component: org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreenComponent) : Child()
         data class TrainDetails(val fromStation: String, val toStation: String, val component: Any) : Child()
+        data class HotelForTrain(
+            val selectedTrain: com.example.travel.network.TrainSearchResultDTO,
+            val selectedCoach: String,
+            val fare: Int,
+            val component: Any
+        ) : Child()
     }
 }
 
@@ -144,15 +150,32 @@ class RootComponentImpl(
                 RootComponent.Child.CitySearchScreen(CitySearchScreenComponentImpl(componentContext, this))
             }
             is Screen.TripItinerary -> {
-                val component = org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl(
-                    componentContext,
-                    this,
-                    screen.selectedFlight,
-                    screen.selectedHotel,
-                    screen.selectedCityName,
-                    networkService = TripService(authService)
-                )
-                RootComponent.Child.TripItinerary(component)
+                val component = when {
+                    screen.selectedFlight != null -> {
+                        org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl(
+                            componentContext,
+                            this,
+                            selectedFlight = screen.selectedFlight,
+                            selectedHotel = screen.selectedHotel,
+                            selectedCityName = screen.selectedCityName,
+                            networkService = TripService(authService)
+                        )
+                    }
+                    screen.selectedTrain != null -> {
+                        org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl(
+                            componentContext,
+                            this,
+                            selectedTrain = screen.selectedTrain,
+                            selectedHotel = screen.selectedHotel,
+                            selectedCityName = screen.selectedCityName,
+                            selectedCoach = screen.selectedCoach,
+                            fare = screen.fare,
+                            networkService = TripService(authService)
+                        )
+                    }
+                    else -> null
+                }
+                RootComponent.Child.TripItinerary(component!!)
             }
             Screen.ProfileScreen -> {
                 RootComponent.Child.ProfileScreen(Any())
@@ -177,6 +200,15 @@ class RootComponentImpl(
             is Screen.TrainDetails -> {
                 println("RootComponentImpl: Created TrainDetails placeholder component")
                 RootComponent.Child.TrainDetails(screen.fromStation, screen.toStation, Any())
+            }
+            is Screen.HotelForTrain -> {
+                println("RootComponentImpl: Created HotelForTrain placeholder component")
+                RootComponent.Child.HotelForTrain(
+                    selectedTrain = screen.selectedTrain,
+                    selectedCoach = screen.selectedCoach,
+                    fare = screen.fare,
+                    component = Any()
+                )
             }
         }
     }

@@ -41,6 +41,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.example.project.travel.frontEnd.model.TripActivity
+import com.example.travel.network.TrainSearchResultDTO
+import kotlinx.datetime.Clock
 
 // Data classes remain unchanged
 data class ItineraryDay(
@@ -70,9 +72,12 @@ private val primaryBlue = Color(23, 111, 243)
 private val white = Color.White
 
 interface TripItineraryScreenComponent : ComponentContext {
-    val selectedFlight: FlightDTO
+    val selectedFlight: FlightDTO?
+    val selectedTrain: TrainSearchResultDTO?
     val selectedHotel: AccommodationDTO
     val selectedCityName: String
+    val selectedCoach: String?
+    val fare: Int?
     fun onNavigateToTransport()
     fun onNavigateToAccommodation()
     fun onNavigateToActivities()
@@ -84,9 +89,12 @@ interface TripItineraryScreenComponent : ComponentContext {
 class TripItineraryScreenComponentImpl(
     componentContext: ComponentContext,
     private val rootComponent: RootComponent,
-    override val selectedFlight: FlightDTO,
+    override val selectedFlight: FlightDTO? = null,
+    override val selectedTrain: TrainSearchResultDTO? = null,
     override val selectedHotel: AccommodationDTO,
     override val selectedCityName: String,
+    override val selectedCoach: String? = null,
+    override val fare: Int? = null,
     private val networkService: TripService // Make sure this is injected
 ) : TripItineraryScreenComponent, ComponentContext by componentContext {
     private val coroutineScope = CoroutineScope(Dispatchers.Main)
@@ -98,7 +106,8 @@ class TripItineraryScreenComponentImpl(
 
     suspend fun saveTripAndProceed(itinerary: List<ItineraryDay>, tripNotes: String) {
         val day = itinerary.first()
-        val flightCost = selectedFlight.price
+        val isTrainTrip = selectedTrain != null
+        val flightCost = if (isTrainTrip) (fare?.toDouble() ?: 0.0) else selectedFlight?.price ?: 0.0
         val hotelCost = selectedHotel.pricePerNight
         val activitiesCost = day.activities.sumOf { it.cost }
         val mealsCost = day.meals.sumOf { it.cost }
@@ -112,40 +121,67 @@ class TripItineraryScreenComponentImpl(
             transportation = transportationCost
         )
 
-        val tripData = org.example.project.travel.frontEnd.model.TripRequestDTO(
-            flightId = selectedFlight.airlineCode + "-" + selectedFlight.flightNumber,
-            cityName = selectedCityName,
-            hotelName = selectedHotel.name,
-            activities = day.activities,
-            meals = day.meals,
-            notes = tripNotes,
-            costBreakdown = costBreakdown
-        )
+        val tripData = if (isTrainTrip) {
+            val train = selectedTrain!!
+            org.example.project.travel.frontEnd.model.TripRequestDTO(
+                flightId = "Train: ${train.train_no} - ${train.train_name}",
+                cityName = selectedCityName,
+                hotelName = selectedHotel.name,
+                activities = day.activities,
+                meals = day.meals,
+                notes = tripNotes,
+                costBreakdown = costBreakdown
+            )
+        } else {
+            org.example.project.travel.frontEnd.model.TripRequestDTO(
+                flightId = selectedFlight?.airlineCode + "-" + selectedFlight?.flightNumber,
+                cityName = selectedCityName,
+                hotelName = selectedHotel.name,
+                activities = day.activities,
+                meals = day.meals,
+                notes = tripNotes,
+                costBreakdown = costBreakdown
+            )
+        }
         try {
             val tripId = networkService.saveTrip(tripData)
             // Gather trip details for confirmation screen
-            val formattedDeparture = formatInstant(selectedFlight.departure.time)
-            val formattedArrival = formatInstant(selectedFlight.arrival.time)
+            val formattedDeparture = formatInstant(
+                selectedFlight?.departure?.time
+                    ?: selectedTrain?.from_departure_time?.let { parseTrainTimeToInstant(it) }
+                    ?: Clock.System.now()
+            )
+            val formattedArrival = formatInstant(
+                selectedFlight?.arrival?.time
+                    ?: selectedTrain?.to_arrival_time?.let { parseTrainTimeToInstant(it) }
+                    ?: Clock.System.now()
+            )
             val formattedCheckIn = day.accommodation.checkIn // Already a string
             val formattedCheckOut = day.accommodation.checkOut // Already a string
 
             val destination = selectedCityName
             val dates = "${formattedDeparture.first} to ${formattedCheckOut}" // Example
-            val flightDetails = "${selectedFlight.airlineCode} ${selectedFlight.flightNumber}, Departs: ${formattedDeparture.first}, ${formattedDeparture.second}"
+            val transportDetails = if (isTrainTrip) {
+                val train = selectedTrain!!
+                "Train: ${train.train_no} - ${train.train_name}, ${train.from_station_name} to ${train.to_station_name}"
+            } else {
+                val flight = selectedFlight!!
+                "${flight.airlineCode} ${flight.flightNumber}"
+            }
             val hotelDetails = "${selectedHotel.name}, ${selectedHotel.pricePerNight} per night"
             val activities = day.activities.joinToString { it.name }
             val meals = day.meals.joinToString { it.type }
-            val costBreakdown = "Flight: ₹${flightCost}, Hotel: ₹${hotelCost}/night, Activities: ₹${activitiesCost}, Meals: ₹${mealsCost}, Transport: ₹${transportationCost}"
+            val costBreakdownStr = "Flight/Train: ₹${flightCost}, Hotel: ₹${hotelCost}/night, Activities: ₹${activitiesCost}, Meals: ₹${mealsCost}, Transport: ₹${transportationCost}"
             val notesForSummary = tripNotes
             rootComponent.navigateTo(
                 Screen.TripConfirmation(
                     destination = destination,
                     dates = dates,
-                    flightDetails = flightDetails,
+                    flightDetails = transportDetails,
                     hotelDetails = hotelDetails,
                     activities = activities,
                     meals = meals,
-                    costBreakdown = costBreakdown,
+                    costBreakdown = costBreakdownStr,
                     notes = notesForSummary
                 )
             )
@@ -171,8 +207,11 @@ fun TripItineraryScreen(
     var saveError by remember { mutableStateOf<String?>(null) }
 
     // Sample data - Replace with ViewModel in production
-    val itinerary = remember(component.selectedFlight, component.selectedHotel) {
-        val arrivalTime = component.selectedFlight.arrival.time
+    val itinerary = remember(component.selectedFlight, component.selectedHotel, component.selectedTrain) {
+        val isTrainTrip = component.selectedTrain != null
+        val arrivalTime = component.selectedFlight?.arrival?.time
+            ?: component.selectedTrain?.to_arrival_time?.let { parseTrainTimeToInstant(it) }
+            ?: Clock.System.now()
         val checkInTime = arrivalTime.plus(1, DateTimeUnit.HOUR)
 
         // Calculate checkout time: 11:00 AM on the day after check-in, in the system's local timezone
@@ -187,12 +226,28 @@ fun TripItineraryScreen(
             minute = 0
         ).toInstant(tz)
 
-
-        val formattedDeparture = formatInstant(component.selectedFlight.departure.time)
+        val formattedDeparture = formatInstant(
+            component.selectedFlight?.departure?.time
+                ?: component.selectedTrain?.from_departure_time?.let { parseTrainTimeToInstant(it) }
+                ?: Clock.System.now()
+        )
         val formattedArrival = formatInstant(arrivalTime)
         val formattedCheckIn = formatInstant(checkInTime)
         val formattedCheckOut = formatInstant(checkOutTime)
 
+        val transportType = if (isTrainTrip) "Train" else "Flight"
+        val transportDetails = if (isTrainTrip) {
+            val train = component.selectedTrain!!
+            "Train: ${train.train_no} - ${train.train_name}\n" +
+            "From: ${train.from_station_name} (${train.from_station_code})\n" +
+            "To: ${train.to_station_name} (${train.to_station_code})" +
+            (if (component.selectedCoach != null) "\nCoach: ${component.selectedCoach}" else "") 
+//            (if (component.fare != null) "\nFare: ₹${component.fare}" else "")
+        } else {
+            val flight = component.selectedFlight!!
+            "Flight: ${flight.airlineCode} ${flight.flightNumber}"
+        }
+        val transportCost = if (isTrainTrip) (component.fare?.toDouble() ?: 0.0) else component.selectedFlight?.price ?: 0.0
 
         listOf(
             ItineraryDay(
@@ -205,10 +260,10 @@ fun TripItineraryScreen(
                     TripActivity("19:00", "Dinner", "Enjoy a nice dinner.", 0.0)
                 ),
                 transport = Transport(
-                    type = "Flight",
-                    details = "${component.selectedFlight.airlineCode} ${component.selectedFlight.flightNumber}",
+                    type = transportType,
+                    details = transportDetails,
                     time = "Departs: ${formattedDeparture.first}, ${formattedDeparture.second}\nArrives: ${formattedArrival.first}, ${formattedArrival.second}",
-                    cost = component.selectedFlight.price
+                    cost = transportCost
                 ),
                 accommodation = Accommodation(
                     name = component.selectedHotel.name,
@@ -338,6 +393,17 @@ private fun formatInstant(instant: Instant): Pair<String, String> {
     val date = "${localDateTime.dayOfMonth} ${localDateTime.month.name.take(3)} ${localDateTime.year}"
     val time = "%02d:%02d".format(localDateTime.hour, localDateTime.minute)
     return Pair(date, time)
+}
+
+fun parseTrainTimeToInstant(time: String): Instant {
+    // Assumes time is in format "HH:mm:ss" and today as date
+    val today = kotlinx.datetime.Clock.System.now().toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
+    val dateTimeStr = "${today}T${time}"
+    return try {
+        kotlinx.datetime.LocalDateTime.parse(dateTimeStr).toInstant(kotlinx.datetime.TimeZone.currentSystemDefault())
+    } catch (e: Exception) {
+        Clock.System.now()
+    }
 }
 
 @Composable

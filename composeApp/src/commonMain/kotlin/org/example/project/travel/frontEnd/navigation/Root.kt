@@ -1,6 +1,9 @@
 package org.example.project.travel.frontend.navigation
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.fade
@@ -23,6 +26,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import org.example.project.travel.frontEnd.AppSettings
 import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 import org.example.project.travel.frontEnd.Screens.OfflineScreen
@@ -35,6 +40,13 @@ import moe.tlaster.precompose.navigation.BackHandler
 import org.example.project.travel.frontEnd.network.ui.NetworkMonitor
 import org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreen
 import org.example.project.travel.frontend.Screens.Transportation.TrainDetailsScreen
+import org.example.project.travel.frontend.Screens.Transportation.TrainDetailsScreenComponentImpl
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.sp
+import org.example.project.travel.frontend.Screens.HotelForTrainScreen
 
 @Composable
 fun RootContent(
@@ -66,6 +78,7 @@ fun RootContent(
         if (!isOnline) {
             OfflineScreen(onRetry = { NetworkMonitor.start() })
         } else {
+            var selectedCityForTrain by remember { mutableStateOf<String?>(null) }
             Children(
                 stack = component.childStack,
                 animation = stackAnimation(fade()) // Using fade animation for simplicity
@@ -171,7 +184,27 @@ fun RootContent(
                     is RootComponent.Child.TrainSearch -> org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreen(instance.component)
                     is RootComponent.Child.TrainDetails -> TrainDetailsScreen(
                         fromStation = instance.fromStation,
-                        toStation = instance.toStation
+                        toStation = instance.toStation,
+                        component = TrainDetailsScreenComponentImpl(component)
+                    )
+                    is RootComponent.Child.HotelForTrain -> HotelForTrainScreen(
+                        selectedTrain = instance.selectedTrain,
+                        selectedCoach = instance.selectedCoach,
+                        fare = instance.fare,
+                        onNavigateBack = { component.pop() },
+                        onNavigateToNext = { selectedHotel ->
+                            val cityName = selectedCityForTrain ?: instance.selectedTrain.to_station_name
+                            component.navigateTo(
+                                Screen.TripItinerary(
+                                    selectedTrain = instance.selectedTrain,
+                                    selectedHotel = selectedHotel,
+                                    selectedCityName = cityName,
+                                    selectedCoach = instance.selectedCoach,
+                                    fare = instance.fare
+                                )
+                            )
+                        },
+                        onCitySelected = { city -> selectedCityForTrain = city.city }
                     )
                 }
             }

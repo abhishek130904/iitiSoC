@@ -2,6 +2,8 @@ package org.example.project.travel.frontend.navigation
 
 import com.example.travel.model.dto.FlightDTO
 import kotlinx.serialization.Serializable
+import com.example.travel.network.TrainSearchResultDTO
+import com.example.travel.model.dto.AccommodationDTO
 
 @Serializable
 sealed class Screen {
@@ -32,9 +34,12 @@ sealed class Screen {
 
     @Serializable
     data class TripItinerary(
-        val selectedFlight: FlightDTO,
-        val selectedHotel: com.example.travel.model.dto.AccommodationDTO,
-        val selectedCityName: String
+        val selectedFlight: FlightDTO? = null,
+        val selectedTrain: TrainSearchResultDTO? = null,
+        val selectedHotel: AccommodationDTO,
+        val selectedCityName: String,
+        val selectedCoach: String? = null,
+        val fare: Int? = null
     ) : Screen()
 
     @Serializable
@@ -73,4 +78,7 @@ sealed class Screen {
 
     @Serializable
     data class TrainDetails(val fromStation: String, val toStation: String) : Screen()
+
+    @Serializable
+    data class HotelForTrain(val selectedTrain: TrainSearchResultDTO, val selectedCoach: String, val fare: Int) : Screen()
 }

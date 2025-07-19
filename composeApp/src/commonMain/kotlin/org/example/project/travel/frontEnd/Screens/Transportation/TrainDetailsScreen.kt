@@ -1,6 +1,7 @@
 package org.example.project.travel.frontend.Screens.Transportation
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -21,6 +22,8 @@ import kotlinx.coroutines.launch
 import androidx.compose.runtime.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 fun calculateFare(distance: Int, coach: String): Int {
     val (base, perKm) = when (coach) {
@@ -35,17 +38,15 @@ fun calculateFare(distance: Int, coach: String): Int {
 }
 
 @Composable
-fun FareCalculator(distance: Int) {
-    var selectedCoach by remember { mutableStateOf("SL") }
+fun FareCalculator(distance: Int, selectedCoach: String, onCoachSelected: (String) -> Unit) {
     val coachTypes = listOf("SL", "3E", "3A", "2A", "1A")
     val fare = calculateFare(distance, selectedCoach)
-
     Column(modifier = Modifier.padding(top = 8.dp)) {
         Text("Fare Calculator", fontWeight = FontWeight.Bold, color = Color(0xFF176FF3))
         Row(modifier = Modifier.padding(vertical = 4.dp)) {
             coachTypes.forEach { coach ->
                 Button(
-                    onClick = { selectedCoach = coach },
+                    onClick = { onCoachSelected(coach) },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = if (selectedCoach == coach) Color(0xFF176FF3) else Color.LightGray
                     ),
@@ -60,15 +61,31 @@ fun FareCalculator(distance: Int) {
     }
 }
 
+interface TrainDetailsScreenComponent {
+    fun navigateToHotel(selectedTrain: TrainSearchResultDTO, selectedCoach: String, fare: Int)
+}
+
+class TrainDetailsScreenComponentImpl(
+    private val rootComponent: org.example.project.travel.frontend.navigation.RootComponent
+) : TrainDetailsScreenComponent {
+    override fun navigateToHotel(selectedTrain: TrainSearchResultDTO, selectedCoach: String, fare: Int) {
+        rootComponent.navigateTo(org.example.project.travel.frontend.navigation.Screen.HotelForTrain(selectedTrain, selectedCoach, fare))
+    }
+}
+
 @Composable
 fun TrainDetailsScreen(
     fromStation: String,
-    toStation: String
+    toStation: String,
+    component: TrainDetailsScreenComponent? = null // Optional for preview
 ) {
     var trains by remember { mutableStateOf<List<TrainSearchResultDTO>>(emptyList()) }
     var isLoading by remember { mutableStateOf(true) }
     var error by remember { mutableStateOf<String?>(null) }
     val coroutineScope = rememberCoroutineScope()
+    var selectedTrain by remember { mutableStateOf<TrainSearchResultDTO?>(null) }
+    var selectedCoach by remember { mutableStateOf("SL") }
+    val fare = selectedTrain?.let { calculateFare(it.distance, selectedCoach) } ?: 0
 
     LaunchedEffect(fromStation, toStation) {
         isLoading = true
@@ -116,13 +133,19 @@ fun TrainDetailsScreen(
             else -> {
                 LazyColumn(
                     verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
+                    modifier = Modifier.weight(1f)
                 ) {
                     items(trains) { train ->
                         Card(
                             colors = CardDefaults.cardColors(containerColor = Color(0xFFF0F4F8)),
                             elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { selectedTrain = train }
+                                .then(
+                                    if (selectedTrain == train) Modifier.border(2.dp, Color(0xFF176FF3), RoundedCornerShape(12.dp))
+                                    else Modifier
+                                )
                         ) {
                             Column(modifier = Modifier.padding(16.dp)) {
                                 Text(
@@ -137,9 +160,28 @@ fun TrainDetailsScreen(
                                 Text("Departure: ${train.from_departure_time}    Arrival: ${train.to_arrival_time}", color = Color.Gray, fontSize = 14.sp)
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text("Distance: ${train.distance} km", color = Color.Gray, fontSize = 13.sp)
-                                FareCalculator(train.distance)
+                                FareCalculator(
+                                    distance = train.distance,
+                                    selectedCoach = selectedCoach,
+                                    onCoachSelected = { selectedCoach = it }
+                                )
                             }
                         }
+                    }
+                }
+                if (selectedTrain != null && component != null) {
+                    Button(
+                        onClick = {
+                            component.navigateToHotel(selectedTrain!!, selectedCoach, fare)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 16.dp)
+                            .height(48.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF176FF3)),
+                        shape = RoundedCornerShape(8.dp)
+                    ) {
+                        Text("Continue", color = Color.White, fontSize = 18.sp, fontWeight = FontWeight.Bold)
                     }
                 }
             }
