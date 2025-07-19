@@ -7,5 +7,5 @@ data class TripActivity(
     val time: String,
     val name: String,
     val description: String,
-    val cost: Double
+    val cost: Int
 ) 

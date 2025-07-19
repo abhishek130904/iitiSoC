@@ -7,5 +7,5 @@ data class Meal(
     val type: String,
     val venue: String?,
     val time: String,
-    val cost: Double
+    val cost: Int
 ) 

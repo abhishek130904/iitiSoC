@@ -163,15 +163,15 @@ class RootComponentImpl(
                     }
                     screen.selectedTrain != null -> {
                         org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl(
-                            componentContext,
-                            this,
+                    componentContext,
+                    this,
                             selectedTrain = screen.selectedTrain,
                             selectedHotel = screen.selectedHotel,
                             selectedCityName = screen.selectedCityName,
                             selectedCoach = screen.selectedCoach,
                             fare = screen.fare,
-                            networkService = TripService(authService)
-                        )
+                    networkService = TripService(authService)
+                )
                     }
                     else -> null
                 }

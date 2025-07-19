@@ -54,6 +54,9 @@ data class TripItinerary(
     val cityName: String,
     val flightId: String,
     val hotelName: String,
+    val hotelPrice: Int = 0,      // <-- added
+    val flightPrice: Int = 0,     // <-- added
+    val transportPrice: Int = 0,  // <-- added
     val activities: List<TripActivity>,
     val meals: List<TripMeal>,
     val notes: String? = null,
@@ -781,7 +784,7 @@ private fun EnhancedDownloadButton(
                 hotelDetails = trip.hotelName,
                 activities = trip.activities.joinToString { it.name },
                 meals = trip.meals.joinToString { it.type },
-                costBreakdown = "",
+                costBreakdown = buildCostBreakdown(trip),
                 notes = trip.notes
             )
             val pdfBytes = generateTripSummaryPdf(summary)
@@ -835,4 +838,17 @@ private fun getMealEmoji(mealType: String): String {
         "snack" -> "🍪"
         else -> "🍴"
     }
+}
+
+fun buildCostBreakdown(trip: TripItinerary): String {
+    val activitiesCost = trip.activities.sumOf { it.cost.toInt() }
+    val mealsCost = trip.meals.sumOf { it.cost.toInt() }
+    val hotelCost = trip.hotelPrice
+    val isTrainTrip = trip.flightId.startsWith("Train:")
+    val mainTransportCost = if (isTrainTrip) trip.transportPrice else trip.flightPrice
+    return """Flight/Train: ₹$mainTransportCost,
+Hotel: ₹$hotelCost/night,
+Activities: ₹$activitiesCost,
+Meals: ₹$mealsCost,
+Transport: ₹${trip.transportPrice}"""
 }

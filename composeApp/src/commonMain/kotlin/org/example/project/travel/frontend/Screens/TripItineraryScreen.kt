@@ -57,7 +57,7 @@ data class Transport(
     val type: String,
     val details: String,
     val time: String,
-    val cost: Double
+    val cost: Int
 )
 
 data class Accommodation(
@@ -65,7 +65,7 @@ data class Accommodation(
     val type: String,
     val checkIn: String,
     val checkOut: String,
-    val cost: Double
+    val cost: Int
 )
 
 private val primaryBlue = Color(23, 111, 243)
@@ -107,11 +107,11 @@ class TripItineraryScreenComponentImpl(
     suspend fun saveTripAndProceed(itinerary: List<ItineraryDay>, tripNotes: String) {
         val day = itinerary.first()
         val isTrainTrip = selectedTrain != null
-        val flightCost = if (isTrainTrip) (fare?.toDouble() ?: 0.0) else selectedFlight?.price ?: 0.0
-        val hotelCost = selectedHotel.pricePerNight
+        val flightCost = if (isTrainTrip) (fare ?: 0) else (selectedFlight?.price?.toInt() ?: 0)
+        val hotelCost = selectedHotel.pricePerNight.toInt()
         val activitiesCost = day.activities.sumOf { it.cost }
         val mealsCost = day.meals.sumOf { it.cost }
-        val transportationCost = day.transport?.cost ?: 0.0
+        val transportationCost = day.transport?.cost ?: 0
 
         val costBreakdown = org.example.project.travel.frontEnd.model.TripCostBreakdown(
             flight = flightCost,
@@ -130,7 +130,10 @@ class TripItineraryScreenComponentImpl(
                 activities = day.activities,
                 meals = day.meals,
                 notes = tripNotes,
-                costBreakdown = costBreakdown
+                costBreakdown = costBreakdown,
+                hotelPrice = selectedHotel.pricePerNight.toInt(),
+                flightPrice = 0,
+                transportPrice = fare ?: 0
             )
         } else {
             org.example.project.travel.frontEnd.model.TripRequestDTO(
@@ -140,7 +143,10 @@ class TripItineraryScreenComponentImpl(
                 activities = day.activities,
                 meals = day.meals,
                 notes = tripNotes,
-                costBreakdown = costBreakdown
+                costBreakdown = costBreakdown,
+                hotelPrice = selectedHotel.pricePerNight.toInt(),
+                flightPrice = selectedFlight?.price?.toInt() ?: 0,
+                transportPrice = 0
             )
         }
         try {
@@ -247,17 +253,17 @@ fun TripItineraryScreen(
             val flight = component.selectedFlight!!
             "Flight: ${flight.airlineCode} ${flight.flightNumber}"
         }
-        val transportCost = if (isTrainTrip) (component.fare?.toDouble() ?: 0.0) else component.selectedFlight?.price ?: 0.0
+        val transportCost = if (isTrainTrip) (component.fare?.toInt() ?: 0) else (component.selectedFlight?.price?.toInt() ?: 0)
 
         listOf(
             ItineraryDay(
                 date = "Trip Summary",
                 activities = listOf(
-                    TripActivity("09:00", "Breakfast", "Enjoy breakfast at the hotel.", 0.0),
-                    TripActivity("10:00", "City Tour", "Explore the city's main attractions.", 0.0),
-                    TripActivity("13:00", "Lunch", "Have lunch at a local restaurant.", 0.0),
-                    TripActivity("15:00", "Local Sightseeing", "Visit the interesting places.", 0.0),
-                    TripActivity("19:00", "Dinner", "Enjoy a nice dinner.", 0.0)
+                    TripActivity("09:00", "Breakfast", "Enjoy breakfast at the hotel.", 0),
+                    TripActivity("10:00", "City Tour", "Explore the city's main attractions.", 0),
+                    TripActivity("13:00", "Lunch", "Have lunch at a local restaurant.", 0),
+                    TripActivity("15:00", "Local Sightseeing", "Visit the interesting places.", 0),
+                    TripActivity("19:00", "Dinner", "Enjoy a nice dinner.", 0)
                 ),
                 transport = Transport(
                     type = transportType,
@@ -270,12 +276,12 @@ fun TripItineraryScreen(
                     type = "Hotel",
                     checkIn = "${formattedCheckIn.first}, ${formattedCheckIn.second}",
                     checkOut = "${formattedCheckOut.first}, ${formattedCheckOut.second}",
-                    cost = component.selectedHotel.pricePerNight
+                    cost = component.selectedHotel.pricePerNight.toInt()
                 ),
                 meals = listOf(
-                    Meal("Breakfast", "Hotel", "09:00", Random.nextDouble(500.0, 1000.0)),
-                    Meal("Lunch", "Local Restaurant", "13:00", Random.nextDouble(500.0, 1000.0)),
-                    Meal("Dinner", "Local Restaurant", "19:00", Random.nextDouble(500.0, 1000.0))
+                    Meal("Breakfast", "Hotel", "09:00", (500..1000).random()),
+                    Meal("Lunch", "Local Restaurant", "13:00", (500..1000).random()),
+                    Meal("Dinner", "Local Restaurant", "19:00", (500..1000).random())
                 )
             )
         )
@@ -560,7 +566,7 @@ private fun DayItineraryCard(day: ItineraryDay) {
                             day.meals.forEach { meal ->
                                 ItineraryItemContent("${meal.time} - ${meal.type}")
                                 meal.venue?.let { ItineraryItemContent("at $it") }
-                                ItineraryItemContent("Cost: ₹${"%.2f".format(meal.cost)}")
+                                ItineraryItemContent("Cost: ₹${meal.cost}")
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
                         }

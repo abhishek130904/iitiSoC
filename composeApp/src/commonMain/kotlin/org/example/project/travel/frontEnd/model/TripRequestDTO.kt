@@ -5,11 +5,11 @@ import org.example.project.travel.frontEnd.model.Meal
 
 @Serializable
 data class TripCostBreakdown(
-    val flight: Double,
-    val hotel: Double,
-    val activities: Double,
-    val meals: Double,
-    val transportation: Double
+    val flight: Int,
+    val hotel: Int,
+    val activities: Int,
+    val meals: Int,
+    val transportation: Int
 )
 
 @Serializable
@@ -20,5 +20,8 @@ data class TripRequestDTO(
     val activities: List<TripActivity>,
     val meals: List<Meal>,
     val notes: String?,
-    val costBreakdown: TripCostBreakdown
+    val costBreakdown: TripCostBreakdown,
+    val hotelPrice: Int = 0,
+    val flightPrice: Int = 0,
+    val transportPrice: Int = 0
 )
