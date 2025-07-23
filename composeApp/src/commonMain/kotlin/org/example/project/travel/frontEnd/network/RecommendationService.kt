@@ -18,7 +18,7 @@ class RecommendationApi(private val baseUrl: String) {
     }
 
     suspend fun getRecommendations(userId: String): Recommendations? {
-        val url = "http://10.176.172.173:5000/api/recommendations/$userId"
+        val url = "http://10.17.2.32:5000/api/recommendations/$userId"
         val response: RecommendationResponse = client.get(url).body()
         return if (response.success) response.recommendations else null
     }

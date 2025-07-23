@@ -138,16 +138,16 @@ class TripItineraryScreenComponentImpl(
         } else {
             org.example.project.travel.frontEnd.model.TripRequestDTO(
                 flightId = selectedFlight?.airlineCode + "-" + selectedFlight?.flightNumber,
-                cityName = selectedCityName,
-                hotelName = selectedHotel.name,
-                activities = day.activities,
-                meals = day.meals,
-                notes = tripNotes,
+            cityName = selectedCityName,
+            hotelName = selectedHotel.name,
+            activities = day.activities,
+            meals = day.meals,
+            notes = tripNotes,
                 costBreakdown = costBreakdown,
                 hotelPrice = selectedHotel.pricePerNight.toInt(),
                 flightPrice = selectedFlight?.price?.toInt() ?: 0,
                 transportPrice = 0
-            )
+        )
         }
         try {
             val tripId = networkService.saveTrip(tripData)

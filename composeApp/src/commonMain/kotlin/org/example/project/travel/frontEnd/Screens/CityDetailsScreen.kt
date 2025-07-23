@@ -49,6 +49,8 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import kotlin.math.roundToInt
 import com.airbnb.lottie.compose.*
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 
 interface CityDetailsScreenComponent {
     val viewModel: CityDetailsViewModel
@@ -122,7 +124,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
         },
         bottomBar = {
             // Show Continue button only when not loading
-//            if (!isLoading) {
+            if (!isLoading) {
                 Button(
                     onClick = { component.onContinue() },
                     modifier = Modifier
@@ -133,7 +135,7 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
                 ){
                     Text("Continue", color = Color.White, fontSize = 18.sp)
                 }
-//            }
+            }
         }
     ) { paddingValues ->
         Box(
@@ -386,19 +388,26 @@ fun ActivityItem(
 @Composable
 fun CityImageCarousel(images: List<Pair<String, String>>) {
     var currentIndex by remember { mutableStateOf(0) }
-    val coroutineScope = rememberCoroutineScope()
 
-    // Auto-slide every 10 seconds
-    LaunchedEffect(images) {
-        while (images.isNotEmpty()) {
-            delay(10_000)
-            currentIndex = (currentIndex + 1) % images.size
-        }
-    }
-
-    val (imageUrl, _) = images.getOrNull(currentIndex) ?: ("" to "")
-
-    Box(modifier = Modifier.fillMaxWidth().height(320.dp)) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(320.dp)
+            .pointerInput(images, currentIndex) {
+                detectHorizontalDragGestures { _, dragAmount ->
+                    if (dragAmount > 30) { // Swipe right
+                        if (images.isNotEmpty()) {
+                            currentIndex = if (currentIndex == 0) images.lastIndex else currentIndex - 1
+                        }
+                    } else if (dragAmount < -30) { // Swipe left
+                        if (images.isNotEmpty()) {
+                            currentIndex = (currentIndex + 1) % images.size
+                        }
+                    }
+                }
+            }
+    ) {
+        val (imageUrl, _) = images.getOrNull(currentIndex) ?: ("" to "")
         if (imageUrl.isNotEmpty()) {
             KamelImage(
                 resource = asyncPainterResource(data = imageUrl),
@@ -413,7 +422,9 @@ fun CityImageCarousel(images: List<Pair<String, String>>) {
             if (images.size > 1) {
                 IconButton(
                     onClick = {
-                        currentIndex = if (currentIndex == 0) images.lastIndex else currentIndex - 1
+                        if (images.isNotEmpty()) {
+                            currentIndex = if (currentIndex == 0) images.lastIndex else currentIndex - 1
+                        }
                     },
                     modifier = Modifier.align(Alignment.CenterStart)
                 ) {
@@ -422,7 +433,9 @@ fun CityImageCarousel(images: List<Pair<String, String>>) {
                 // Right arrow
                 IconButton(
                     onClick = {
-                        currentIndex = (currentIndex + 1) % images.size
+                        if (images.isNotEmpty()) {
+                            currentIndex = (currentIndex + 1) % images.size
+                        }
                     },
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
@@ -430,20 +443,22 @@ fun CityImageCarousel(images: List<Pair<String, String>>) {
                 }
             }
         }
-    }
-    // Optionally, show indicators
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.Center
-    ) {
-        images.forEachIndexed { idx, _ ->
-            Box(
-                modifier = Modifier
-                    .padding(2.dp)
-                    .size(if (idx == currentIndex) 12.dp else 8.dp)
-                    .clip(CircleShape)
-                    .background(if (idx == currentIndex) Color(0xFF176FF3) else Color.LightGray)
-            )
+        // Dots indicator
+        Row(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            images.forEachIndexed { idx, _ ->
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .size(if (idx == currentIndex) 12.dp else 8.dp)
+                        .clip(CircleShape)
+                        .background(if (idx == currentIndex) Color(0xFF176FF3) else Color.LightGray)
+                )
+            }
         }
     }
 }

@@ -34,7 +34,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.material.icons.filled.DirectionsBus
 import androidx.compose.material.icons.filled.DirectionsCar
 import androidx.compose.material.icons.filled.Flight
-import androidx.compose.material.icons.filled.Directions
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.travel.network.fetchTrainStations
 import com.example.travel.network.TrainStationDTO

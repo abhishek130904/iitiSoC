@@ -32,9 +32,9 @@ import org.example.project.travel.frontEnd.utils.formatDate
 import org.example.project.travel.frontEnd.utils.isLeapYear
 
 interface FlightSearchScreenComponent {
-//    val cityViewModel: CityViewModel
+    //    val cityViewModel: CityViewModel
     val flightViewModel: FlightViewModel
-//    val flights: List<FlightDTO>
+    //    val flights: List<FlightDTO>
     fun navigateTo(screen: Screen)
 //    fun pop()
 }
@@ -43,8 +43,8 @@ class FlightSearchScreenComponentImpl(
     componentContext: ComponentContext,
     private val rootComponent: RootComponent
 ) : FlightSearchScreenComponent, ComponentContext by componentContext {
-//    override val cityViewModel = CityViewModel()
-override val flightViewModel: FlightViewModel = rootComponent.flightViewModel
+    //    override val cityViewModel = CityViewModel()
+    override val flightViewModel: FlightViewModel = rootComponent.flightViewModel
 
 //    override val flights: List<FlightDTO>
 //        get() = flightViewModel.flights.value
@@ -221,7 +221,7 @@ fun FlightSearchScreen(
                         ) {
                             Text(
                                 searchState.fromCity,
-                                 fontSize = 32.sp,
+                                fontSize = 32.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = Color.Black
                             )

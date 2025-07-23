@@ -69,7 +69,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE0F7FA),
             description = "Discover pristine beaches and coastal paradises",
             popularDestinations = listOf(
-                "Panjim", "Vasco da Gama", "Sancoale", "Mapusa", "Puducherry", "Alibag", "Gokarna"
+                "Panjim", "Vasco da Gama", "Sancoale", "Puducherry", "Alibag", "Gokarna"
             )
         ),
         TravelCategory(

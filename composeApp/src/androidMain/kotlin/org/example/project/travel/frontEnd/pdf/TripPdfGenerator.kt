@@ -37,22 +37,20 @@ actual fun generateTripSummaryPdf(trip: TripSummary): ByteArray {
         strokeWidth = 2f
     }
 
-    // Draw app logo at the top center (replace 'logo' with your logo PNG/JPG in res/drawable)
+    // Draw app logo at the top center (load from assets for reliability)
     try {
         val contextField = canvas.javaClass.getDeclaredField("mContext")
         contextField.isAccessible = true
         val context = contextField.get(canvas) as android.content.Context
-        val resId = context.resources.getIdentifier("logo", "drawable", context.packageName) // <-- fixed: no .png
-        if (resId != 0) {
-            val logoBitmap = BitmapFactory.decodeResource(context.resources, resId)
-            val logoWidth = 80
-            val logoHeight = 80
-            val xLogo = (595 - logoWidth) / 2f
-            canvas.drawBitmap(logoBitmap, null, RectF(xLogo, y.toFloat(), xLogo + logoWidth, y + logoHeight.toFloat()), null)
-            y += logoHeight + 20
-        } else {
-            y += 20
-        }
+        val assetManager = context.assets
+        val inputStream = assetManager.open("logo.png")
+        val logoBitmap = BitmapFactory.decodeStream(inputStream)
+        val logoWidth = 80
+        val logoHeight = 80
+        val xLogo = (595 - logoWidth) / 2f
+        canvas.drawBitmap(logoBitmap, null, RectF(xLogo, y.toFloat(), xLogo + logoWidth, y + logoHeight.toFloat()), null)
+        y += logoHeight + 20
+        inputStream.close()
     } catch (e: Exception) {
         // Logo not found or error, skip drawing logo
         y += 20
@@ -73,7 +71,7 @@ actual fun generateTripSummaryPdf(trip: TripSummary): ByteArray {
         strokeWidth = 4f
     }
     canvas.drawRoundRect(35f, y.toFloat(), 560f, 1050f, 18f, 18f, borderPaint)
-    y += 30
+        y += 30
 
     fun drawSectionHeader(text: String) {
         canvas.drawText(text, 50f, y.toFloat(), sectionPaint)
