@@ -4,6 +4,12 @@ import com.example.travel.model.TrainEntity
 import com.example.travel.repository.TrainRepository
 import org.springframework.stereotype.Service
 
+// DTO for station
+data class StationDTO(
+    val station_code: String,
+    val station_name: String
+)
+
 @Service
 class TrainService(private val trainRepository: TrainRepository) {
     fun findTrainsBetweenStations(fromStation: String, toStation: String): List<TrainSearchResultDTO> {
@@ -20,6 +26,24 @@ class TrainService(private val trainRepository: TrainRepository) {
                 from_departure_time = from.departure_time,
                 to_arrival_time = to.arrival_time,
                 distance = to.distance - from.distance
+            )
+        }
+    }
+
+    fun getDistinctStations(): List<StationDTO> {
+        return trainRepository.findDistinctStations().map {
+            StationDTO(
+                station_code = it[0] as String,
+                station_name = it[1] as String
+            )
+        }
+    }
+
+    fun searchStationsByName(query: String): List<StationDTO> {
+        return trainRepository.searchStationsByName(query).map {
+            StationDTO(
+                station_code = it[0] as String,
+                station_name = it[1] as String
             )
         }
     }

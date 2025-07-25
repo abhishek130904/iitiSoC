@@ -15,4 +15,10 @@ interface TrainRepository : CrudRepository<TrainEntity, Long> {
           AND t1.stop_number < t2.stop_number
     """)
     fun findTrainPairsBetweenStations(fromStation: String, toStation: String): List<Array<TrainEntity>>
+
+    @Query("SELECT DISTINCT t.station_code, t.station_name FROM TrainEntity t")
+    fun findDistinctStations(): List<Array<Any>>
+
+    @Query("SELECT DISTINCT t.station_code, t.station_name FROM TrainEntity t WHERE LOWER(t.station_name) LIKE LOWER(CONCAT('%', :query, '%'))")
+    fun searchStationsByName(query: String): List<Array<Any>>
 } 

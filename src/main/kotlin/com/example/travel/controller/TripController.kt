@@ -26,7 +26,10 @@ class TravelController(
                 tripRequest.hotelName,
                 tripRequest.activities,
                 tripRequest.meals,
-                tripRequest.notes
+                tripRequest.notes,
+                tripRequest.hotelPrice,
+                tripRequest.flightPrice,
+                tripRequest.transportPrice
             )
             ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_JSON)
@@ -50,7 +53,10 @@ data class TripRequestDTO(
     val hotelName: String,
     val activities: List<ActivityEntity>,
     val meals: List<MealEntity>,
-    val notes: String?
+    val notes: String?,
+    val hotelPrice: Int = 0,
+    val flightPrice: Int = 0,
+    val transportPrice: Int = 0
 )
 
 data class TripResponseDTO(val id: Long)

@@ -22,6 +22,15 @@ data class TripEntity(
     @Column(nullable = false)
     val hotelName: String, // Store the hotel name directly
 
+    @Column(name = "hotel_price", nullable = true)
+    val hotelPrice: Int = 0,
+
+    @Column(name = "flight_price", nullable = true)
+    val flightPrice: Int = 0,
+
+    @Column(name = "transport_price", nullable = true)
+    val transportPrice: Int = 0,
+
     @ElementCollection
     @CollectionTable(name = "trip_activities", joinColumns = [JoinColumn(name = "trip_id")])
     val activities: List<ActivityEntity> = emptyList(),

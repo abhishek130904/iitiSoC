@@ -10,7 +10,18 @@ import org.springframework.stereotype.Service
 class TripService(
     private val tripRepository: TripRepository
 ) {
-    fun saveTrip(userId: String, cityName: String, flightId: String, hotelName: String, activities: List<ActivityEntity>, meals: List<MealEntity>, notes: String?): Long {
+    fun saveTrip(
+        userId: String,
+        cityName: String,
+        flightId: String,
+        hotelName: String,
+        activities: List<ActivityEntity>,
+        meals: List<MealEntity>,
+        notes: String?,
+        hotelPrice: Int = 0,
+        flightPrice: Int = 0,
+        transportPrice: Int = 0
+    ): Long {
         if (userId.isBlank() || cityName.isBlank() || hotelName.isBlank()) {
             throw IllegalArgumentException("Invalid trip data")
         }
@@ -21,7 +32,10 @@ class TripService(
             hotelName = hotelName,
             activities = activities,
             meals = meals,
-            notes = notes
+            notes = notes,
+            hotelPrice = hotelPrice,
+            flightPrice = flightPrice,
+            transportPrice = transportPrice
         )
         return tripRepository.save(trip).id
     }
