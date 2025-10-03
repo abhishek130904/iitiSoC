@@ -93,17 +93,41 @@ iitiSoC/
 
 ## 📱 Screenshots
 
-### Main Features
-- **Home Screen**: Category-based destination discovery
-- **Search**: Real-time flight and train search
-- **Trip Planning**: Comprehensive itinerary creation
-- **Booking**: Multi-transportation booking flow
-- **Profile**: User management and trip history
+<div align="center">
+  <img src="photo_2025-07-29_21-30-54.jpg" width="30%" alt="Onboarding Screen"/>
+  <img src="photo_2025-07-29_21-30-58.jpg" width="30%" alt="Welcome Screen"/>
+  <img src="photo_2025-07-29_21-30-59.jpg" width="30%" alt="Travel Discovery"/>
+</div>
 
-### UI Highlights
-- Material 3 design with custom theming
-- Smooth animations and transitions
-- Responsive layout for different screen sizes
+<div align="center">
+  <img src="photo_2025-07-29_21-31-01.jpg" width="30%" alt="Login Screen"/>
+  <img src="photo_2025-07-29_21-31-02.jpg" width="30%" alt="Home Dashboard"/>
+  <img src="photo_2025-07-29_21-31-03.jpg" width="30%" alt="Destination Categories"/>
+</div>
+
+<div align="center">
+  <img src="photo_2025-07-29_21-31-04.jpg" width="30%" alt="City Search"/>
+  <img src="photo_2025-07-29_21-31-05.jpg" width="30%" alt="Flight Search"/>
+  <img src="photo_2025-07-29_21-31-07.jpg" width="30%" alt="Flight Results"/>
+</div>
+
+<div align="center">
+  <img src="photo_2025-07-29_21-31-09.jpg" width="30%" alt="Hotel Selection"/>
+  <img src="photo_2025-07-29_21-31-10.jpg" width="30%" alt="Trip Itinerary"/>
+  <img src="photo_2025-07-29_21-31-11.jpg" width="30%" alt="Trip Confirmation"/>
+</div>
+
+<div align="center">
+  <img src="photo_2025-07-29_21-43-28.jpg" width="30%" alt="Profile Screen"/>
+</div>
+
+### 🎯 Key Features Showcased
+- **Onboarding Experience**: Beautiful animated introduction screens
+- **Authentication**: Secure login and signup with Google integration
+- **Home Dashboard**: Category-based destination discovery
+- **Smart Search**: Real-time flight and accommodation search
+- **Trip Planning**: Comprehensive itinerary creation and management
+- **User Profile**: Personalized user experience and trip history
 
 ## 🙏 Acknowledgments
 
