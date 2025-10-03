@@ -116,7 +116,7 @@ iitiSoC/
 
 ## 📞 Contact
 - **Email**: rajabhishek4444@gmail.com
-- **LinkedIn**: [Your LinkedIn Profile]([https://linkedin.com/in/yourprofile](http://www.linkedin.com/in/abhishekraj-iiti))
+- **LinkedIn**: [Your LinkedIn Profile](https://linkedin.com/in/yourprofile](http://www.linkedin.com/in/abhishekraj-iiti)  
 
 
 ---
