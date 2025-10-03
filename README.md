@@ -14,7 +14,7 @@ Abhishek Raj, Purvi Jain, Shrawani Palange
 ## 📱 Features
 
 ### 🎯 Core Functionality
-- **Multi-transportation Booking**: Search and book flights, trains, buses, and private cabs
+- **Multi-transportation Booking**: Search and book flights, trains, buses.
 - **Accommodation Search**: Find hotels and accommodations by city with detailed information
 - **Smart Trip Planning**: Create comprehensive itineraries with activities, meals, and transportation
 - **Destination Discovery**: Explore destinations by categories (Beaches, Mountains, Hill Stations, Temples)
@@ -104,7 +104,6 @@ iitiSoC/
 - Material 3 design with custom theming
 - Smooth animations and transitions
 - Responsive layout for different screen sizes
-- Dark/Light theme support
 
 ## 🙏 Acknowledgments
 
