@@ -8,10 +8,18 @@ A comprehensive travel planning application built with **Kotlin Multiplatform** 
 ![iOS](https://img.shields.io/badge/iOS-000000?style=for-the-badge&logo=ios&logoColor=white)
 ![Firebase](https://img.shields.io/badge/Firebase-039BE5?style=for-the-badge&logo=firebase)
 
-## Contributors
-Abhishek Raj, Purvi Jain, Shrawani Palange
-To use the app use link - https://limewire.com/d/Wc8Jf#XyotwZkBFR
+## 🚀 Try the App
+Click the link below to use the app:  
+👉 [Download / Access App](https://limewire.com/d/Wc8Jf#XyotwZkBFR)
 
+---
+
+## 👨‍💻 Contributors
+- **Abhishek Raj**  
+- **Purvi Jain**  
+- **Shrawani Palange**
+
+---
 ## 📱 Features
 
 ### 🎯 Core Functionality
