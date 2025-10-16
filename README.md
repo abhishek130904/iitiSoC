@@ -10,6 +10,7 @@ A comprehensive travel planning application built with **Kotlin Multiplatform** 
 
 ## Contributors
 Abhishek Raj, Purvi Jain, Shrawani Palange
+To use the app use link - https://limewire.com/d/Wc8Jf#XyotwZkBFR
 
 ## 📱 Features
 
@@ -139,7 +140,7 @@ iitiSoC/
 
 ## 📞 Contact
 - **Email**: rajabhishek4444@gmail.com
-- **LinkedIn**: [Abhishek Raj](https://linkedin.com/in/yourprofile](http://www.linkedin.com/in/abhishekraj-iiti)  
+- **LinkedIn**: [Abhishek Raj](https://linkedin.com/in/yourprofile](http://www.linkedin.com/in/abhishekraj-iiti)
 
 
 ---
