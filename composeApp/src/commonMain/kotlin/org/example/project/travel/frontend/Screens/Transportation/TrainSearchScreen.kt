@@ -38,9 +38,13 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import com.example.travel.network.fetchTrainStations
 import com.example.travel.network.TrainStationDTO
 import kotlinx.coroutines.launch
+import androidx.compose.runtime.saveable.rememberSaveable
 
 
 interface TrainSearchScreenComponent {
+    var fromStation: String
+    var toStation: String
+    var selectedDate: LocalDate
     fun navigateTo(screen: Screen)
     fun replaceAll(screen: Screen)
     fun pop()
@@ -50,6 +54,10 @@ class TrainSearchScreenComponentImpl(
     componentContext: ComponentContext,
     private val rootComponent: RootComponent
 ) : TrainSearchScreenComponent, ComponentContext by componentContext {
+    override var fromStation: String = "PNBE - Patna - All stations"
+    override var toStation: String = "JBP - Jabalpur"
+    override var selectedDate: LocalDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
+
     override fun navigateTo(screen: Screen) {
         rootComponent.navigateTo(screen)
     }
@@ -66,9 +74,16 @@ class TrainSearchScreenComponentImpl(
 fun TrainSearchScreen(
     component: TrainSearchScreenComponent
 ) {
-    var fromStation by remember { mutableStateOf("PNBE - Patna - All stations") }
-    var toStation by remember { mutableStateOf("JBP - Jabalpur") }
-    var selectedDate by remember { mutableStateOf(Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date) }
+    var fromStation by remember { mutableStateOf(component.fromStation) }
+    var toStation by remember { mutableStateOf(component.toStation) }
+    var selectedDate by remember { mutableStateOf(component.selectedDate) }
+
+    LaunchedEffect(fromStation, toStation, selectedDate) {
+        component.fromStation = fromStation
+        component.toStation = toStation
+        component.selectedDate = selectedDate
+    }
+
     var showDatePicker by remember { mutableStateOf(false) }
     var selectedTab by remember { mutableStateOf("Trains") }
     val today = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
@@ -262,273 +277,273 @@ fun TrainSearchScreen(
             }
         }
 
-    // Date Picker Dialog (copied and adapted from FlightSearchScreen)
-    if (showDatePicker) {
-        val currentMoment = Clock.System.now()
-        val today = currentMoment.toLocalDateTime(TimeZone.currentSystemDefault()).date
-        var selectedDateLocal by remember { mutableStateOf(selectedDate) }
+        // Date Picker Dialog (copied and adapted from FlightSearchScreen)
+        if (showDatePicker) {
+            val currentMoment = Clock.System.now()
+            val today = currentMoment.toLocalDateTime(TimeZone.currentSystemDefault()).date
+            var selectedDateLocal by remember { mutableStateOf(selectedDate) }
 
-        AlertDialog(
-            onDismissRequest = { showDatePicker = false },
-            title = {
-                Text(
-                    "Select Date",
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    color = Color(0xFF176FF3)
-                )
-            },
-            text = {
-                Column {
-                    // Month and Year selector
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconButton(
-                            onClick = {
-                                selectedDateLocal = selectedDateLocal.minus(1, DateTimeUnit.MONTH)
-                            }
+            AlertDialog(
+                onDismissRequest = { showDatePicker = false },
+                title = {
+                    Text(
+                        "Select Date",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF176FF3)
+                    )
+                },
+                text = {
+                    Column {
+                        // Month and Year selector
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Icon(Icons.Default.ChevronLeft, "Previous month", tint = Color(0xFF176FF3))
-                        }
-                        Text(
-                            "${selectedDateLocal.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${selectedDateLocal.year}",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = Color(0xFF176FF3)
-                        )
-                        IconButton(
-                            onClick = {
-                                selectedDateLocal = selectedDateLocal.plus(1, DateTimeUnit.MONTH)
+                            IconButton(
+                                onClick = {
+                                    selectedDateLocal = selectedDateLocal.minus(1, DateTimeUnit.MONTH)
+                                }
+                            ) {
+                                Icon(Icons.Default.ChevronLeft, "Previous month", tint = Color(0xFF176FF3))
                             }
-                        ) {
-                            Icon(Icons.Default.ChevronRight, "Next month", tint = Color(0xFF176FF3))
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                    // Days of week header
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa").forEach { day ->
                             Text(
-                                text = day,
-                                modifier = Modifier.weight(1f),
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.bodySmall,
+                                "${selectedDateLocal.month.name.lowercase().replaceFirstChar { it.uppercase() }} ${selectedDateLocal.year}",
+                                style = MaterialTheme.typography.titleMedium,
                                 color = Color(0xFF176FF3)
                             )
-                        }
-                    }
-                    Spacer(modifier = Modifier.height(8.dp))
-                    // Calendar grid
-                    val firstDayOfMonth = LocalDate(selectedDateLocal.year, selectedDateLocal.monthNumber, 1)
-                    val daysInMonth = selectedDateLocal.month.length(isLeapYear(selectedDateLocal.year))
-                    val firstDayOfWeek = firstDayOfMonth.dayOfWeek.isoDayNumber % 7 // Sunday start
-                    Column {
-                        var dayCounter = 1
-                        repeat(6) { week ->
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween
+                            IconButton(
+                                onClick = {
+                                    selectedDateLocal = selectedDateLocal.plus(1, DateTimeUnit.MONTH)
+                                }
                             ) {
-                                repeat(7) { dayOfWeek ->
-                                    val dayIndex = week * 7 + dayOfWeek
-                                    val showDay = dayIndex >= firstDayOfWeek && dayCounter <= daysInMonth
-                                    if (showDay) {
-                                        val currentDate = LocalDate(
-                                            selectedDateLocal.year,
-                                            selectedDateLocal.monthNumber,
-                                            dayCounter
-                                        )
-                                        val isSelected = currentDate == selectedDateLocal
-                                        val isToday = currentDate == today
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f)
-                                                .padding(2.dp)
-                                                .background(
-                                                    color = if (isSelected) Color(0xFF176FF3) else Color.Transparent,
-                                                    shape = RoundedCornerShape(50)
+                                Icon(Icons.Default.ChevronRight, "Next month", tint = Color(0xFF176FF3))
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(16.dp))
+                        // Days of week header
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            listOf("Su", "Mo", "Tu", "We", "Th", "Fr", "Sa").forEach { day ->
+                                Text(
+                                    text = day,
+                                    modifier = Modifier.weight(1f),
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = Color(0xFF176FF3)
+                                )
+                            }
+                        }
+                        Spacer(modifier = Modifier.height(8.dp))
+                        // Calendar grid
+                        val firstDayOfMonth = LocalDate(selectedDateLocal.year, selectedDateLocal.monthNumber, 1)
+                        val daysInMonth = selectedDateLocal.month.length(isLeapYear(selectedDateLocal.year))
+                        val firstDayOfWeek = firstDayOfMonth.dayOfWeek.isoDayNumber % 7 // Sunday start
+                        Column {
+                            var dayCounter = 1
+                            repeat(6) { week ->
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    repeat(7) { dayOfWeek ->
+                                        val dayIndex = week * 7 + dayOfWeek
+                                        val showDay = dayIndex >= firstDayOfWeek && dayCounter <= daysInMonth
+                                        if (showDay) {
+                                            val currentDate = LocalDate(
+                                                selectedDateLocal.year,
+                                                selectedDateLocal.monthNumber,
+                                                dayCounter
+                                            )
+                                            val isSelected = currentDate == selectedDateLocal
+                                            val isToday = currentDate == today
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .aspectRatio(1f)
+                                                    .padding(2.dp)
+                                                    .background(
+                                                        color = if (isSelected) Color(0xFF176FF3) else Color.Transparent,
+                                                        shape = RoundedCornerShape(50)
+                                                    )
+                                                    .clickable(enabled = currentDate >= today) {
+                                                        selectedDateLocal = currentDate
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Text(
+                                                    text = dayCounter.toString(),
+                                                    color = when {
+                                                        isSelected -> Color.White
+                                                        isToday -> Color(0xFF176FF3)
+                                                        currentDate < today -> Color(0xFF176FF3).copy(alpha = 0.5f)
+                                                        else -> Color(0xFF176FF3)
+                                                    },
+                                                    style = MaterialTheme.typography.bodyMedium,
+                                                    fontWeight = when {
+                                                        isSelected || isToday -> FontWeight.Bold
+                                                        else -> FontWeight.Normal
+                                                    }
                                                 )
-                                                .clickable(enabled = currentDate >= today) {
-                                                    selectedDateLocal = currentDate
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = dayCounter.toString(),
-                                                color = when {
-                                                    isSelected -> Color.White
-                                                    isToday -> Color(0xFF176FF3)
-                                                    currentDate < today -> Color(0xFF176FF3).copy(alpha = 0.5f)
-                                                    else -> Color(0xFF176FF3)
-                                                },
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                fontWeight = when {
-                                                    isSelected || isToday -> FontWeight.Bold
-                                                    else -> FontWeight.Normal
-                                                }
+                                            }
+                                            dayCounter++
+                                        } else {
+                                            Box(
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .aspectRatio(1f)
                                             )
                                         }
-                                        dayCounter++
-                                    } else {
-                                        Box(
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .aspectRatio(1f)
-                                        )
                                     }
                                 }
                             }
                         }
                     }
-                }
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        selectedDate = selectedDateLocal
-                        showDatePicker = false
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            selectedDate = selectedDateLocal
+                            showDatePicker = false
+                        }
+                    ) {
+                        Text("OK", color = Color(0xFF176FF3))
                     }
-                ) {
-                    Text("OK", color = Color(0xFF176FF3))
+                },
+                dismissButton = {
+                    TextButton(onClick = { showDatePicker = false }) {
+                        Text("Cancel", color = Color(0xFF176FF3))
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel", color = Color(0xFF176FF3))
-                }
-            }
-        )
-    }
+            )
+        }
 
-    // Station Search Dialog
-    if (showFromDialog || showToDialog) {
-        AlertDialog(
-            onDismissRequest = {
-                showFromDialog = false
-                showToDialog = false
-            },
-            title = { Text("Select Station", color = Color(0xFF176FF3)) },
-            text = {
-                Column {
-                    OutlinedTextField(
-                        value = stationSearchQuery,
-                        onValueChange = {
-                            stationSearchQuery = it
-                            if (it.length >= 2) {
-                                isLoadingStations = true
-                                coroutineScope.launch {
-                                    try {
-                                        stationResults = fetchTrainStations(it)
-                                    } catch (e: Exception) {
-                                        stationResults = emptyList()
-                                    }
-                                    isLoadingStations = false
-                                }
-                            } else {
-                                stationResults = emptyList()
-                            }
-                        },
-                        label = { Text("Search station name or code") },
-                        modifier = Modifier.fillMaxWidth(),
-                        singleLine = true
-                    )
-                    if (isLoadingStations) {
-                        CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
-                    } else {
-                        Column(modifier = Modifier.heightIn(max = 300.dp)) {
-                            stationResults.forEach { station ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clickable {
-                                            if (stationDialogType == "from") {
-                                                fromStation = "${station.station_code} - ${station.station_name}"
-                                            } else {
-                                                toStation = "${station.station_code} - ${station.station_name}"
-                                            }
-                                            showFromDialog = false
-                                            showToDialog = false
-                                        }
-                                        .padding(vertical = 12.dp, horizontal = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Icon(Icons.Default.Train, contentDescription = null, tint = Color(0xFF176FF3))
-                                    Spacer(modifier = Modifier.width(8.dp))
-                                    Text("${station.station_code} - ${station.station_name}", color = Color(0xFF176FF3), fontSize = 16.sp)
-                                }
-                            }
-                        }
-                    }
-                }
-            },
-            confirmButton = {
-                TextButton(onClick = {
+        // Station Search Dialog
+        if (showFromDialog || showToDialog) {
+            AlertDialog(
+                onDismissRequest = {
                     showFromDialog = false
                     showToDialog = false
-                }) {
-                    Text("Cancel", color = Color(0xFF176FF3))
+                },
+                title = { Text("Select Station", color = Color(0xFF176FF3)) },
+                text = {
+                    Column {
+                        OutlinedTextField(
+                            value = stationSearchQuery,
+                            onValueChange = {
+                                stationSearchQuery = it
+                                if (it.length >= 2) {
+                                    isLoadingStations = true
+                                    coroutineScope.launch {
+                                        try {
+                                            stationResults = fetchTrainStations(it)
+                                        } catch (e: Exception) {
+                                            stationResults = emptyList()
+                                        }
+                                        isLoadingStations = false
+                                    }
+                                } else {
+                                    stationResults = emptyList()
+                                }
+                            },
+                            label = { Text("Search station name or code") },
+                            modifier = Modifier.fillMaxWidth(),
+                            singleLine = true
+                        )
+                        if (isLoadingStations) {
+                            CircularProgressIndicator(modifier = Modifier.align(Alignment.CenterHorizontally))
+                        } else {
+                            Column(modifier = Modifier.heightIn(max = 300.dp)) {
+                                stationResults.forEach { station ->
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clickable {
+                                                if (stationDialogType == "from") {
+                                                    fromStation = "${station.station_code} - ${station.station_name}"
+                                                } else {
+                                                    toStation = "${station.station_code} - ${station.station_name}"
+                                                }
+                                                showFromDialog = false
+                                                showToDialog = false
+                                            }
+                                            .padding(vertical = 12.dp, horizontal = 8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Icon(Icons.Default.Train, contentDescription = null, tint = Color(0xFF176FF3))
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text("${station.station_code} - ${station.station_name}", color = Color(0xFF176FF3), fontSize = 16.sp)
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        showFromDialog = false
+                        showToDialog = false
+                    }) {
+                        Text("Cancel", color = Color(0xFF176FF3))
+                    }
                 }
-            }
-        )
+            )
+        }
+
+        if (showComingSoonDialog) {
+            AlertDialog(
+                onDismissRequest = { showComingSoonDialog = false },
+                title = { Text("Coming Soon!", color = Color(0xFF176FF3)) },
+                text = { Text("This feature will be available soon.", color = Color(0xFF176FF3)) },
+                confirmButton = {
+                    TextButton(onClick = { showComingSoonDialog = false }) {
+                        Text("OK", color = Color(0xFF176FF3))
+                    }
+                }
+            )
+        }
     }
 
-    if (showComingSoonDialog) {
-        AlertDialog(
-            onDismissRequest = { showComingSoonDialog = false },
-            title = { Text("Coming Soon!", color = Color(0xFF176FF3)) },
-            text = { Text("This feature will be available soon.", color = Color(0xFF176FF3)) },
-            confirmButton = {
-                TextButton(onClick = { showComingSoonDialog = false }) {
-                    Text("OK", color = Color(0xFF176FF3))
-                }
-            }
-        )
-    }
-}
-
-@Composable
-fun TabItem(
-    title: String,
-    icon: ImageVector,
-    selectedTab: String,
-    onClick: () -> Unit
-) {
-    val alpha by animateFloatAsState(
-        targetValue = if (selectedTab == title) 1f else 0.6f,
-        label = "Tab Alpha Animation"
-    )
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .clickable(onClick = onClick)
-            .padding(8.dp)
+    @Composable
+    fun TabItem(
+        title: String,
+        icon: ImageVector,
+        selectedTab: String,
+        onClick: () -> Unit
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = title,
-            tint = Color(23, 111, 243).copy(alpha = alpha),
-            modifier = Modifier.size(24.dp)
+        val alpha by animateFloatAsState(
+            targetValue = if (selectedTab == title) 1f else 0.6f,
+            label = "Tab Alpha Animation"
         )
-        Text(
-            text = title,
-            color = Color(0xFF424242).copy(alpha = alpha),
-            fontSize = 12.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.width(72.dp)
-        )
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .clickable(onClick = onClick)
+                .padding(8.dp)
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = title,
+                tint = Color(23, 111, 243).copy(alpha = alpha),
+                modifier = Modifier.size(24.dp)
+            )
+            Text(
+                text = title,
+                color = Color(0xFF424242).copy(alpha = alpha),
+                fontSize = 12.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.width(72.dp)
+            )
+        }
     }
-}
 
-@Composable
-fun TrainDetailsScreen() {
-    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-        Text("Train Details Screen", color = Color(0xFF176FF3), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+    @Composable
+    fun TrainDetailsScreen() {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            Text("Train Details Screen", color = Color(0xFF176FF3), fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        }
     }
-}
 }
