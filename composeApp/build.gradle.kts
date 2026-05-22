@@ -8,7 +8,7 @@ plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
-        kotlin("plugin.serialization") version "1.9.0" // match your Kotlin version
+    alias(libs.plugins.kotlinSerialization)
     id("com.google.gms.google-services")
 }
 
@@ -43,36 +43,37 @@ kotlin {
                 implementation(compose.components.resources)
                 implementation("org.jetbrains.compose.material3:material3:1.5.11")
                 implementation("org.jetbrains.compose.material:material-icons-extended:1.5.11")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3")
+
+                // Coroutines — single version
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
+
+                // Ktor — all 2.3.12
                 implementation("io.ktor:ktor-client-core:2.3.12")
                 implementation("io.ktor:ktor-client-content-negotiation:2.3.12")
                 implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.12")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
                 implementation("io.ktor:ktor-client-logging:2.3.12")
+
+                // Serialization
                 implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.6.3")
 
-                //navigation
-//                implementation("cafe.adriel.voyager:voyager-navigator:1.1.0-beta02")
+                // Date/time — single version
+                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
 
+                // Navigation — PreCompose (single version)
                 implementation("moe.tlaster:precompose:1.5.7")
                 implementation("moe.tlaster:precompose-viewmodel:1.5.7")
 
-                implementation("io.ktor:ktor-client-cio:2.3.11")
-                implementation("io.ktor:ktor-client-content-negotiation:2.3.11")
-                implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.11")
-                implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.6.0")
+                // Logging
                 implementation("co.touchlab:kermit:2.0.3")
-                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.0")
 
+                // DI
                 implementation("io.insert-koin:koin-core:3.5.3")
 
+                // Decompose
                 implementation("com.arkivanov.decompose:decompose:3.1.0")
                 implementation("com.arkivanov.decompose:extensions-compose:3.1.0")
 
-                implementation("moe.tlaster:precompose:1.5.6")
-                implementation("moe.tlaster:precompose-viewmodel:1.5.6")
-
+                // Skiko & image loading
                 implementation("org.jetbrains.skiko:skiko:0.8.12")
                 implementation("media.kamel:kamel-image:0.9.0")
 
@@ -84,12 +85,12 @@ kotlin {
                 implementation(libs.androidx.activity.compose)
                 implementation("androidx.core:core-ktx:1.10.1")
                 implementation("io.ktor:ktor-client-okhttp:2.3.12")
-                implementation("io.ktor:ktor-client-android:2.3.11")
-                implementation ("androidx.navigation:navigation-compose:2.7.7")// Latest stable as of June 2025
+                implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.8.1")
+                implementation("androidx.navigation:navigation-compose:2.7.7")
 
                 // (Optional but recommended)
-                implementation ("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
-                implementation ("androidx.activity:activity-compose:1.8.2")
+                implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+                implementation("androidx.activity:activity-compose:1.8.2")
 
                 // Koin for Android (only if you need it)
                 implementation("io.insert-koin:koin-android:3.5.3")
