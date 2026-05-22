@@ -85,7 +85,7 @@ fun RootContent(
             ) { child ->
                 when (val instance = child.instance) {
                     is RootComponent.Child.Onboarding -> OnboardingScreen(
-                        onFinished = { component.pop()},
+                        onFinished = { component.replaceAll(Screen.Login) },
                         onNavigateToSignIn = { component.navigateTo(Screen.Login) }
                     )
                     is RootComponent.Child.Login -> SignInScreen(
@@ -125,7 +125,6 @@ fun RootContent(
                         ProfileScreen(
                             uid = uid,
                             authService = authService,
-                            password = "",
                             onLogout = { component.replaceAll(Screen.Login) },
                             onHomeClick = { component.replaceAll(Screen.HomeScreen) },
                             onMyTripsClick = { userId ->

@@ -20,16 +20,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import moe.tlaster.precompose.viewmodel.viewModel
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
+import org.example.project.travel.frontend.model.DestinationCity
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PostTripFeedbackScreen(viewModel: CitySearchViewModel<*> = viewModel(
-    modelClass = TODO(),
-    keys = TODO(),
-    creator = TODO()
-)) {
+fun PostTripFeedbackScreen(
+    viewModel: CitySearchViewModel<DestinationCity> = remember { CitySearchViewModel() }
+) {
     var cities by remember { mutableStateOf("") }
     var activities by remember { mutableStateOf("") }
     var hotels by remember { mutableStateOf("") }

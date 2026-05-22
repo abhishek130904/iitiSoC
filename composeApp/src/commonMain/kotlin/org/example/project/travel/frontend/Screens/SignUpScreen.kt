@@ -46,6 +46,8 @@ fun SignUpScreen(
     var name by remember { mutableStateOf("") }
     var age by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
     var isSigningUp by remember { mutableStateOf(false) }
     var isSigningUpWithGoogle by remember { mutableStateOf(false) }
     var showGoogleProfileDialog by remember { mutableStateOf(false) }
@@ -122,24 +124,30 @@ fun SignUpScreen(
 
             OutlinedTextField(
                 value = email,
-                onValueChange = { email = it },
+                onValueChange = { email = it; emailError = null },
                 label = { Text("Email", color = Color.White) },
                 singleLine = true,
+                isError = emailError != null,
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     cursorColor = AppBlue,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.Gray,
                     focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
+                    unfocusedTextColor = Color.White,
+                    errorBorderColor = Color.Red
                 )
             )
+            emailError?.let {
+                Text(it, color = Color.Red, fontSize = 12.sp)
+            }
 
             OutlinedTextField(
                 value = password,
-                onValueChange = { password = it },
+                onValueChange = { password = it; passwordError = null },
                 label = { Text("Password", color = Color.White) },
                 singleLine = true,
+                isError = passwordError != null,
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                 modifier = Modifier.fillMaxWidth(),
@@ -148,9 +156,13 @@ fun SignUpScreen(
                     focusedBorderColor = AppBlue,
                     unfocusedBorderColor = Color.Gray,
                     focusedTextColor = Color.White,
-                    unfocusedTextColor = Color.White
+                    unfocusedTextColor = Color.White,
+                    errorBorderColor = Color.Red
                 )
             )
+            passwordError?.let {
+                Text(it, color = Color.Red, fontSize = 12.sp)
+            }
 
             errorMessage?.let {
                 Text(it, color = Color.Red, fontSize = 14.sp)
@@ -158,6 +170,21 @@ fun SignUpScreen(
 
             Button(
                 onClick = {
+                    // Validate email and password before Firebase call
+                    val trimmedEmail = email.trim()
+                    val trimmedPassword = password.trim()
+                    var hasValidationError = false
+
+                    if (trimmedEmail.isBlank() || !trimmedEmail.contains("@") || !trimmedEmail.contains(".")) {
+                        emailError = "Enter a valid email (e.g. user@example.com)"
+                        hasValidationError = true
+                    }
+                    if (trimmedPassword.length < 8) {
+                        passwordError = "Password must be at least 8 characters"
+                        hasValidationError = true
+                    }
+                    if (hasValidationError) return@Button
+
                     coroutineScope.launch {
                         isSigningUp = true
                         // Firestore check for existing user by email FIRST

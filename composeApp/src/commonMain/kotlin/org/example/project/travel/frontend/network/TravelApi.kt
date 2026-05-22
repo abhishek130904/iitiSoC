@@ -14,6 +14,7 @@ import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.example.project.travel.frontEnd.model.TripHistoryRequest
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
+import org.example.project.travel.frontend.config.ApiConfig
 import org.example.project.travel.frontend.model.*
 import com.example.travel.network.BASE_URL
 import org.example.project.travel.frontEnd.Screens.TripItinerary
@@ -74,7 +75,7 @@ object TravelApi {
     suspend fun getCityPhotos(city: String): UnsplashResponse {
         return client.get("https://api.unsplash.com/search/photos") {
             parameter("query", city)
-            parameter("client_id", "NEHMVuobdQVmCfXiH4XfIp-K7rY0965QnPKn7tS602A")
+            parameter("client_id", ApiConfig.unsplashApiKey)
         }.body()
     }
 

@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Network Security Configuration for TripBuddy.
+
+  PRODUCTION: Only HTTPS traffic is allowed (usesCleartextTraffic="false" in manifest).
+  DEBUG ONLY: Add domain-config entries below if you need local HTTP servers for testing.
+
+  Example for local dev (uncomment if needed):
+    <domain-config cleartextTrafficPermitted="true">
+        <domain includeSubdomains="true">10.0.2.2</domain>
+        <domain includeSubdomains="true">localhost</domain>
+    </domain-config>
+-->
+<network-security-config>
+    <base-config cleartextTrafficPermitted="false">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

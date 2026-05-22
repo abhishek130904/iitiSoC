@@ -58,6 +58,8 @@ fun SignInScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isSigningIn by remember { mutableStateOf(false) }
+    var emailError by remember { mutableStateOf<String?>(null) }
+    var passwordError by remember { mutableStateOf<String?>(null) }
 
     val snackbarHostState = remember { SnackbarHostState() }
     var message by remember { mutableStateOf("") }
@@ -102,10 +104,11 @@ fun SignInScreen(
 
                 OutlinedTextField(
                     value = email,
-                    onValueChange = { email = it },
+                    onValueChange = { email = it; emailError = null },
                     label = { Text("Email ID", color = Color.White) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
                     singleLine = true,
+                    isError = emailError != null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
@@ -114,17 +117,22 @@ fun SignInScreen(
                         focusedBorderColor = AppBlue,
                         unfocusedBorderColor = Color.Gray,
                         focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedTextColor = Color.White,
+                        errorBorderColor = Color.Red
                     )
                 )
+                emailError?.let {
+                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.fillMaxWidth())
+                }
 
                 OutlinedTextField(
                     value = password,
-                    onValueChange = { password = it },
+                    onValueChange = { password = it; passwordError = null },
                     label = { Text("Password", color = Color.White) },
                     visualTransformation = PasswordVisualTransformation(),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     singleLine = true,
+                    isError = passwordError != null,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 8.dp),
@@ -133,26 +141,41 @@ fun SignInScreen(
                         focusedBorderColor = AppBlue,
                         unfocusedBorderColor = Color.Gray,
                         focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White
+                        unfocusedTextColor = Color.White,
+                        errorBorderColor = Color.Red
                     )
                 )
+                passwordError?.let {
+                    Text(it, color = Color.Red, fontSize = 12.sp, modifier = Modifier.fillMaxWidth())
+                }
 
                 Button(
                     onClick = {
-                        if (email.isNotBlank() && password.isNotBlank() && !isSigningIn) {
-                            isSigningIn = true
-                            coroutineScope.launch {
-                                val result = authService.signInWithEmailAndPassword(email.trim(), password.trim())
-                                result.onSuccess { userId ->
-                                    message = "Sign In Successful!"
-                                    onLoginSuccess()
-                                }.onFailure { exception ->
-                                    message = "Error: ${exception.message}"
-                                }
-                                isSigningIn = false
+                        // Validate email format
+                        val trimmedEmail = email.trim()
+                        val trimmedPassword = password.trim()
+                        var hasError = false
+
+                        if (trimmedEmail.isBlank() || !trimmedEmail.contains("@") || !trimmedEmail.contains(".")) {
+                            emailError = "Enter a valid email (e.g. user@example.com)"
+                            hasError = true
+                        }
+                        if (trimmedPassword.length < 8) {
+                            passwordError = "Password must be at least 8 characters"
+                            hasError = true
+                        }
+                        if (hasError || isSigningIn) return@Button
+
+                        isSigningIn = true
+                        coroutineScope.launch {
+                            val result = authService.signInWithEmailAndPassword(trimmedEmail, trimmedPassword)
+                            result.onSuccess { userId ->
+                                message = "Sign In Successful!"
+                                onLoginSuccess()
+                            }.onFailure { exception ->
+                                message = "Error: ${exception.message}"
                             }
-                        } else if (!isSigningIn) {
-                            message = "Please enter both email and password."
+                            isSigningIn = false
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = AppBlue),

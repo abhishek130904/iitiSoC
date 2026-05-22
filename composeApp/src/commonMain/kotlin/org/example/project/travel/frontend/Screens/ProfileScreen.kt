@@ -49,7 +49,6 @@ fun ProfileScreen(
     onHomeClick: () -> Unit,
     uid: String?,
     authService: AuthService,
-    password: String,
     onLogout: suspend () -> Unit = {},
     onMyTripsClick: ((String) -> Unit)? = null
 ) {

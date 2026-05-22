@@ -1,6 +1,7 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import java.util.Properties
 
 plugins {
     alias(libs.plugins.kotlinMultiplatform)
@@ -13,7 +14,6 @@ plugins {
 
 
 kotlin {
-
 
     androidTarget {
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
@@ -133,6 +133,28 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+
+        // Read secrets from local.properties (never committed to VCS)
+        val localProps = rootProject.file("local.properties")
+        val properties = Properties()
+        if (localProps.exists()) {
+            properties.load(localProps.inputStream())
+        }
+
+        buildConfigField(
+            "String",
+            "UNSPLASH_KEY",
+            "\"${properties.getProperty("unsplash.api.key", "")}\""
+        )
+        buildConfigField(
+            "String",
+            "RECOMMENDATION_BASE_URL",
+            "\"${properties.getProperty("recommendation.base.url", "")}\""
+        )
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
     
     packaging {

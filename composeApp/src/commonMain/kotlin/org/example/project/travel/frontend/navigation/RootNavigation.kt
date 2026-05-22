@@ -24,6 +24,22 @@ import org.example.project.travel.frontEnd.network.TripService
 import org.example.project.travel.frontend.Screens.TripItineraryScreenComponent
 import org.example.project.travel.frontend.Screens.TripItineraryScreenComponentImpl
 
+/**
+ * Component for the SignUp screen, holding navigation callbacks.
+ */
+interface SignUpScreenComponent {
+    val onBack: () -> Unit
+    val onSignUpSuccess: () -> Unit
+}
+
+class SignUpScreenComponentImpl(
+    componentContext: ComponentContext,
+    private val rootComponent: RootComponent
+) : SignUpScreenComponent, ComponentContext by componentContext {
+    override val onBack: () -> Unit = { rootComponent.pop() }
+    override val onSignUpSuccess: () -> Unit = { rootComponent.navigateTo(Screen.HomeScreen) }
+}
+
 interface RootComponent {
     val childStack: Value<ChildStack<*, Child>>
     val flightViewModel: FlightViewModel
@@ -37,7 +53,7 @@ interface RootComponent {
         data class CitySearchScreen(val component: CitySearchScreenComponentImpl) : Child()
         data class HomeScreen(val component: Any) : Child()
         data class Login(val component: SignInScreenComponentImpl) : Child() // Changed to LoginScreenComponent
-        data class Signup(val component: Any) : Child()
+        data class Signup(val component: SignUpScreenComponent) : Child()
         data class FlightSearch(val component: FlightSearchScreenComponent) : Child()
         data class FlightDetail(val component: FlightDetailScreenComponent) : Child()
         data class Hotel(val component: HotelScreenComponent) : Child()
@@ -117,8 +133,9 @@ class RootComponentImpl(
                 RootComponent.Child.Login(component)
             }
             Screen.Signup -> {
-                println("RootComponentImpl: Created Signup placeholder component")
-                RootComponent.Child.Signup(Any())
+                val component = SignUpScreenComponentImpl(componentContext, this)
+                println("RootComponentImpl: Created SignUpScreenComponent")
+                RootComponent.Child.Signup(component)
             }
             Screen.FlightSearch -> {
                 val component = FlightSearchScreenComponentImpl(componentContext, this)
@@ -173,9 +190,19 @@ class RootComponentImpl(
                     networkService = TripService(authService)
                 )
                     }
-                    else -> null
+                    else -> {
+                        println("RootComponentImpl: TripItinerary - no flight or train selected, navigating back")
+                        null
+                    }
                 }
-                RootComponent.Child.TripItinerary(component!!)
+                if (component != null) {
+                    RootComponent.Child.TripItinerary(component)
+                } else {
+                    // Safe fallback: go back to previous screen instead of crashing
+                    navigation.pop()
+                    // Return a HomeScreen child as safe fallback
+                    RootComponent.Child.HomeScreen(Any())
+                }
             }
             Screen.ProfileScreen -> {
                 RootComponent.Child.ProfileScreen(Any())
