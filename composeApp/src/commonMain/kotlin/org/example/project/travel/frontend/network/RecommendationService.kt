@@ -3,19 +3,13 @@ package org.example.project.travel.frontEnd.network
 import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
 import org.example.project.travel.frontEnd.model.RecommendationResponse
 import org.example.project.travel.frontEnd.model.Recommendations
 import org.example.project.travel.frontend.config.ApiConfig
+import org.example.project.travel.frontend.network.NetworkClient
 
 class RecommendationApi(private val baseUrl: String = ApiConfig.recommendationBaseUrl) {
-    private val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json { ignoreUnknownKeys = true })
-        }
-    }
+    private val client: HttpClient = NetworkClient.client
 
     /**
      * Fetches personalized recommendations for a user.

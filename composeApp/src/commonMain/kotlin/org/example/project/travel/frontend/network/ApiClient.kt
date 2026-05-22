@@ -3,29 +3,18 @@ package com.example.travel.network
 import com.example.travel.model.dto.AccommodationDTO
 import io.ktor.client.*
 import io.ktor.client.call.body
-import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
-import io.ktor.serialization.kotlinx.json.*
-import kotlinx.serialization.json.Json
 import kotlinx.serialization.Serializable
+import org.example.project.travel.frontend.network.NetworkClient
 
 const val BASE_URL = "https://tripbuddybackend-2.onrender.com"
 
 object ApiClient {
-    val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                prettyPrint = true
-                isLenient = true
-            })
-        }
-    }
+    val client: HttpClient = NetworkClient.client
 }
 
-class HotelApiClient(private val httpClient: HttpClient) {
+class HotelApiClient(private val httpClient: HttpClient = NetworkClient.client) {
     suspend fun getHotels(city: String): List<AccommodationDTO> {
         return httpClient.get("$BASE_URL/api/hotels?city=$city").body()
     }

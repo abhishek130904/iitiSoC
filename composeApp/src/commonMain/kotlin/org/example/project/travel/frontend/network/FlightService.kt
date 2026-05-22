@@ -3,30 +3,18 @@ package com.example.travel.network
 import com.example.travel.dto.CityDTO
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.plugins.*
-import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import io.ktor.serialization.kotlinx.json.*
 import kotlinx.serialization.json.Json
 import co.touchlab.kermit.Logger
 import com.example.travel.model.dto.FlightDTO
 import kotlinx.serialization.Serializable
 import com.example.travel.network.BASE_URL
+import org.example.project.travel.frontend.network.NetworkClient
 
 class ApiService {
-    private val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            })
-        }
-        install(HttpTimeout) {
-            requestTimeoutMillis = 15000
-        }
-    }
+    private val client: HttpClient = NetworkClient.client
 
     suspend fun getCitiesWithAirports(): Result<List<CityDTO>> {
         Logger.d { "Fetching cities with airports" }

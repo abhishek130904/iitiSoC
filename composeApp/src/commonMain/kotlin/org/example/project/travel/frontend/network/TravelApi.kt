@@ -2,15 +2,12 @@ package org.example.project.travel.frontend.network
 
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
-import io.ktor.client.engine.*
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.contentType
-import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 import org.example.project.travel.frontEnd.model.TripHistoryRequest
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
@@ -20,14 +17,7 @@ import com.example.travel.network.BASE_URL
 import org.example.project.travel.frontEnd.Screens.TripItinerary
 
 object TravelApi {
-    private val client = HttpClient {
-        install(ContentNegotiation) {
-            json(Json {
-                ignoreUnknownKeys = true
-                isLenient = true
-            })
-        }
-    }
+    private val client: HttpClient = NetworkClient.client
 
     suspend fun submitTripHistory(data: CitySearchViewModel.FeedbackData): Boolean {
         val request = TripHistoryRequest(

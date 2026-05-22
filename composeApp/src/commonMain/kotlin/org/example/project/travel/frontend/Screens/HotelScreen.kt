@@ -29,9 +29,6 @@ import com.arkivanov.decompose.ComponentContext
 import com.example.travel.model.dto.AccommodationDTO
 import com.example.travel.model.dto.FlightDTO
 import com.example.travel.network.HotelApiClient
-import io.ktor.client.HttpClient
-import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
-import io.ktor.serialization.kotlinx.json.json
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
@@ -83,15 +80,9 @@ fun HotelScreen(
     val isLoading by citySearchViewModel.isLoading.collectAsState()
     val error by citySearchViewModel.error.collectAsState()
 
-    // Hotel API and ViewModel
-    val httpClient = remember {
-        HttpClient {
-            install(ContentNegotiation) { json() }
-        }
-    }
-    val apiClient = remember { HotelApiClient(httpClient) }
+    // Hotel API and ViewModel — uses shared NetworkClient (no local HttpClient leak)
     val hotelViewModel = remember(selectedCity?.city) {
-        HotelViewModel(apiClient, selectedCity?.city ?: "")
+        HotelViewModel(HotelApiClient(), selectedCity?.city ?: "")
     }
     val hotels by hotelViewModel.hotels.collectAsState()
     val isHotelsLoading by hotelViewModel.isLoading.collectAsState()

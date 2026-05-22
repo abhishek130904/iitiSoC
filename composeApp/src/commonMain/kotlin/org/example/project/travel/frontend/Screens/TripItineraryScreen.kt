@@ -97,7 +97,14 @@ class TripItineraryScreenComponentImpl(
     override val fare: Int? = null,
     private val networkService: TripService // Make sure this is injected
 ) : TripItineraryScreenComponent, ComponentContext by componentContext {
-    private val coroutineScope = CoroutineScope(Dispatchers.Main)
+    // Lifecycle-aware coroutine scope — auto-cancelled when component is destroyed
+    private val job = kotlinx.coroutines.SupervisorJob()
+    private val coroutineScope = CoroutineScope(Dispatchers.Main + job)
+
+    // Error state exposed to UI
+    private val _saveError = kotlinx.coroutines.flow.MutableStateFlow<String?>(null)
+    val saveError: kotlinx.coroutines.flow.StateFlow<String?> = _saveError
+
     override fun onNavigateToTransport() { /*TODO*/ }
     override fun onNavigateToAccommodation() { /*TODO*/ }
     override fun onNavigateToActivities() { /*TODO*/ }
@@ -105,6 +112,7 @@ class TripItineraryScreenComponentImpl(
     override fun onGoBack() { rootComponent.pop() }
 
     suspend fun saveTripAndProceed(itinerary: List<ItineraryDay>, tripNotes: String) {
+        _saveError.value = null
         val day = itinerary.first()
         val isTrainTrip = selectedTrain != null
         val flightCost = if (isTrainTrip) (fare ?: 0) else (selectedFlight?.price?.toInt() ?: 0)
@@ -192,7 +200,9 @@ class TripItineraryScreenComponentImpl(
                 )
             )
         } catch (e: Exception) {
-            // Handle error (e.g., update state in UI)
+            // Fix #16: Surface error to UI instead of swallowing it
+            _saveError.value = "Failed to save trip: ${e.message ?: "Please try again."}"
+            println("TripItineraryScreen: Error saving trip — ${e.message}")
         }
     }
 
@@ -200,6 +210,15 @@ class TripItineraryScreenComponentImpl(
         coroutineScope.launch {
             saveTripAndProceed(itinerary, tripNotes)
         }
+    }
+
+    /** Cancel coroutine scope when component is destroyed */
+    init {
+        lifecycle.subscribe(object : com.arkivanov.essenty.lifecycle.Lifecycle.Callbacks {
+            override fun onDestroy() {
+                job.cancel()
+            }
+        })
     }
 }
 
@@ -209,8 +228,18 @@ fun TripItineraryScreen(
 ) {
     var showConfirmDialog by remember { mutableStateOf(false) }
     var tripNotes by remember { mutableStateOf("") }
-    var isSaving by remember { mutableStateOf(false) }
-    var saveError by remember { mutableStateOf<String?>(null) }
+
+    // Collect error state from component (if it exposes saveError)
+    val saveError = if (component is TripItineraryScreenComponentImpl) {
+        component.saveError.collectAsState().value
+    } else null
+
+    val snackbarHostState = remember { SnackbarHostState() }
+    LaunchedEffect(saveError) {
+        saveError?.let {
+            snackbarHostState.showSnackbar(it)
+        }
+    }
 
     // Sample data - Replace with ViewModel in production
     val itinerary = remember(component.selectedFlight, component.selectedHotel, component.selectedTrain) {

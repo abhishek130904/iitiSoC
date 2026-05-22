@@ -2,13 +2,19 @@ package com.example.travel.viewmodel
 
 import com.example.travel.dto.CityDTO
 import com.example.travel.network.ApiService
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import moe.tlaster.precompose.viewmodel.ViewModel
+import moe.tlaster.precompose.viewmodel.viewModelScope
 
-class AirportCityViewModel : CoroutineScope by CoroutineScope(Dispatchers.Default) {
+/**
+ * ViewModel for loading airport city data.
+ *
+ * Uses PreCompose's ViewModel base class so the coroutine scope ([viewModelScope])
+ * is automatically cancelled when the ViewModel is cleared — preventing coroutine leaks.
+ */
+class AirportCityViewModel : ViewModel() {
     private val apiService = ApiService()
 
     // Cities state
@@ -34,7 +40,7 @@ class AirportCityViewModel : CoroutineScope by CoroutineScope(Dispatchers.Defaul
     }
 
     private fun fetchCities() {
-        launch {
+        viewModelScope.launch {
             _isCitiesLoading.value = true
             val result = apiService.getCitiesWithAirports()
             when {
