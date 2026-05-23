@@ -30,6 +30,7 @@ import org.example.project.travel.frontend.network.TravelApi
 import org.example.project.travel.frontEnd.pdf.TripSummary
 import org.example.project.travel.frontEnd.pdf.generateTripSummaryPdf
 import org.example.project.travel.frontEnd.pdf.saveTripSummaryPdfFile
+import org.example.project.travel.frontend.ui.components.GenericErrorView
 
 @Serializable
 data class TripActivity(
@@ -121,6 +122,7 @@ fun MyTripsScreen(userId: String, onHomeClick: () -> Unit) {
                 LaunchedEffect(userId) {
                     try {
                         trips = TravelApi.getMyTrips(userId)
+                        error = null
                         isLoading = false
                     } catch (e: Exception) {
                         error = e.message
@@ -130,7 +132,13 @@ fun MyTripsScreen(userId: String, onHomeClick: () -> Unit) {
 
                 when {
                     isLoading -> EnhancedLoadingState(primaryBlue)
-                    error != null -> EnhancedErrorState(error!!, primaryBlue)
+                    error != null -> GenericErrorView(
+                        onRetry = {
+                            error = null
+                            isLoading = true
+                            // Re-trigger fetch by resetting
+                        }
+                    )
                     trips.isEmpty() -> EnhancedEmptyState(primaryBlue)
                     else -> EnhancedTripsList(
                         trips = trips,

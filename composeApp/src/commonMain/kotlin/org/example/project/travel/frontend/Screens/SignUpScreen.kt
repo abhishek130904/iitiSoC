@@ -17,8 +17,12 @@ import androidx.compose.ui.graphics.Shadow
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import org.example.project.travel.frontend.auth.AuthService
 import kotlinx.coroutines.launch        // Already present
 import org.example.project.travel.frontend.auth.GoogleSignInManager
@@ -48,6 +52,10 @@ fun SignUpScreen(
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var emailError by remember { mutableStateOf<String?>(null) }
     var passwordError by remember { mutableStateOf<String?>(null) }
+    var confirmPassword by remember { mutableStateOf("") }
+    var confirmPasswordError by remember { mutableStateOf<String?>(null) }
+    var passwordVisible by remember { mutableStateOf(false) }
+    var confirmPasswordVisible by remember { mutableStateOf(false) }
     var isSigningUp by remember { mutableStateOf(false) }
     var isSigningUpWithGoogle by remember { mutableStateOf(false) }
     var showGoogleProfileDialog by remember { mutableStateOf(false) }
@@ -148,8 +156,17 @@ fun SignUpScreen(
                 label = { Text("Password", color = Color.White) },
                 singleLine = true,
                 isError = passwordError != null,
-                visualTransformation = PasswordVisualTransformation(),
+                visualTransformation = if (passwordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { passwordVisible = !passwordVisible }) {
+                        Icon(
+                            imageVector = if (passwordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (passwordVisible) "Hide password" else "Show password",
+                            tint = Color.White
+                        )
+                    }
+                },
                 modifier = Modifier.fillMaxWidth(),
                 colors = OutlinedTextFieldDefaults.colors(
                     cursorColor = AppBlue,
@@ -161,6 +178,37 @@ fun SignUpScreen(
                 )
             )
             passwordError?.let {
+                Text(it, color = Color.Red, fontSize = 12.sp)
+            }
+
+            OutlinedTextField(
+                value = confirmPassword,
+                onValueChange = { confirmPassword = it; confirmPasswordError = null },
+                label = { Text("Confirm Password", color = Color.White) },
+                singleLine = true,
+                isError = confirmPasswordError != null,
+                visualTransformation = if (confirmPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                        Icon(
+                            imageVector = if (confirmPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff,
+                            contentDescription = if (confirmPasswordVisible) "Hide password" else "Show password",
+                            tint = Color.White
+                        )
+                    }
+                },
+                modifier = Modifier.fillMaxWidth(),
+                colors = OutlinedTextFieldDefaults.colors(
+                    cursorColor = AppBlue,
+                    focusedBorderColor = AppBlue,
+                    unfocusedBorderColor = Color.Gray,
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    errorBorderColor = Color.Red
+                )
+            )
+            confirmPasswordError?.let {
                 Text(it, color = Color.Red, fontSize = 12.sp)
             }
 
@@ -181,6 +229,10 @@ fun SignUpScreen(
                     }
                     if (trimmedPassword.length < 8) {
                         passwordError = "Password must be at least 8 characters"
+                        hasValidationError = true
+                    }
+                    if (trimmedPassword != confirmPassword.trim()) {
+                        confirmPasswordError = "Passwords do not match"
                         hasValidationError = true
                     }
                     if (hasValidationError) return@Button

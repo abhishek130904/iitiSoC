@@ -34,6 +34,7 @@ import org.example.project.travel.frontend.navigation.RootComponent
 import org.example.project.travel.frontend.navigation.Screen
 import org.example.project.travel.frontend.model.DestinationCity
 import org.example.project.travel.frontend.viewModel.HotelViewModel
+import org.example.project.travel.frontend.ui.components.GenericErrorView
 import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.background_image
@@ -313,19 +314,12 @@ fun HotelScreen(
                     }
                     error != null -> {
                         item {
-                            Card(
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = CardDefaults.cardColors(
-                                    containerColor = Color(0xFFFFEBEE)
-                                )
-                            ) {
-                                Text(
-                                    text = error!!,
-                                    color = Color.Red,
-                                    modifier = Modifier.padding(16.dp),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                            GenericErrorView(
+                                onRetry = {
+                                    searchQuery = ""
+                                    selectedCity = null
+                                }
+                            )
                         }
                     }
                     cities.isNotEmpty() -> {

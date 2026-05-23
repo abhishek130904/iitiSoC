@@ -27,6 +27,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
 import org.example.project.travel.frontend.auth.UserProfile
+import org.example.project.travel.frontend.auth.AuthService
+import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
+import org.example.project.travel.frontend.auth.fetchUserProfile
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.ExperimentalResourceApi
 import org.jetbrains.compose.resources.painterResource
@@ -61,6 +64,14 @@ fun HomeScreen(
     var isVisible by remember { mutableStateOf(false) }
     val context = LocalContext.current
 
+    // Fetch user profile for personalized greeting
+    LaunchedEffect(Unit) {
+        val uid = getCurrentFirebaseUserUid()
+        if (uid != null) {
+            userProfile = try { fetchUserProfile(uid) } catch (_: Exception) { null }
+        }
+    }
+
     // Enhanced categories with more data
     val categories = listOf(
         TravelCategory(
@@ -78,7 +89,7 @@ fun HomeScreen(
             bgColor = Color(0xFFE8F5E9),
             description = "Explore majestic mountains and scenic trails",
             popularDestinations = listOf(
-                "Manali", "Shimla", "Mussoorie", "Naini Tal", "Darjiling", "Dehra Dun", "Leh", "Kargil", "Munnar"
+                "Manali", "Shimla", "Mussoorie", "Naini Tal", "Darjeeling", "Dehra Dun", "Leh", "Kargil", "Munnar"
             )
         ),
         TravelCategory(
@@ -87,7 +98,7 @@ fun HomeScreen(
             bgColor = Color(0xFFFFF3E0),
             description = "Escape to cool hill stations and mountain retreats",
             popularDestinations = listOf(
-                "Ooty", "Munnar", "Shimla", "Darjiling", "Mussoorie", "Kodaikanal", "Lonavla", "Dhramsala", "Pithoragarhr"
+                "Ooty", "Munnar", "Shimla", "Darjeeling", "Mussoorie", "Kodaikanal", "Lonavla", "Dharamshala", "Pithoragarh"
             )
         ),
         TravelCategory(
@@ -160,7 +171,7 @@ fun HomeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = "Welcome, Traveller",
+                        text = "Welcome, ${userProfile?.name ?: "Traveller"}",
                         fontSize = 28.sp,
                         fontWeight = FontWeight.Bold,
                         color = blue

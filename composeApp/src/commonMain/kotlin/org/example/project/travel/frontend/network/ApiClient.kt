@@ -8,7 +8,7 @@ import io.ktor.client.request.parameter
 import kotlinx.serialization.Serializable
 import org.example.project.travel.frontend.network.NetworkClient
 
-const val BASE_URL = "https://tripbuddybackend-2.onrender.com"
+const val BASE_URL = "https://tripbuddyfinalbackend.onrender.com"
 
 object ApiClient {
     val client: HttpClient = NetworkClient.client

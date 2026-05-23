@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import com.arkivanov.decompose.extensions.compose.stack.Children
 import com.arkivanov.decompose.extensions.compose.stack.animation.fade
 import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
+import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import org.example.project.travel.frontEnd.Screens.OnboardingScreen
 import org.example.project.travel.frontend.Screens.HotelScreenWrapper
 import org.example.project.travel.frontend.Screens.SignInScreen
@@ -46,7 +47,19 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import org.example.project.travel.frontend.Screens.HotelForTrainScreen
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Luggage
+import androidx.compose.material.icons.filled.Person
+import androidx.compose.material3.Icon
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
 
 @Composable
 fun RootContent(
@@ -79,6 +92,85 @@ fun RootContent(
             OfflineScreen(onRetry = { NetworkMonitor.start() })
         } else {
             var selectedCityForTrain by remember { mutableStateOf<String?>(null) }
+
+            // Determine if the current screen should show the bottom nav
+            val currentChild = component.childStack.subscribeAsState().value.active.instance
+            val showBottomNav = currentChild is RootComponent.Child.HomeScreen
+                    || currentChild is RootComponent.Child.FlightSearch
+                    || currentChild is RootComponent.Child.CitySearchScreen
+                    || currentChild is RootComponent.Child.MyTrips
+                    || currentChild is RootComponent.Child.ProfileScreen
+
+            // Determine selected tab index
+            val selectedTab = when (currentChild) {
+                is RootComponent.Child.HomeScreen -> 0
+                is RootComponent.Child.FlightSearch, is RootComponent.Child.CitySearchScreen -> 1
+                is RootComponent.Child.MyTrips -> 2
+                is RootComponent.Child.ProfileScreen -> 3
+                else -> -1
+            }
+
+            Scaffold(
+                bottomBar = {
+                    if (showBottomNav) {
+                        NavigationBar(
+                            containerColor = Color.White,
+                            tonalElevation = 8.dp
+                        ) {
+                            NavigationBarItem(
+                                selected = selectedTab == 0,
+                                onClick = { component.replaceAll(Screen.HomeScreen) },
+                                icon = { Icon(Icons.Default.Home, contentDescription = "Home") },
+                                label = { Text("Home") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color(23, 111, 243),
+                                    selectedTextColor = Color(23, 111, 243),
+                                    indicatorColor = Color(23, 111, 243).copy(alpha = 0.12f)
+                                )
+                            )
+                            NavigationBarItem(
+                                selected = selectedTab == 1,
+                                onClick = { component.replaceAll(Screen.FlightSearch) },
+                                icon = { Icon(Icons.Default.Search, contentDescription = "Search") },
+                                label = { Text("Search") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color(23, 111, 243),
+                                    selectedTextColor = Color(23, 111, 243),
+                                    indicatorColor = Color(23, 111, 243).copy(alpha = 0.12f)
+                                )
+                            )
+                            NavigationBarItem(
+                                selected = selectedTab == 2,
+                                onClick = {
+                                    val userId = getCurrentFirebaseUserUid()
+                                    if (userId != null) {
+                                        component.replaceAll(Screen.MyTrips(userId))
+                                    }
+                                },
+                                icon = { Icon(Icons.Default.Luggage, contentDescription = "My Trips") },
+                                label = { Text("My Trips") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color(23, 111, 243),
+                                    selectedTextColor = Color(23, 111, 243),
+                                    indicatorColor = Color(23, 111, 243).copy(alpha = 0.12f)
+                                )
+                            )
+                            NavigationBarItem(
+                                selected = selectedTab == 3,
+                                onClick = { component.replaceAll(Screen.ProfileScreen) },
+                                icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                                label = { Text("Profile") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color(23, 111, 243),
+                                    selectedTextColor = Color(23, 111, 243),
+                                    indicatorColor = Color(23, 111, 243).copy(alpha = 0.12f)
+                                )
+                            )
+                        }
+                    }
+                }
+            ) { innerPadding ->
+            Box(modifier = Modifier.padding(innerPadding)) {
             Children(
                 stack = component.childStack,
                 animation = stackAnimation(fade()) // Using fade animation for simplicity
@@ -207,6 +299,8 @@ fun RootContent(
                     )
                 }
             }
+            } // Box
+            } // Scaffold
         }
     }
 }

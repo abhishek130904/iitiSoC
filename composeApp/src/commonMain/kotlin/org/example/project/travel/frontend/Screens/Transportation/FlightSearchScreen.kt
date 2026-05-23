@@ -30,6 +30,7 @@ import org.example.project.travel.frontend.navigation.Screen
 import com.airbnb.lottie.compose.*
 import org.example.project.travel.frontEnd.utils.formatDate
 import org.example.project.travel.frontEnd.utils.isLeapYear
+import org.example.project.travel.frontend.ui.components.GenericErrorView
 
 interface FlightSearchScreenComponent {
     //    val cityViewModel: CityViewModel
@@ -544,15 +545,10 @@ fun FlightSearchScreen(
                             println("FlightSearchScreen: City picker - cities are loading")
                         }
                         error != null -> {
-                            Text(
-                                text = error ?: "Error",
-                                color = Color.Red,
-                                modifier = Modifier
-                                    .clickable {
-                                        cityViewModel.retryFetchCities()
-                                        println("FlightSearchScreen: City picker - retryFetchCities clicked")
-                                    }
-                                    .align(Alignment.CenterHorizontally)
+                            GenericErrorView(
+                                onRetry = {
+                                    cityViewModel.retryFetchCities()
+                                }
                             )
                             println("FlightSearchScreen: City picker - error=$error")
                         }

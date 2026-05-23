@@ -38,6 +38,7 @@ import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.background_image
 import travelfrontend.composeapp.generated.resources.gg
+import org.example.project.travel.frontend.ui.components.GenericErrorView
 
 // Custom colors based on the provided blue (RGB: 23, 111, 243)
 val AppBlue = Color(23, 111, 243)
@@ -59,13 +60,37 @@ fun ProfileScreen(
     var editName by remember { mutableStateOf("") }
     var editAge by remember { mutableStateOf("") }
     var isSaving by remember { mutableStateOf(false) }
+    var profileError by remember { mutableStateOf(false) }
 
     // Fetch profile on first composition or when uid changes
     LaunchedEffect(uid) {
         isVisible = true
         if (uid != null) {
-            userProfile = fetchUserProfile(uid)
+            try {
+                userProfile = fetchUserProfile(uid)
+                profileError = false
+            } catch (_: Exception) {
+                profileError = true
+            }
         }
+    }
+
+    if (profileError) {
+        GenericErrorView(
+            onRetry = {
+                profileError = false
+                coroutineScope.launch {
+                    if (uid != null) {
+                        try {
+                            userProfile = fetchUserProfile(uid)
+                        } catch (_: Exception) {
+                            profileError = true
+                        }
+                    }
+                }
+            }
+        )
+        return
     }
 
     Box(
