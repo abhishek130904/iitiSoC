@@ -26,6 +26,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.delay
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.repeatOnLifecycle
 import org.example.project.travel.frontend.auth.UserProfile
 import org.example.project.travel.frontend.auth.AuthService
 import org.example.project.travel.frontend.auth.getCurrentFirebaseUserUid
@@ -158,11 +161,14 @@ fun HomeScreen(
     val totalItems = Int.MAX_VALUE
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = totalItems / 2)
 
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(2500L)
-            val nextIndex = listState.firstVisibleItemIndex + 1
-            listState.animateScrollToItem(nextIndex)
+    val lifecycleOwner = LocalLifecycleOwner.current
+    LaunchedEffect(lifecycleOwner) {
+        lifecycleOwner.lifecycle.repeatOnLifecycle(Lifecycle.State.RESUMED) {
+            while (true) {
+                delay(2500L)
+                val nextIndex = listState.firstVisibleItemIndex + 1
+                listState.animateScrollToItem(nextIndex)
+            }
         }
     }
 

@@ -204,26 +204,24 @@ private fun FloatingParticles() {
                 y = (0..100).random(),
                 size = (4..12).random()
             )
-                }
-            }
-
-    particles.forEach { particle ->
-        var animatedY by remember { mutableStateOf(particle.y.toFloat()) }
-
-        LaunchedEffect(Unit) {
-            while (true) {
-                animate(
-                    initialValue = animatedY,
-                    targetValue = if (animatedY > 50) 0f else 100f,
-                    animationSpec = tween(
-                        durationMillis = (3000..6000).random(),
-                        easing = LinearEasing
-                    )
-                ) { value, _ ->
-                    animatedY = value
-                }
-            }
         }
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "floatingParticles")
+
+    particles.forEachIndexed { index, particle ->
+        val animatedY by infiniteTransition.animateFloat(
+            initialValue = particle.y.toFloat(),
+            targetValue = if (particle.y > 50) 0f else 100f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 3000 + index * 200,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "particleY_$index"
+        )
 
         Box(
             modifier = Modifier

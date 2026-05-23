@@ -155,35 +155,37 @@ fun MyTripsScreen(userId: String, onHomeClick: () -> Unit) {
 @Composable
 private fun FloatingTravelElements() {
     val travelIcons = listOf("✈️", "🏨", "🗺️", "🎒", "📸", "🌍")
+    val infiniteTransition = rememberInfiniteTransition(label = "floatingTravel")
 
     travelIcons.forEachIndexed { index, icon ->
-        var animatedY by remember { mutableStateOf((0..100).random().toFloat()) }
-        var animatedX by remember { mutableStateOf((0..100).random().toFloat()) }
+        val initialY = remember { (0..100).random().toFloat() }
+        val initialX = remember { (0..100).random().toFloat() }
 
-        LaunchedEffect(Unit) {
-            while (true) {
-                animate(
-                    initialValue = animatedY,
-                    targetValue = if (animatedY > 50) 0f else 100f,
-                    animationSpec = tween(
-                        durationMillis = (4000..8000).random(),
-                        easing = LinearEasing
-                    )
-                ) { value, _ ->
-                    animatedY = value
-                }
-                animate(
-                    initialValue = animatedX,
-                    targetValue = if (animatedX > 50) 0f else 100f,
-                    animationSpec = tween(
-                        durationMillis = (3000..6000).random(),
-                        easing = LinearEasing
-                    )
-                ) { value, _ ->
-                    animatedX = value
-                }
-            }
-        }
+        val animatedY by infiniteTransition.animateFloat(
+            initialValue = initialY,
+            targetValue = if (initialY > 50) 0f else 100f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 4000 + index * 800,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "floatY_$index"
+        )
+
+        val animatedX by infiniteTransition.animateFloat(
+            initialValue = initialX,
+            targetValue = if (initialX > 50) 0f else 100f,
+            animationSpec = infiniteRepeatable(
+                animation = tween(
+                    durationMillis = 3000 + index * 600,
+                    easing = LinearEasing
+                ),
+                repeatMode = RepeatMode.Reverse
+            ),
+            label = "floatX_$index"
+        )
 
         Box(
             modifier = Modifier

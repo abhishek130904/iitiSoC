@@ -83,23 +83,11 @@ fun FlightSearchScreen(
     val searchState by flightViewModel.searchState.collectAsState()
     val safeSearchState = searchState
 
-    // Log the initial search state
-    println("FlightSearchScreen: Initial searchState - fromCity=${searchState.fromCity}, toCity=${searchState.toCity}, selectedDate=${searchState.selectedDate}, adults=${searchState.adultCount}, children=${searchState.childCount}, infants=${searchState.infantCount}, cabinClass=${searchState.cabinClass}")
 
-    // Log the flights state whenever it changes
-    println("FlightSearchScreen: Flights state - flights=$flights, isLoading=$isFlightsLoading, error=$flightsError")
 
-    DisposableEffect(Unit) {
-        println("FlightSearchScreen: DisposableEffect - onStart")
-        onDispose {
-            println("FlightSearchScreen: DisposableEffect - onDispose")
-        }
-    }
 
     LaunchedEffect(flights) {
         if (flights.isNotEmpty()) {
-            println("FlightSearchScreen: Flights loaded - flights count=${flights.size}")
-            println("FlightSearchScreen: Navigating to flight_detail with ${flights.size} flights")
             val screen: Screen = Screen.FlightDetail(flights) // Explicitly declare the type
             component.navigateTo(screen)
         }
@@ -162,15 +150,12 @@ fun FlightSearchScreen(
                 TabItem("Flights", Icons.Default.Flight, selectedTab) { selectedTab = "Flights" }
                 TabItem("Bus", Icons.Default.DirectionsBus, selectedTab) {
                     showComingSoonDialog = true
-                    println("FlightSearchScreen: Bus tab clicked")
                 }
                 TabItem("Trains", Icons.Default.Train, selectedTab) {
                     component.navigateTo(org.example.project.travel.frontend.navigation.Screen.TrainSearch)
-                    println("FlightSearchScreen: Trains tab clicked, navigating to TrainSearch screen")
                 }
                 TabItem("Private Cab", Icons.Default.DirectionsCar, selectedTab) {
                     showComingSoonDialog = true
-                    println("FlightSearchScreen: Private Cab tab clicked")
                 }
             }
         }
@@ -216,7 +201,6 @@ fun FlightSearchScreen(
                                 .fillMaxWidth()
                                 .clickable {
                                     showCityPicker = "from"
-                                    println("FlightSearchScreen: From city clicked, opening city picker")
                                 }
                                 .padding(start = 28.dp)
                         ) {
@@ -248,7 +232,6 @@ fun FlightSearchScreen(
                         IconButton(
                             onClick = {
                                 flightViewModel.swapCities()
-                                println("FlightSearchScreen: Swap cities clicked, new fromCity=${searchState.fromCity}, toCity=${searchState.toCity}")
                             }
                         ) {
                             Icon(
@@ -292,7 +275,6 @@ fun FlightSearchScreen(
                                 .fillMaxWidth()
                                 .clickable {
                                     showCityPicker = "to"
-                                    println("FlightSearchScreen: To city clicked, opening city picker")
                                 }
                                 .padding(start = 28.dp)
                         ) {
@@ -331,7 +313,6 @@ fun FlightSearchScreen(
                         Column(
                             modifier = Modifier.clickable {
                                 showDatePicker = true
-                                println("FlightSearchScreen: Departure date clicked, opening date picker")
                             }
                         ) {
                             Text("Departure Date", color = Color(0xFF424242), fontSize = 14.sp)
@@ -364,7 +345,6 @@ fun FlightSearchScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         showPassengerDialog = true
-                                        println("FlightSearchScreen: Passenger selection clicked, opening passenger dialog")
                                     }
                                     .padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -410,7 +390,6 @@ fun FlightSearchScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         showCabinClassDialog = true
-                                        println("FlightSearchScreen: Cabin class selection clicked, opening cabin class dialog")
                                     }
                                     .padding(16.dp),
                                 verticalAlignment = Alignment.CenterVertically
@@ -473,7 +452,6 @@ fun FlightSearchScreen(
                     val date = safeSearchState.selectedDate.ifEmpty {
                         Clock.System.now().toLocalDateTime(TimeZone.of("Asia/Kolkata")).date.toString()
                     }
-                    println("FlightSearchScreen: Search button clicked - fromCity=${safeSearchState.fromCity}, toCity=${safeSearchState.toCity}, date=$date, adults=${safeSearchState.adultCount}, children=${safeSearchState.childCount}, infants=${safeSearchState.infantCount}, cabinClass=${safeSearchState.cabinClass}")
                     showLoadingAnimation = true // Show animation immediately on click
                     flightViewModel.searchFlights(
                         fromCity = safeSearchState.fromCity,
@@ -484,7 +462,6 @@ fun FlightSearchScreen(
                         infants = safeSearchState.infantCount,
                         cabinClass = safeSearchState.cabinClass.name
                     )
-                    println("FlightSearchScreen: searchFlights called")
                 },
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
@@ -515,12 +492,10 @@ fun FlightSearchScreen(
         val error by cityViewModel.citiesError.collectAsState()
 
         // Log when city picker dialog opens
-        println("FlightSearchScreen: City picker dialog opened for ${showCityPicker}")
 
         AlertDialog(
             onDismissRequest = {
                 showCityPicker = null
-                println("FlightSearchScreen: City picker dialog dismissed")
             },
             title = { Text("Select ${if (showCityPicker == "from") "Departure" else "Destination"} City") },
             text = {
@@ -529,7 +504,6 @@ fun FlightSearchScreen(
                         value = searchQuery,
                         onValueChange = {
                             searchQuery = it
-                            println("FlightSearchScreen: City search query updated - query=$searchQuery")
                         },
                         label = { Text("Search City") },
                         modifier = Modifier
@@ -542,7 +516,6 @@ fun FlightSearchScreen(
                             CircularProgressIndicator(
                                 modifier = Modifier.align(Alignment.CenterHorizontally)
                             )
-                            println("FlightSearchScreen: City picker - cities are loading")
                         }
                         error != null -> {
                             GenericErrorView(
@@ -550,7 +523,6 @@ fun FlightSearchScreen(
                                     cityViewModel.retryFetchCities()
                                 }
                             )
-                            println("FlightSearchScreen: City picker - error=$error")
                         }
                         else -> {
                             if (searchQuery.isEmpty()) {
@@ -574,10 +546,8 @@ fun FlightSearchScreen(
                                                 onSelect = { c, n, a ->
                                                     if (showCityPicker == "from") {
                                                         flightViewModel.updateFromCity(c, n, a)
-                                                        println("FlightSearchScreen: Selected departure city - code=$c, name=$n, airport=$a")
                                                     } else {
                                                         flightViewModel.updateToCity(c, n, a)
-                                                        println("FlightSearchScreen: Selected destination city - code=$c, name=$n, airport=$a")
                                                     }
                                                     showCityPicker = null
                                                     searchQuery = ""
@@ -604,10 +574,8 @@ fun FlightSearchScreen(
                                             onSelect = { code, name, airport ->
                                                 if (showCityPicker == "from") {
                                                     flightViewModel.updateFromCity(code, name, airport)
-                                                    println("FlightSearchScreen: Selected departure city (filtered) - code=$code, name=$name, airport=$airport")
                                                 } else {
                                                     flightViewModel.updateToCity(code, name, airport)
-                                                    println("FlightSearchScreen: Selected destination city (filtered) - code=$code, name=$name, airport=$airport")
                                                 }
                                                 showCityPicker = null
                                                 searchQuery = ""
@@ -615,7 +583,6 @@ fun FlightSearchScreen(
                                         )
                                     }
                                 }
-                                println("FlightSearchScreen: City picker - filtered cities count=${filteredCities.size}")
                             }
                         }
                     }
@@ -625,7 +592,6 @@ fun FlightSearchScreen(
             dismissButton = {
                 TextButton(onClick = {
                     showCityPicker = null
-                    println("FlightSearchScreen: City picker dialog cancelled")
                 }) {
                     Text("Cancel")
                 }
@@ -640,12 +606,10 @@ fun FlightSearchScreen(
         var infantCount by remember { mutableStateOf(searchState.infantCount) }
 
         // Log when passenger dialog opens
-        println("FlightSearchScreen: Passenger dialog opened - adults=$adultCount, children=$childCount, infants=$infantCount")
 
         AlertDialog(
             onDismissRequest = {
                 showPassengerDialog = false
-                println("FlightSearchScreen: Passenger dialog dismissed")
             },
             title = { Text("Select Passengers") },
             text = {
@@ -658,11 +622,9 @@ fun FlightSearchScreen(
                         count = adultCount,
                         onIncrement = {
                             if (adultCount < 9) adultCount++
-                            println("FlightSearchScreen: Adult count incremented - new count=$adultCount")
                         },
                         onDecrement = {
                             if (adultCount > 1) adultCount--
-                            println("FlightSearchScreen: Adult count decremented - new count=$adultCount")
                         }
                     )
                     PassengerTypeSelector(
@@ -671,11 +633,9 @@ fun FlightSearchScreen(
                         count = childCount,
                         onIncrement = {
                             if (childCount < 8) childCount++
-                            println("FlightSearchScreen: Child count incremented - new count=$childCount")
                         },
                         onDecrement = {
                             if (childCount > 0) childCount--
-                            println("FlightSearchScreen: Child count decremented - new count=$childCount")
                         }
                     )
                     PassengerTypeSelector(
@@ -684,11 +644,9 @@ fun FlightSearchScreen(
                         count = infantCount,
                         onIncrement = {
                             if (infantCount < adultCount) infantCount++
-                            println("FlightSearchScreen: Infant count incremented - new count=$infantCount")
                         },
                         onDecrement = {
                             if (infantCount > 0) infantCount--
-                            println("FlightSearchScreen: Infant count decremented - new count=$infantCount")
                         }
                     )
                 }
@@ -698,7 +656,6 @@ fun FlightSearchScreen(
                     onClick = {
                         flightViewModel.updatePassengerCounts(adultCount, childCount, infantCount)
                         showPassengerDialog = false
-                        println("FlightSearchScreen: Passenger counts updated - adults=$adultCount, children=$childCount, infants=$infantCount")
                     }
                 ) {
                     Text("Done")
@@ -707,7 +664,6 @@ fun FlightSearchScreen(
             dismissButton = {
                 TextButton(onClick = {
                     showPassengerDialog = false
-                    println("FlightSearchScreen: Passenger dialog cancelled")
                 }) {
                     Text("Cancel")
                 }
@@ -718,12 +674,10 @@ fun FlightSearchScreen(
     // Cabin Class Selection Dialog
     if (showCabinClassDialog) {
         // Log when cabin class dialog opens
-        println("FlightSearchScreen: Cabin class dialog opened - current cabinClass=${searchState.cabinClass}")
 
         AlertDialog(
             onDismissRequest = {
                 showCabinClassDialog = false
-                println("FlightSearchScreen: Cabin class dialog dismissed")
             },
             title = { Text("Select Cabin Class") },
             text = {
@@ -735,7 +689,6 @@ fun FlightSearchScreen(
                                 .clickable {
                                     flightViewModel.updateCabinClass(cabinClass)
                                     showCabinClassDialog = false
-                                    println("FlightSearchScreen: Cabin class selected - cabinClass=$cabinClass")
                                 }
                                 .padding(vertical = 12.dp, horizontal = 16.dp),
                             horizontalArrangement = Arrangement.SpaceBetween,
@@ -761,7 +714,6 @@ fun FlightSearchScreen(
             dismissButton = {
                 TextButton(onClick = {
                     showCabinClassDialog = false
-                    println("FlightSearchScreen: Cabin class dialog cancelled")
                 }) {
                     Text("Cancel")
                 }
@@ -776,12 +728,10 @@ fun FlightSearchScreen(
         var selectedDateLocal by remember { mutableStateOf(today) }
 
         // Log when date picker dialog opens
-        println("FlightSearchScreen: Date picker dialog opened - current selected date=$selectedDateLocal")
 
         AlertDialog(
             onDismissRequest = {
                 showDatePicker = false
-                println("FlightSearchScreen: Date picker dialog dismissed")
             },
             title = {
                 Text(
@@ -801,7 +751,6 @@ fun FlightSearchScreen(
                         IconButton(
                             onClick = {
                                 selectedDateLocal = selectedDateLocal.minus(1, DateTimeUnit.MONTH)
-                                println("FlightSearchScreen: Previous month clicked - new date=$selectedDateLocal")
                             }
                         ) {
                             Icon(Icons.Default.ChevronLeft, "Previous month", tint = Color(23, 111, 243))
@@ -816,7 +765,6 @@ fun FlightSearchScreen(
                         IconButton(
                             onClick = {
                                 selectedDateLocal = selectedDateLocal.plus(1, DateTimeUnit.MONTH)
-                                println("FlightSearchScreen: Next month clicked - new date=$selectedDateLocal")
                             }
                         ) {
                             Icon(Icons.Default.ChevronRight, "Next month", tint = Color(23, 111, 243))
@@ -881,7 +829,6 @@ fun FlightSearchScreen(
                                                     enabled = currentDate >= today
                                                 ) {
                                                     selectedDateLocal = currentDate
-                                                    println("FlightSearchScreen: Date selected in picker - date=$selectedDateLocal")
                                                 },
                                             contentAlignment = Alignment.Center
                                         ) {
@@ -920,7 +867,6 @@ fun FlightSearchScreen(
                         val apiDate = selectedDateLocal.toString() // yyyy-MM-dd
                         flightViewModel.updateDate(apiDate)
                         showDatePicker = false
-                        println("FlightSearchScreen: Date picker confirmed - selected date=$apiDate")
                     }
                 ) {
                     Text("OK", color = Color(23, 111, 243))
@@ -929,7 +875,6 @@ fun FlightSearchScreen(
             dismissButton = {
                 TextButton(onClick = {
                     showDatePicker = false
-                    println("FlightSearchScreen: Date picker cancelled")
                 }) {
                     Text("Cancel", color = Color(23, 111, 243))
                 }

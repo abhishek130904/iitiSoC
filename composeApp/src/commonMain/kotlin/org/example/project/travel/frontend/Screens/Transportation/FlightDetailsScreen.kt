@@ -53,13 +53,10 @@ class FlightDetailScreenComponentImpl(
     private val _flights = MutableStateFlow(initialFlights)
     override val flights: StateFlow<List<FlightDTO>> = _flights.asStateFlow()
 
-    init {
-        println("FlightDetailScreenComponentImpl: Constructor - initialFlights size=${initialFlights.size}")
-        println("FlightDetailScreenComponentImpl: Initialized - flights=$_flights")
-    }
+
+
 
     override fun navigateTo(screen: Screen) {
-        println("FlightDetailScreenComponentImpl: Navigating to $screen")
         rootComponent.navigateTo(screen)
     }
 }
@@ -70,14 +67,11 @@ fun FlightDetailScreen(
     component: FlightDetailScreenComponent
 ) {
     val flights by component.flights.collectAsStateWithLifecycle()
-    println("FlightDetailScreen: Composable started - flights=$flights")
     val searchState by component.flightViewModel.searchState.collectAsState()
     val filteredFlights = flights.filter { it.arrival.iataCode == component.flightViewModel.searchState.value.toCity }
-    println("FlightDetailScreen: After filtering - filteredFlights=$filteredFlights")
 
     var selectedFlight by remember { mutableStateOf<FlightDTO?>(null) }
 
-    println("FlightDetailScreen: Composable started - flights=$flights")
 
     Column(
         modifier = Modifier
@@ -93,7 +87,6 @@ fun FlightDetailScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = {
-                println("FlightDetailScreen: Back button clicked")
             }) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
@@ -111,7 +104,6 @@ fun FlightDetailScreen(
         }
 
         if (flights.isEmpty()) {
-            println("FlightDetailScreen: Flights list is empty, showing 'No flights found'")
             Box(
                 modifier = Modifier.fillMaxSize(),
                 contentAlignment = Alignment.Center
@@ -119,7 +111,6 @@ fun FlightDetailScreen(
                 Text("No flights found", color = Color.Gray)
             }
         } else {
-            println("FlightDetailScreen: Flights list is not empty - flights count=${flights.size}")
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -127,7 +118,6 @@ fun FlightDetailScreen(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 items(flights) { flight ->
-                    println("FlightDetailScreen: Rendering flight item - airlineCode=${flight.airlineCode}, price=${flight.price}")
                     FlightItem(
 
                         flight = flight,
@@ -139,7 +129,6 @@ fun FlightDetailScreen(
 
                         onClick = {
                             selectedFlight = flight
-                            println("FlightDetailScreen: Flight item clicked - airlineCode=${flight.airlineCode}")
                         },
                     )
                     Spacer(modifier = Modifier.height(8.dp))
@@ -150,7 +139,6 @@ fun FlightDetailScreen(
         if (selectedFlight != null) {
             Button(
                 onClick = {
-                    println("FlightDetailScreen: Next button clicked for flight - airlineCode=${selectedFlight?.airlineCode}")
                     val destinationIata = selectedFlight!!.arrival.iataCode
                     val destinationCity = component.flightViewModel.getCityNameByIata(destinationIata) ?: destinationIata
                     component.navigateTo(
@@ -180,9 +168,7 @@ fun FlightDetailScreen(
     }
 
     DisposableEffect(Unit) {
-        println("FlightDetailScreen: DisposableEffect - onStart")
         onDispose {
-            println("FlightDetailScreen: DisposableEffect - onDispose, clearing flights")
             component.flightViewModel.clearFlights(component.flightViewModel)
         }
     }

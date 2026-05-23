@@ -98,30 +98,22 @@ class RootComponentImpl(
         childFactory = ::createChild
     )
 
-    init {
-        println("RootComponentImpl: Initialized with initial screen - ${childStack.value.active.configuration}")
-    }
+
+
 
     override fun navigateTo(screen: Screen) {
-        println("RootComponentImpl: Navigating to $screen")
         navigation.push(screen)
-        println("RootComponentImpl: Navigation stack after push - active screen=${childStack.value.active.configuration}")
     }
 
     override fun pop() {
-        println("RootComponentImpl: Popping from stack")
         navigation.pop()
-        println("RootComponentImpl: Navigation stack after pop - active screen=${childStack.value.active.configuration}")
     }
 
     override fun replaceAll(screen: Screen) {
-        println("RootComponentImpl: Replacing stack with $screen")
         navigation.replaceAll(screen)
-        println("RootComponentImpl: Navigation stack after replaceAll - active screen=${childStack.value.active.configuration}")
     }
 
     private fun createChild(screen: Screen, componentContext: ComponentContext): RootComponent.Child {
-        println("RootComponentImpl: Creating child for screen=$screen")
         return when (screen) {
             Screen.Login -> {
                 val component = SignInScreenComponentImpl( // Use SignInScreenComponent for Login
@@ -129,31 +121,25 @@ class RootComponentImpl(
                     rootComponent = this,
                     authService = authService
                 )
-                println("RootComponentImpl: Created SignInScreenComponent")
                 RootComponent.Child.Login(component)
             }
             Screen.Signup -> {
                 val component = SignUpScreenComponentImpl(componentContext, this)
-                println("RootComponentImpl: Created SignUpScreenComponent")
                 RootComponent.Child.Signup(component)
             }
             Screen.FlightSearch -> {
                 val component = FlightSearchScreenComponentImpl(componentContext, this)
-                println("RootComponentImpl: Created FlightSearchScreenComponent")
                 RootComponent.Child.FlightSearch(component)
             }
             is Screen.FlightDetail -> {
                 val component = FlightDetailScreenComponentImpl(componentContext, this, screen.flights)
-                println("RootComponentImpl: Created FlightDetailScreenComponent - flights=${screen.flights}")
                 RootComponent.Child.FlightDetail(component)
             }
             is Screen.Hotel -> {
                 val component = HotelScreenComponentImpl(componentContext, this, screen.selectedFlight)
-                println("RootComponentImpl: Created HotelScreenComponent - flight=${screen.selectedFlight.flightNumber}")
                 RootComponent.Child.Hotel(component)
             }
             Screen.Onboarding -> {
-                println("RootComponentImpl: Created Onboarding placeholder component")
                 RootComponent.Child.Onboarding(Any())
             }
             is Screen.CityDetails -> {
@@ -191,7 +177,6 @@ class RootComponentImpl(
                 )
                     }
                     else -> {
-                        println("RootComponentImpl: TripItinerary - no flight or train selected, navigating back")
                         null
                     }
                 }
@@ -221,15 +206,12 @@ class RootComponentImpl(
             }
             Screen.TrainSearch -> {
                 val component = org.example.project.travel.frontend.Screens.Transportation.TrainSearchScreenComponentImpl(componentContext, this)
-                println("RootComponentImpl: Created TrainSearchScreenComponent")
                 RootComponent.Child.TrainSearch(component)
             }
             is Screen.TrainDetails -> {
-                println("RootComponentImpl: Created TrainDetails placeholder component")
                 RootComponent.Child.TrainDetails(screen.fromStation, screen.toStation, Any())
             }
             is Screen.HotelForTrain -> {
-                println("RootComponentImpl: Created HotelForTrain placeholder component")
                 RootComponent.Child.HotelForTrain(
                     selectedTrain = screen.selectedTrain,
                     selectedCoach = screen.selectedCoach,
