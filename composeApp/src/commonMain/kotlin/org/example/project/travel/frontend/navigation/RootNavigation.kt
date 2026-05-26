@@ -72,6 +72,7 @@ interface RootComponent {
             val fare: Int,
             val component: Any
         ) : Child()
+        data class HotelSearch(val component: Any) : Child()
     }
 }
 
@@ -218,6 +219,9 @@ class RootComponentImpl(
                     fare = screen.fare,
                     component = Any()
                 )
+            }
+            Screen.HotelSearch -> {
+                RootComponent.Child.HotelSearch(Any())
             }
         }
     }

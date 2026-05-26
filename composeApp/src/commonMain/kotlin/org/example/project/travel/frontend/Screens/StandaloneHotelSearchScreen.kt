@@ -26,13 +26,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.arkivanov.decompose.ComponentContext
 import com.example.travel.model.dto.AccommodationDTO
-import com.example.travel.model.dto.FlightDTO
 import com.example.travel.network.HotelApiClient
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
-import org.example.project.travel.frontend.navigation.RootComponent
-import org.example.project.travel.frontend.navigation.Screen
 import org.example.project.travel.frontend.model.DestinationCity
 import org.example.project.travel.frontend.viewModel.HotelViewModel
 import org.example.project.travel.frontend.ui.components.GenericErrorView
@@ -40,49 +36,24 @@ import org.jetbrains.compose.resources.painterResource
 import travelfrontend.composeapp.generated.resources.Res
 import travelfrontend.composeapp.generated.resources.background_image
 
-interface HotelScreenComponent : ComponentContext {
-    val city: String
-    val selectedFlight: FlightDTO
-    fun navigateTo(screen: Screen)
-    fun goBack()
-}
-
-class HotelScreenComponentImpl(
-    componentContext: ComponentContext,
-    private val rootComponent: RootComponent,
-    override val selectedFlight: FlightDTO
-) : HotelScreenComponent, ComponentContext by componentContext {
-    override val city: String = selectedFlight.arrival.iataCode
-
-    override fun navigateTo(screen: Screen) {
-        rootComponent.navigateTo(screen)
-    }
-
-    override fun goBack() {
-        rootComponent.pop()
-    }
-}
-
+/**
+ * Standalone Hotel Search screen for bottom navigation bar.
+ * Does not require a pre-selected flight — allows the user to search hotels in any city.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun HotelScreen(
-    selectedFlight: FlightDTO,
-    onNavigateBack: () -> Unit,
-    onNavigateToNext: (AccommodationDTO) -> Unit,
-    onCitySelected: (DestinationCity) -> Unit
-) {
+fun StandaloneHotelSearchScreen() {
     val primaryBlue = Color(0xFF176FF3)
 
     val citySearchViewModel = remember { CitySearchViewModel<DestinationCity>() }
     var selectedCity by remember { mutableStateOf<DestinationCity?>(null) }
     var searchQuery by remember { mutableStateOf("") }
-    var selectedHotel by remember { mutableStateOf<AccommodationDTO?>(null) }
 
     val cities by citySearchViewModel.cities.collectAsState()
     val isLoading by citySearchViewModel.isLoading.collectAsState()
     val error by citySearchViewModel.error.collectAsState()
 
-    // Hotel API and ViewModel — uses shared NetworkClient (no local HttpClient leak)
+    // Hotel API and ViewModel
     val hotelViewModel = remember(selectedCity?.city) {
         HotelViewModel(HotelApiClient(), selectedCity?.city ?: "")
     }
@@ -119,52 +90,10 @@ fun HotelScreen(
                         )
                     }
                 },
-                navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
-                        Icon(
-                            Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = primaryBlue
-                        )
-                    }
-                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color.White
                 )
             )
-        },
-        bottomBar = {
-            if (selectedHotel != null) {
-                Surface(
-                    modifier = Modifier.fillMaxWidth(),
-                    color = Color.White,
-                    shadowElevation = 8.dp
-                ) {
-                    Button(
-                        onClick = { selectedHotel?.let { onNavigateToNext(it) } },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                            .height(48.dp),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = primaryBlue
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    ) {
-                        Icon(
-                            Icons.Default.ArrowForward,
-                            contentDescription = "Continue",
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            "Continue",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
         },
         containerColor = Color(0xFFF5F5F5)
     ) { paddingValues ->
@@ -331,7 +260,6 @@ fun HotelScreen(
                                     .fillMaxWidth()
                                     .clickable {
                                         selectedCity = city
-                                        onCitySelected(city)
                                     },
                                 colors = CardDefaults.cardColors(
                                     containerColor = Color.White
@@ -449,11 +377,9 @@ fun HotelScreen(
                     }
                     else -> {
                         items(hotels) { hotel ->
-                            ExpandableHotelCard(
+                            StandaloneHotelCard(
                                 hotel = hotel,
-                                isSelected = selectedHotel == hotel,
-                                primaryBlue = primaryBlue,
-                                onClick = { selectedHotel = hotel }
+                                primaryBlue = primaryBlue
                             )
                         }
                     }
@@ -464,11 +390,9 @@ fun HotelScreen(
 }
 
 @Composable
-private fun ExpandableHotelCard(
+private fun StandaloneHotelCard(
     hotel: AccommodationDTO,
-    isSelected: Boolean,
-    primaryBlue: Color,
-    onClick: () -> Unit
+    primaryBlue: Color
 ) {
     val uriHandler = LocalUriHandler.current
     var isFavorite by remember { mutableStateOf(false) }
@@ -477,16 +401,10 @@ private fun ExpandableHotelCard(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { onClick() },
+            .clickable { isExpanded = !isExpanded },
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected)
-                Color(0xFFE3F2FD)
-            else
-                Color.White
+            containerColor = Color.White
         ),
-        border = if (isSelected)
-            BorderStroke(2.dp, primaryBlue)
-        else null,
         shape = RoundedCornerShape(12.dp)
     ) {
         Column(
@@ -697,28 +615,6 @@ private fun ExpandableHotelCard(
                             }
                         }
                     }
-                }
-            }
-
-            // Selection Indicator
-            if (isSelected) {
-                Spacer(modifier = Modifier.height(12.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        Icons.Default.CheckCircle,
-                        contentDescription = "Selected",
-                        tint = primaryBlue,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        "Selected",
-                        color = primaryBlue,
-                        fontWeight = FontWeight.Medium,
-                        fontSize = 14.sp
-                    )
                 }
             }
         }

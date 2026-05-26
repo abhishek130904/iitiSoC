@@ -168,16 +168,10 @@ fun CityDetailsScreen(component: CityDetailsScreenComponent) {
             when {
                 isLoading -> {}
                 error != null -> {
-                    Column(
-                        modifier = Modifier.align(Alignment.Center),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Text(error!!, color = Color.Red, fontSize = 18.sp)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Button(onClick = component.viewModel::fetchCityDetails) {
-                            Text("Retry")
-                        }
-                    }
+                    org.example.project.travel.frontend.ui.components.GenericErrorView(
+                        onRetry = component.viewModel::fetchCityDetails,
+                        modifier = Modifier.align(Alignment.Center)
+                    )
                 }
                 cityDetails != null -> {
                     LazyColumn(

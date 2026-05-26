@@ -259,7 +259,12 @@ fun HotelForTrainScreen(
                     }
                 } else if (error != null) {
                     item {
-                        Text(error!!, color = Color.Red, modifier = Modifier.padding(8.dp))
+                        org.example.project.travel.frontend.ui.components.GenericErrorView(
+                            onRetry = {
+                                searchQuery = ""
+                                selectedCity = null
+                            }
+                        )
                     }
                 } else {
                     items(cities) { city ->
@@ -291,7 +296,12 @@ fun HotelForTrainScreen(
                     }
                 } else if (hotelError != null) {
                     item {
-                        Text(hotelError!!, color = Color.Red, modifier = Modifier.padding(8.dp))
+                        org.example.project.travel.frontend.ui.components.GenericErrorView(
+                            onRetry = {
+                                selectedCity = null
+                                searchQuery = ""
+                            }
+                        )
                     }
                 } else {
                     items(hotels) { hotel ->

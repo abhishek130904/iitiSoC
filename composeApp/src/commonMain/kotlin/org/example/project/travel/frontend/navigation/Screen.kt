@@ -81,4 +81,7 @@ sealed class Screen {
 
     @Serializable
     data class HotelForTrain(val selectedTrain: TrainSearchResultDTO, val selectedCoach: String, val fare: Int) : Screen()
+
+    @Serializable
+    data object HotelSearch : Screen()
 }

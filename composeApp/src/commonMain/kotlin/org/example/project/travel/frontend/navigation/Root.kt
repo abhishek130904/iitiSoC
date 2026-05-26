@@ -11,6 +11,7 @@ import com.arkivanov.decompose.extensions.compose.stack.animation.stackAnimation
 import com.arkivanov.decompose.extensions.compose.subscribeAsState
 import org.example.project.travel.frontEnd.Screens.OnboardingScreen
 import org.example.project.travel.frontend.Screens.HotelScreenWrapper
+import org.example.project.travel.frontend.Screens.StandaloneHotelSearchScreen
 import org.example.project.travel.frontend.Screens.SignInScreen
 import org.example.project.travel.frontend.Screens.SignUpScreen
 import org.example.project.travel.frontend.Screens.Transportation.FlightDetailScreen
@@ -55,6 +56,7 @@ import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Luggage
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Hotel
 import androidx.compose.material3.Icon
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -100,13 +102,15 @@ fun RootContent(
                     || currentChild is RootComponent.Child.CitySearchScreen
                     || currentChild is RootComponent.Child.MyTrips
                     || currentChild is RootComponent.Child.ProfileScreen
+                    || currentChild is RootComponent.Child.HotelSearch
 
             // Determine selected tab index
             val selectedTab = when (currentChild) {
                 is RootComponent.Child.HomeScreen -> 0
                 is RootComponent.Child.FlightSearch, is RootComponent.Child.CitySearchScreen -> 1
-                is RootComponent.Child.MyTrips -> 2
-                is RootComponent.Child.ProfileScreen -> 3
+                is RootComponent.Child.HotelSearch -> 2
+                is RootComponent.Child.MyTrips -> 3
+                is RootComponent.Child.ProfileScreen -> 4
                 else -> -1
             }
 
@@ -141,6 +145,17 @@ fun RootContent(
                             )
                             NavigationBarItem(
                                 selected = selectedTab == 2,
+                                onClick = { component.replaceAll(Screen.HotelSearch) },
+                                icon = { Icon(Icons.Default.Hotel, contentDescription = "Hotels") },
+                                label = { Text("Hotels") },
+                                colors = NavigationBarItemDefaults.colors(
+                                    selectedIconColor = Color(23, 111, 243),
+                                    selectedTextColor = Color(23, 111, 243),
+                                    indicatorColor = Color(23, 111, 243).copy(alpha = 0.12f)
+                                )
+                            )
+                            NavigationBarItem(
+                                selected = selectedTab == 3,
                                 onClick = {
                                     val userId = getCurrentFirebaseUserUid()
                                     if (userId != null) {
@@ -156,7 +171,7 @@ fun RootContent(
                                 )
                             )
                             NavigationBarItem(
-                                selected = selectedTab == 3,
+                                selected = selectedTab == 4,
                                 onClick = { component.replaceAll(Screen.ProfileScreen) },
                                 icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
                                 label = { Text("Profile") },
@@ -297,6 +312,7 @@ fun RootContent(
                         },
                         onCitySelected = { city -> selectedCityForTrain = city.city }
                     )
+                    is RootComponent.Child.HotelSearch -> StandaloneHotelSearchScreen()
                 }
             }
             } // Box

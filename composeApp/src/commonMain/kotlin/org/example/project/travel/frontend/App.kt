@@ -18,6 +18,7 @@ import org.example.project.travel.frontEnd.Screens.TripConfirmationScreen
 import org.example.project.travel.frontEnd.viewModel.CitySearchViewModel
 import org.example.project.travel.frontend.Screens.HotelForTrainScreen
 import org.example.project.travel.frontend.Screens.HotelScreenWrapper
+import org.example.project.travel.frontend.Screens.StandaloneHotelSearchScreen
 import org.example.project.travel.frontend.Screens.SignInScreen
 import org.example.project.travel.frontend.Screens.SignUpScreen
 import org.example.project.travel.frontend.Screens.Transportation.FlightDetailScreen
@@ -159,6 +160,7 @@ fun App(
                 },
                 onCitySelected = { city -> selectedCityForTrain = city.city }
             )
+            is RootComponent.Child.HotelSearch -> StandaloneHotelSearchScreen()
         }
     }
 }

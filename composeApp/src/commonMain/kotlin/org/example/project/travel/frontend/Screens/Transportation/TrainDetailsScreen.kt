@@ -121,9 +121,21 @@ fun TrainDetailsScreen(
                 }
             }
             error != null -> {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text(error!!, color = Color.Red)
-                }
+                org.example.project.travel.frontend.ui.components.GenericErrorView(
+                    onRetry = {
+                        error = null
+                        isLoading = true
+                        coroutineScope.launch {
+                            try {
+                                trains = fetchTrains(fromStation, toStation)
+                            } catch (e: Exception) {
+                                error = "Failed to load trains."
+                                trains = emptyList()
+                            }
+                            isLoading = false
+                        }
+                    }
+                )
             }
             trains.isEmpty() -> {
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
