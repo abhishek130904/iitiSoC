@@ -18,3 +18,7 @@
 -keep class com.example.travel.model.dto.** { *; }
 -keep class com.example.travel.network.** { *; }
 -keep class org.example.project.travel.frontend.model.** { *; }
+
+# Suppress slf4j binder warnings (missing optional dependency in release builds)
+-dontwarn org.slf4j.impl.StaticLoggerBinder
+

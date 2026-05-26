@@ -125,11 +125,11 @@ kotlin {
 }
 
 android {
-    namespace = "org.example.project.travel"
+    namespace = "com.tripbuddy.app"
     compileSdk = libs.versions.android.compileSdk.get().toInt()
 
     defaultConfig {
-        applicationId = "org.example.project.travel"
+        applicationId = "com.tripbuddy.app"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1

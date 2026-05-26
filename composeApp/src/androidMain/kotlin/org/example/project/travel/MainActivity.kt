@@ -49,7 +49,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import android.app.AlarmManager
-import org.example.project.travel.R
+import com.tripbuddy.app.R
 import org.example.project.travel.frontend.ui.initSettings
 import android.util.Log
 
