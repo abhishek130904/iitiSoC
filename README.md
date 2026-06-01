@@ -17,7 +17,7 @@ A **full-stack, cross-platform travel planning application** built with **Kotlin
 
 ## 🚀 Try the App
 
-> 👉 **[Download the APK](https://limewire.com/d/Wc8Jf#XyotwZkBFR)**
+> 👉 **[Download the APK](https://play.google.com/store/apps/details?id=com.tripbuddy.app)**
 
 ---
 
