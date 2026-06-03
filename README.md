@@ -2,7 +2,7 @@
 
 <div align="center">
 
-A **full-stack, cross-platform travel planning application** built with **Kotlin Multiplatform (KMP)** and a **Spring Boot** backend — enabling users to search flights, trains & hotels, build smart itineraries, and manage trips across Android, iOS, and Desktop from a single shared codebase.
+A **full-stack, cross-platform travel planning application** built with **Kotlin Multiplatform (KMP)** and a **Spring Boot** backend — enabling users to search flights, trains & hotels, build smart itineraries, and manage trips across Android and iOS from a single shared codebase.
 
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.1.21-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose Multiplatform](https://img.shields.io/badge/Compose_Multiplatform-1.5.11-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white)](https://www.jetbrains.com/lp/compose-multiplatform/)
@@ -33,7 +33,6 @@ A **full-stack, cross-platform travel planning application** built with **Kotlin
 - [Getting Started](#-getting-started)
 - [Environment Variables](#-environment-variables)
 - [Deployment](#-deployment)
-- [Contributors](#-contributors)
 - [Acknowledgments](#-acknowledgments)
 - [Contact](#-contact)
 
@@ -49,7 +48,7 @@ A **full-stack, cross-platform travel planning application** built with **Kotlin
 |---|---|
 | Juggling between multiple apps for flights, trains, hotels | **Unified multi-modal transport search** — flights (Amadeus), trains (Indian Railways DB), buses — all in one place |
 | No cohesive trip planning experience | **Smart itinerary builder** with activities, meals, cost breakdown, and notes |
-| Platform lock-in (Android-only or iOS-only) | **Kotlin Multiplatform** — single codebase targets Android, iOS, and Desktop |
+| Platform lock-in (Android-only or iOS-only) | **Kotlin Multiplatform** — single codebase targets Android and iOS |
 | Fragmented destination research | **City discovery** with Wikipedia summaries, Unsplash photos, Foursquare POIs, and weather data |
 | Losing trip details after booking | **Trip history & PDF export** — save, review, and share all your trips |
 
@@ -60,11 +59,11 @@ A **full-stack, cross-platform travel planning application** built with **Kotlin
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                        CLIENT (KMP)                              │
-│  ┌─────────────┐  ┌──────────────┐  ┌─────────────────────────┐ │
-│  │   Android    │  │     iOS      │  │       Desktop           │ │
-│  │  (Primary)   │  │  (Planned)   │  │      (Planned)          │ │
-│  └──────┬───────┘  └──────┬───────┘  └───────────┬─────────────┘ │
-│         └──────────────────┼──────────────────────┘              │
+│           ┌─────────────┐        ┌──────────────┐                │
+│           │   Android   │        │     iOS      │                │
+│           │  (Primary)  │        │  (Planned)   │                │
+│           └──────┬──────┘        └──────┬───────┘                │
+│                  └──────────┬───────────┘                        │
 │                    commonMain (Shared)                            │
 │         ┌──────────────────┼──────────────────┐                  │
 │         │    Compose UI  · ViewModels         │                  │
@@ -518,11 +517,9 @@ The backend is containerized with Docker and deployed on **Render**:
 
 ## 👨‍💻 Contributors
 
-| Name | Role |
-|---|---|
-| **Abhishek Raj** | Full-Stack Developer — Architecture, Backend, Frontend |
-| **Purvi Jain** | Frontend Developer |
-| **Shrawani Palange** | Frontend Developer |
+- **Abhishek Raj**
+- **Purvi Jain**
+- **Shrawani Palange**
 
 ---
 
